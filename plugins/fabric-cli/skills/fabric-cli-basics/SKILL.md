@@ -28,6 +28,28 @@ Authentication tokens are pre-set in `.env`:
 
 These are managed by VD Studio — the agent does not need to authenticate manually.
 
+## Current Workspace Context
+
+The `.env` file also contains the current workspace and lakehouse context, set automatically when an intent is created:
+
+| Variable | Purpose | Example |
+|----------|---------|---------|
+| `WORKSPACE_ID` | Current workspace GUID | `cdb8142c-f4d1-4f48-ac27-2e24b7a960e7` |
+| `WORKSPACE_NAME` | Current workspace name | `ephm_yo__new-intent-e388f802` |
+| `LAKEHOUSE_ID` | Default lakehouse GUID | `724fee7d-2fdd-4a62-b9c8-eac42b02d249` |
+| `LAKEHOUSE` | Default lakehouse name | `ai_lake2_new_intent_e388f802` |
+| `SCHEMA` | Default schema | `dbo` |
+
+**Use these instead of running `fab ls` to discover workspace/lakehouse names.** Build paths directly:
+
+```bash
+# Read from .env — no need to browse workspaces
+uv run --env-file .env fab ls "${WORKSPACE_NAME}.Workspace"
+uv run --env-file .env fab ls "${WORKSPACE_NAME}.Workspace/${LAKEHOUSE}.Lakehouse/Tables"
+uv run --env-file .env fab table schema "${WORKSPACE_NAME}.Workspace/${LAKEHOUSE}.Lakehouse/Tables/dbo/my_table"
+uv run --env-file .env fab cp ./data.csv "${WORKSPACE_NAME}.Workspace/${LAKEHOUSE}.Lakehouse/Files/data.csv"
+```
+
 ## Resource Hierarchy
 
 Fabric organizes resources in a tree:
