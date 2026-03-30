@@ -1,7 +1,7 @@
 {
   "name": "vd-internal",
-  "version": "1.1.0",
-  "description": "Internal productivity skills for the Vibedata team — one-pagers, structured debates, AI prompt engineering, feature requests, and review packaging",
+  "version": "1.2.0",
+  "description": "Internal productivity skills for the Vibedata team — one-pagers, structured debates, AI prompt engineering, feature requests, review packaging, and AD frontend design system",
   "author": {
     "name": "accelerate-data"
   }

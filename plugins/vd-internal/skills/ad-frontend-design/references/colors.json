@@ -1,0 +1,28 @@
+{
+  "primary": {
+    "pacific": "#00b4d8",
+    "navy": "#03045e",
+    "seafoam": "#00dd92"
+  },
+  "secondary": {
+    "powder": "#caf0f8",
+    "arctic": "#90e0ef",
+    "ocean": "#0077b6"
+  },
+  "neutrals": {
+    "pearl": "#f2f2f2",
+    "smoke": "#171c21"
+  },
+  "semantic": {
+    "success": "#00dd92",
+    "warning": "#f59e0b",
+    "error": "#ef4444",
+    "info": "#00b4d8"
+  },
+  "semantic_dark": {
+    "success": "#00c77f",
+    "warning": "#d97706",
+    "error": "#dc2626",
+    "info": "#0096b4"
+  }
+}
