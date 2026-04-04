@@ -146,6 +146,22 @@ All submissions are reviewed before merging. Skills that fail front matter valid
 
 ---
 
+## Claude Code Plugins
+
+This marketplace also distributes Claude Code plugins. Install the marketplace and then install individual plugins:
+
+```bash
+/plugin marketplace add accelerate-data/vibedata-plugins-official
+```
+
+### Available plugins
+
+| Plugin | Description | Install |
+|---|---|---|
+| `ad-migration` | Migrate stored procedures to dbt models — scoping, profiling, test generation, and model generation | `/plugin install ad-migration@vibedata-plugins-official` |
+
+---
+
 ## License
 
 Elastic License 2.0 — see [LICENSE](./LICENSE)
