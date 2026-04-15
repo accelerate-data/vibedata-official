@@ -1,7 +1,7 @@
 <p align="left">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://assets.acceleratedata.ai/logo/product/ui/logo-light-h48.svg">
-    <img src="https://assets.acceleratedata.ai/logo/product/ui/logo-dark-h48.svg" alt="Accelerate Data" height="48">
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/accelerate-data-logo-light.svg">
+    <img src="./assets/accelerate-data-logo-dark.svg" alt="Accelerate Data" height="48">
   </picture>
 </p>
 
