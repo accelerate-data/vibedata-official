@@ -54,12 +54,6 @@ Install:
 |---|---|---|---|
 | `ad-migration` | Governed migration workflows for stored procedures, warehouse logic, and dbt model generation | Legacy warehouse to Fabric Lakehouse modernization | `/plugin install ad-migration@vibedata-plugins-official` |
 | `fabric-cli` | Operational workflows for Fabric workspaces, notebooks, pipelines, and OneLake | Fabric platform operations and environment control | `/plugin install fabric-cli@vibedata-plugins-official` |
-| `skill-builder` | Multi-agent workflow for creating domain-specific Claude plugins and supporting assets | Authoring new Claude workflows and plugin content | `/plugin install skill-builder@vibedata-plugins-official` |
-| `skill-builder-practices` | Authoring standards and structural guidance for high-quality plugin content | Standardizing plugin and workflow authoring | `/plugin install skill-builder-practices@vibedata-plugins-official` |
-| `skill-builder-research` | Structured research workflows for domain discovery, scoring, and evidence gathering | Backing new plugin work with stronger research | `/plugin install skill-builder-research@vibedata-plugins-official` |
-| `skill-builder-validate` | Validation workflows for reviewing plugin quality before publication | Checking plugin content before release | `/plugin install skill-builder-validate@vibedata-plugins-official` |
-| `vd-internal` | Internal productivity workflows for the Accelerate Data team | Team-facing one-pagers, debates, and prompt engineering workflows | `/plugin install vd-internal@vibedata-plugins-official` |
-| `vibedata` | Core practitioner workflows for data and analytics engineering | General Accelerate Data data-platform workflows | `/plugin install vibedata@vibedata-plugins-official` |
 
 ## Coming Soon
 

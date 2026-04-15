@@ -75,8 +75,8 @@ Do not add a `skills` field — skills are auto-discovered from the `skills/` di
 ### Testing
 
 ```bash
-claude --plugin-dir ./plugins/skill-builder      # load without installing
-claude plugin validate ./plugins/skill-builder   # validate structure
+claude --plugin-dir ./plugins/<plugin-name>      # load without installing
+claude plugin validate ./plugins/<plugin-name>   # validate structure
 ```
 
 ---
@@ -85,7 +85,6 @@ claude plugin validate ./plugins/skill-builder   # validate structure
 
 - Only **plugins** get marketplace entries — skills are auto-discovered via their parent plugin
 - Plugin entries: `{ "name", "description", "source": "./plugins/<dir>" }` — no `strict` field needed
-- Root plugin entry: `{ "name", "description", "source": "./" }` — makes the whole repo a plugin, auto-discovers `skills/`
 - No individual entries for `skills/` directories — they are found automatically
 - No `$schema` field, no `skills` field in entries
 

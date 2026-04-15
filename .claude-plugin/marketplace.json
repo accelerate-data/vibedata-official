@@ -6,12 +6,6 @@
     "version": "1.0.0"
   },
   "plugins": [
-    { "name": "skill-builder", "description": "Multi-agent workflow for creating domain-specific Claude skills", "source": "./plugins/skill-builder" },
-    { "name": "skill-builder-practices", "description": "Content guidelines and patterns for skill structure", "source": "./plugins/skill-builder-practices" },
-    { "name": "skill-builder-research", "description": "Research skill for dimension scoring and parallel research", "source": "./plugins/skill-builder-research" },
-    { "name": "skill-builder-validate", "description": "Validate skill for quality checking and companion recommendations", "source": "./plugins/skill-builder-validate" },
-    { "name": "vibedata", "description": "Practitioner-level data and analytics engineering skills for Claude", "source": "./" },
-    { "name": "vd-internal", "description": "Internal productivity skills for the Vibedata team — one-pagers, structured debates, and AI prompt engineering", "source": "./plugins/vd-internal" },
     { "name": "fabric-cli", "description": "Microsoft Fabric CLI operations — workspace management, notebook execution, pipeline orchestration, OneLake file I/O, lakehouse tables, and MCP server integration", "source": "./plugins/fabric-cli" },
     {
       "name": "ad-migration",
