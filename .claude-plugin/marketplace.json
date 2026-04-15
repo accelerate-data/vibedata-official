@@ -2,7 +2,7 @@
   "name": "vibedata-plugins-official",
   "owner": { "name": "accelerate-data" },
   "metadata": {
-    "description": "Vibedata Plugins Official — practitioner-level data and analytics engineering skills for Claude",
+    "description": "Skills and plugins for VibeData — domain expertise for agentic data engineering on Microsoft Fabric",
     "version": "1.0.0"
   },
   "plugins": [
