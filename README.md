@@ -5,8 +5,6 @@
   </picture>
 </p>
 
-# Accelerate Data Claude Plugin Marketplace
-
 Official curated Claude plugins from Accelerate Data
 
 > AI needs good data. Good data needs AI.
