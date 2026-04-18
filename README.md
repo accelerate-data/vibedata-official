@@ -7,23 +7,25 @@
 
 The official skill library and plugin marketplace for [VibeData](https://acceleratedata.ai) — the agentic coordination layer for data platforms.
 
-> Domain expertise, encoded and enforced.
+> Organizational data engineering standards, encoded and enforced.
 
 ## Why This Exists
 
 Data teams lose weeks to coordination tax — intent lost between role switches, fix patterns never captured, institutional knowledge trapped in people's heads. Current tools address individual slices (ingestion, transformation, observability) without connecting them.
 
-This repository is the distribution layer for the domain expertise that powers VibeData's agentic workflow. Skills encode business rules, source-system patterns, and platform conventions so that agents can build, deploy, and operate pipelines with your team's accumulated knowledge — not generic defaults.
+This repository is the distribution layer for the standards that customize VibeData data engineering agents. Skills encode organizational rules for ingestion, extraction, source-system handling, platform conventions, and business logic so agents build, deploy, and operate pipelines with your team's accumulated knowledge — not generic defaults.
+
+The same bundles can also be installed directly in Claude Code as standalone skills for practitioners who want those standards available outside VibeData.
 
 ## Skills vs Plugins
 
 | | Skills | Plugins |
 |---|---|---|
-| **What** | Markdown knowledge packages that encode domain expertise | Full Claude Code plugins with agents, multi-step workflows, and bundled skills |
-| **How they work** | Loaded into VibeData agents at runtime to guide decisions | Installed and executed as standalone tools |
-| **Example** | dbt naming conventions for Fabric, SCD2 snapshot patterns | Migration workflow that scopes, profiles, generates, and tests dbt models |
+| **What** | Markdown knowledge packages that encode organizational standards, source customization, and business rules | Installable Claude Code packages that bundle skills for VibeData agents or standalone Claude Code use |
+| **How they work** | Loaded into VibeData data engineering agents to align behavior with your team's standards | Installed from the marketplace as reusable capabilities |
+| **Example** | dbt naming conventions for Fabric, SCD2 snapshot patterns | Skill bundles like `vibedata-dbt-skills`, or workflow plugins like `ad-migration` |
 
-Skills are the knowledge. Plugins are the workflows that use that knowledge.
+Skills are the behavior-shaping knowledge. Plugins are the distribution unit that makes those standards available to VibeData agents and, when useful, to Claude Code directly.
 
 ## Quick Start
 
@@ -39,7 +41,7 @@ Install the flagship plugin:
 /plugin install ad-migration@vibedata-plugins-official
 ```
 
-Then explore the rest of the catalog from the same marketplace.
+Then explore the rest of the catalog from the same marketplace. Skill bundles are intended for VibeData agent customization first, and can also be installed directly in Claude Code.
 
 ## Featured Plugin: ad-migration
 
@@ -67,45 +69,41 @@ Install:
 | `ad-migration` | Governed migration workflows for stored procedures, warehouse logic, and dbt model generation | Legacy warehouse to Fabric Lakehouse modernization | `/plugin install ad-migration@vibedata-plugins-official` |
 | `fabric-cli` | Operational workflows for Fabric workspaces, notebooks, pipelines, and OneLake | Fabric platform operations and environment control | `/plugin install fabric-cli@vibedata-plugins-official` |
 | `fabric-semantic-model` | TMDL semantic model design, validation, and DAX measure authoring | Fabric and Power BI semantic model delivery | `/plugin install fabric-semantic-model@vibedata-plugins-official` |
+| `vibedata-dbt-skills` | Customizes dbt agents with Fabric modeling, snapshot, semantic layer, and Elementary quality standards | dbt project delivery on Microsoft Fabric | `/plugin install vibedata-dbt-skills@vibedata-plugins-official` |
+| `vibedata-dlt-skills` | Customizes ingestion agents with dlt REST API standards for ADLS Gen2, OneLake, and Fabric lakehouses | API ingestion pipelines feeding dbt | `/plugin install vibedata-dlt-skills@vibedata-plugins-official` |
+| `vibedata-domain-skills` | Customizes modeling agents with business rules, including revenue recognition | Domain-aware marts and accounting logic | `/plugin install vibedata-domain-skills@vibedata-plugins-official` |
+| `vibedata-ingestion-skills` | Customizes extraction agents with source-system standards, including Salesforce extraction | CRM/source-system extraction patterns | `/plugin install vibedata-ingestion-skills@vibedata-plugins-official` |
 
-## Available Skills
+## Skill Bundle Contents
 
-Skills are organized by type, reflecting where they sit in the data platform lifecycle.
+Skills are distributed through Claude plugins. Install the bundle that matches the VibeData agent behavior you want to customize, or install it directly in Claude Code for standalone use.
 
-### Platform
+### `vibedata-dbt-skills`
 
 | Skill | What it encodes |
 |---|---|
 | `dbt-fabric-patterns` | Practitioner-level dbt patterns for Microsoft Fabric |
 | `dbt-semantic-layer` | Semantic models and MetricFlow metrics in dbt on Microsoft Fabric |
+| `dbt-snapshot-scd2` | SCD Type 2 snapshot implementation in dbt on Microsoft Fabric |
 | `elementary-data-quality` | Elementary anomaly detection configuration for dbt on Microsoft Fabric |
 
-### Source
+### `vibedata-dlt-skills`
 
 | Skill | What it encodes |
 |---|---|
 | `dlt-rest-api-connector` | dlt REST API pipelines to ADLS Gen2 and OneLake |
+
+### `vibedata-domain-skills`
+
+| Skill | What it encodes |
+|---|---|
+| `modeling-revenue-recognition` | Revenue recognition mapped to dbt medallion architecture on Microsoft Fabric |
+
+### `vibedata-ingestion-skills`
+
+| Skill | What it encodes |
+|---|---|
 | `salesforce-extraction` | Salesforce data extraction via dlt into dbt on Microsoft Fabric |
-
-### Domain
-
-| Skill | What it encodes |
-|---|---|
-| `revenue-domain` | Revenue recognition mapped to dbt medallion architecture on Microsoft Fabric |
-
-### Data Engineering
-
-| Skill | What it encodes |
-|---|---|
-| `dbt-snapshot-scd2` | SCD Type 2 snapshot implementation in dbt on Microsoft Fabric |
-
-### Skill Builder
-
-Skill-builder skills appear in Settings and are active every session. They guide agents on how to create and maintain skills themselves.
-
-| Skill | What it encodes |
-|---|---|
-| `skill-builder-practices` | Skill structure rules, content principles, quality dimensions, and anti-patterns |
 
 ## How Skills Work in VibeData
 

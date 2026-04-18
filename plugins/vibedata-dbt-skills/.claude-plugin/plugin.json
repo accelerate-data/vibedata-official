@@ -1,0 +1,10 @@
+{
+  "name": "vibedata-dbt-skills",
+  "version": "1.0.0",
+  "description": "Customize VibeData dbt agents with organizational standards for Microsoft Fabric modeling, snapshots, semantic layer design, and Elementary data quality.",
+  "author": {
+    "name": "accelerate-data"
+  },
+  "license": "Elastic-2.0",
+  "keywords": ["dbt", "elementary", "fabric", "semantic-layer", "data-quality"]
+}

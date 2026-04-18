@@ -1,6 +1,6 @@
 # Evaluations
 
-Test scenarios for the revenue-domain skill. Each scenario tests whether the skill produces correct, domain-specific guidance for modeling revenue recognition in dbt on Fabric.
+Test scenarios for the modeling-revenue-recognition skill. Each scenario tests whether the skill produces correct, domain-specific guidance for modeling revenue recognition in dbt on Fabric.
 
 ## Scenarios
 
