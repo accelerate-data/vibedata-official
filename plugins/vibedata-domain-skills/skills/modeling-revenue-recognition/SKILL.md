@@ -1,19 +1,18 @@
 ---
-name: revenue-domain
+name: modeling-revenue-recognition
 description: >
-  Map revenue recognition to dbt medallion architecture on Microsoft Fabric.
-  Use when modeling revenue entities, defining recognition rules, or building
-  silver/gold layers for revenue reporting. Also use when implementing ASC 606
-  or handling multi-element arrangements.
+  Use when modeling ASC 606 revenue recognition in dbt on Microsoft Fabric,
+  including performance obligations, transaction price allocation, deferred
+  revenue, contract modifications, or silver/gold revenue reporting layers.
 tools: Read, Write, Edit, Glob, Grep, Bash
 type: domain
 domain: revenue recognition
 version: 1.0.2
 ---
 
-# Revenue Recognition Domain -- dbt Medallion Mapping
+# Modeling Revenue Recognition in dbt on Fabric
 
-Hard-to-model patterns for implementing ASC 606 revenue recognition in a dbt medallion architecture on Fabric. Focuses on what Claude gets wrong: entity classification, grain decisions, allocation logic in SQL, and the bronze-to-gold pipeline for contracts with multiple performance obligations.
+Patterns for implementing ASC 606 revenue recognition in a dbt medallion architecture on Fabric. Focuses on what Claude gets wrong: entity classification, grain decisions, allocation logic in SQL, and the bronze-to-gold pipeline for contracts with multiple performance obligations.
 
 ## Quick Reference
 

@@ -1,0 +1,10 @@
+{
+  "name": "vibedata-dlt-skills",
+  "version": "1.0.0",
+  "description": "Customize VibeData ingestion agents with organizational standards for dlt REST API pipelines landing data in ADLS Gen2, OneLake, and Microsoft Fabric lakehouses.",
+  "author": {
+    "name": "accelerate-data"
+  },
+  "license": "Elastic-2.0",
+  "keywords": ["dlt", "rest-api", "ingestion", "onelake", "fabric"]
+}

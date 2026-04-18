@@ -6,23 +6,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A public marketplace for [Vibedata](https://acceleratedata.ai) hosting:
 
-- **Standalone skills** (`skills/`) — Markdown knowledge packages loaded into Vibedata agents at runtime
-- **Agent plugins** (`plugins/`) — Full Claude Code plugins with agents, skills, and multi-step workflows
+- **Bundled skills** (`plugins/<plugin>/skills/`) — Markdown knowledge packages that customize Vibedata data engineering agent behavior with organizational standards
+- **Claude plugins** (`plugins/`) — Installable packages that can contain skills, agents, commands, hooks, or multi-step workflows
 
 No build scripts or test runners. All changes are Markdown or JSON edits.
 
 ---
 
-## Standalone skills (`skills/`)
+## Bundled skills (`plugins/<plugin>/skills/`)
 
-Directory name must **exactly match** the `name` field in `SKILL.md` front matter.
+Skills should live inside a plugin bundle. They are primarily used to align VibeData agents to organizational standards for ingestion, extraction, source customization, and business rules; they can also be installed standalone in Claude Code. Directory name must **exactly match** the `name` field in `SKILL.md` front matter.
 
 ```
-skills/
-└── <skill-name>/
-    ├── SKILL.md        # Required
-    ├── references/     # Supporting files, one level deep only
-    └── context/        # Process artifacts only (never published)
+plugins/
+└── <plugin-name>/
+    └── skills/
+        └── <skill-name>/
+            ├── SKILL.md        # Required
+            ├── references/     # Supporting files, one level deep only
+            └── context/        # Process artifacts only (never published)
 ```
 
 ### Front matter
@@ -41,7 +43,7 @@ version: 1.0.0
 
 | Type | Appears in Vibedata |
 |---|---|
-| `platform`, `domain`, `source`, `data-engineering` | Skill Library |
+| `platform`, `domain`, `source`, `data-engineering` | Installed plugin skill library |
 | `skill-builder` | Settings → Skills (active every session) |
 
 ### Structural constraints
@@ -55,7 +57,7 @@ version: 1.0.0
 
 ---
 
-## Agent plugins (`plugins/`)
+## Claude plugins (`plugins/`)
 
 ```
 plugins/
