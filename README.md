@@ -66,6 +66,7 @@ Install:
 |---|---|---|---|
 | `ad-migration` | Governed migration workflows for stored procedures, warehouse logic, and dbt model generation | Legacy warehouse to Fabric Lakehouse modernization | `/plugin install ad-migration@vibedata-plugins-official` |
 | `fabric-cli` | Operational workflows for Fabric workspaces, notebooks, pipelines, and OneLake | Fabric platform operations and environment control | `/plugin install fabric-cli@vibedata-plugins-official` |
+| `fabric-semantic-model` | TMDL semantic model design, validation, and DAX measure authoring | Fabric and Power BI semantic model delivery | `/plugin install fabric-semantic-model@vibedata-plugins-official` |
 
 ## Available Skills
 
@@ -120,7 +121,6 @@ Every pipeline built and every incident resolved makes the skill library more va
 
 | Plugin | Planned focus |
 |---|---|
-| `fabric-semantic-models` | Guided workflows for designing and iterating Fabric semantic models |
 | `fabric-ontology` | Business ontology and semantic layer design workflows for governed analytics platforms |
 
 ## Contributing

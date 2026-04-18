@@ -19,6 +19,19 @@
       "author": { "name": "Accelerate Data" },
       "license": "Elastic-2.0",
       "keywords": ["migration", "dbt", "stored-procedures", "fabric", "sql-server"]
+    },
+    {
+      "name": "fabric-semantic-model",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/accelerate-data/fabric-semantic-model.git",
+        "path": "."
+      },
+      "description": "Build, validate, and manage Microsoft Fabric semantic models using TMDL with AI-assisted DAX authoring and model design",
+      "version": "0.1.0",
+      "author": { "name": "Accelerate Data" },
+      "license": "Elastic-2.0",
+      "keywords": ["fabric", "semantic-model", "tmdl", "dax", "power-bi", "tabular-model"]
     }
   ]
 }
