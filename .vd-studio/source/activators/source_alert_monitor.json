@@ -1,0 +1,76 @@
+{
+  "displayName": "vd_studio_source_alert_monitor",
+  "description": "Monitors DLT/DQ pipeline failures and triggers alert dispatch to Studio",
+  "entities": [
+    {
+      "uniqueIdentifier": "a1000001-0000-4000-8000-000000000001",
+      "payload": {
+        "name": "VD Studio Source Alerts",
+        "description": "Container Description",
+        "type": "rthSubscriptions"
+      },
+      "type": "container-v1"
+    },
+    {
+      "uniqueIdentifier": "a1000001-0000-4000-8000-000000000002",
+      "payload": {
+        "name": "Pipeline failure events",
+        "connection": {
+          "scope": "Artifact",
+          "tenantId": "{{TENANT_ID}}",
+          "workspaceId": "{{WORKSPACE_ID}}",
+          "artifactId": "{{MONITORED_PIPELINE_ID}}",
+          "eventGroupType": "Microsoft.Fabric.JobEvents"
+        },
+        "filterSettings": {
+          "eventTypes": [
+            {
+              "name": "Microsoft.Fabric.ItemJobFailed"
+            }
+          ],
+          "filters": []
+        }
+      },
+      "type": "realTimeHubSource-v1"
+    },
+    {
+      "uniqueIdentifier": "a1000001-0000-4000-8000-000000000004",
+      "payload": {
+        "name": "Pipeline failure events",
+        "definition": {
+          "type": "Event",
+          "instance": "{\"steps\":[{\"id\":\"a1000001-0000-4000-8000-000000000010\",\"name\":\"SourceEventStep\",\"rows\":[{\"arguments\":[{\"name\":\"entityId\",\"type\":\"string\",\"value\":\"a1000001-0000-4000-8000-000000000002\"}],\"kind\":\"SourceReference\",\"name\":\"SourceSelector\"}]}],\"templateId\":\"SourceEvent\",\"templateVersion\":\"1.2.4\"}"
+        }
+      },
+      "type": "timeSeriesView-v1"
+    },
+    {
+      "uniqueIdentifier": "a1000001-0000-4000-8000-000000000003",
+      "payload": {
+        "name": "Run alert dispatcher",
+        "fabricItem": {
+          "itemId": "{{DISPATCHER_NOTEBOOK_ID}}",
+          "workspaceId": "{{WORKSPACE_ID}}",
+          "itemType": "SynapseNotebook"
+        },
+        "jobType": "RunNotebook"
+      },
+      "type": "fabricItemAction-v1"
+    },
+    {
+      "uniqueIdentifier": "0c1ad101-9759-4be0-851c-550897b61f08",
+      "payload": {
+        "name": "dlt_vibedata-plugins-official_failed",
+        "definition": {
+          "type": "Rule",
+          "instance": "{\"steps\":[{\"id\":\"b377bded-bea4-4b17-813c-cf0e355a2c08\",\"name\":\"FieldsDefaultsStep\",\"rows\":[{\"arguments\":[{\"arguments\":[{\"name\":\"entityId\",\"type\":\"string\",\"value\":\"a1000001-0000-4000-8000-000000000004\"}],\"kind\":\"EventReference\",\"name\":\"event\",\"type\":\"complex\"}],\"kind\":\"Event\",\"name\":\"EventSelector\"}]},{\"id\":\"f7a78860-3691-4c2d-86d3-6b1ae5fdd748\",\"name\":\"EventDetectStep\",\"rows\":[{\"arguments\":[],\"kind\":\"OnEveryValue\",\"name\":\"OnEveryValue\"}]},{\"id\":\"a639a4b3-61c1-41f2-8844-fe1e4b6d3c13\",\"name\":\"ActStep\",\"rows\":[{\"kind\":\"FabricItemInvocation\",\"name\":\"FabricItemBinding\",\"arguments\":[{\"__typename\":\"templateInstanceV2StringArg\",\"name\":\"fabricJobConnectionDocumentId\",\"type\":\"string\",\"value\":\"a1000001-0000-4000-8000-000000000003\"},{\"name\":\"parameters\",\"type\":\"array\",\"values\":[]},{\"name\":\"additionalInformation\",\"type\":\"array\",\"values\":[]},{\"name\":\"workspaceId\",\"type\":\"string\",\"value\":\"{{WORKSPACE_ID}}\"},{\"name\":\"itemId\",\"type\":\"string\",\"value\":\"{{DISPATCHER_NOTEBOOK_ID}}\"},{\"name\":\"itemType\",\"type\":\"string\",\"value\":\"SynapseNotebook\"},{\"name\":\"jobType\",\"type\":\"string\",\"value\":\"RunNotebook\"}]}]}],\"templateId\":\"EventTrigger\",\"templateVersion\":\"1.2.4\"}",
+          "settings": {
+            "shouldRun": true,
+            "shouldApplyRuleOnUpdate": false
+          }
+        }
+      },
+      "type": "timeSeriesView-v1"
+    }
+  ]
+}
