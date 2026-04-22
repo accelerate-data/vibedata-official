@@ -6,36 +6,32 @@
     "version": "1.0.0"
   },
   "plugins": [
-    { "name": "fabric-cli", "description": "Microsoft Fabric CLI operations — workspace management, notebook execution, pipeline orchestration, OneLake file I/O, lakehouse tables, and MCP server integration", "source": "./plugins/fabric-cli" },
-    { "name": "vibedata-dbt-skills", "description": "Customize VibeData dbt agents with Fabric modeling, snapshot, semantic layer, and Elementary quality standards", "source": "./plugins/vibedata-dbt-skills" },
-    { "name": "vibedata-dlt-skills", "description": "Customize VibeData ingestion agents with dlt REST API standards for ADLS Gen2, OneLake, and Fabric lakehouses", "source": "./plugins/vibedata-dlt-skills" },
-    { "name": "vibedata-domain-skills", "description": "Customize VibeData modeling agents with business rules, including revenue recognition on dbt and Microsoft Fabric", "source": "./plugins/vibedata-domain-skills" },
-    { "name": "vibedata-ingestion-skills", "description": "Customize VibeData extraction agents with source-system standards, including Salesforce extraction with dlt and dbt", "source": "./plugins/vibedata-ingestion-skills" },
     {
       "name": "ad-migration",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/accelerate-data/migration-utility.git",
-        "path": "plugin"
-      },
       "description": "Migrate stored procedures to dbt models — scoping, profiling, test generation, and model generation pipeline",
-      "version": "1.0.0",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/accelerate-data/migration-utility.git"
+      },
       "author": { "name": "Accelerate Data" },
       "license": "Elastic-2.0",
       "keywords": ["migration", "dbt", "stored-procedures", "fabric", "sql-server"]
     },
+    { "name": "fabric-cli", "description": "Microsoft Fabric CLI operations — workspace management, notebook execution, pipeline orchestration, OneLake file I/O, lakehouse tables, and MCP server integration", "source": "./plugins/fabric-cli" },
     {
       "name": "fabric-semantic-model",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/accelerate-data/fabric-semantic-model.git",
-        "path": "."
-      },
       "description": "Build, validate, and manage Microsoft Fabric semantic models using TMDL with AI-assisted DAX authoring and model design",
-      "version": "0.1.0",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/accelerate-data/fabric-semantic-model.git"
+      },
       "author": { "name": "Accelerate Data" },
       "license": "Elastic-2.0",
       "keywords": ["fabric", "semantic-model", "tmdl", "dax", "power-bi", "tabular-model"]
-    }
+    },
+    { "name": "vibedata-dbt-skills", "description": "Customize VibeData dbt agents with Fabric modeling, snapshot, semantic layer, and Elementary quality standards", "source": "./plugins/vibedata-dbt-skills" },
+    { "name": "vibedata-dlt-skills", "description": "Customize VibeData ingestion agents with dlt REST API standards for ADLS Gen2, OneLake, and Fabric lakehouses", "source": "./plugins/vibedata-dlt-skills" },
+    { "name": "vibedata-domain-skills", "description": "Customize VibeData modeling agents with business rules, including revenue recognition on dbt and Microsoft Fabric", "source": "./plugins/vibedata-domain-skills" },
+    { "name": "vibedata-ingestion-skills", "description": "Customize VibeData extraction agents with source-system standards, including Salesforce extraction with dlt and dbt", "source": "./plugins/vibedata-ingestion-skills" }
   ]
 }

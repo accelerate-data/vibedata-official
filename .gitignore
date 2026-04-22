@@ -15,3 +15,10 @@ $RECYCLE.BIN/
 
 # Local brainstorming/mockup artifacts
 .superpowers/
+
+# Python
+__pycache__/
+*.py[cod]
+.coverage
+coverage.xml
+htmlcov/

@@ -1,0 +1,26 @@
+name: version-bump
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  version-bump:
+    name: version-bump
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      - name: Fetch main branch
+        run: git fetch origin main --depth=1
+
+      - name: Check plugin version for bundled plugin changes
+        run: python3 scripts/check-plugin-version-bump.py --base-ref origin/main
