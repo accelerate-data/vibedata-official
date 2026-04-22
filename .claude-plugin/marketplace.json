@@ -10,9 +10,8 @@
       "name": "ad-migration",
       "description": "Migrate stored procedures to dbt models — scoping, profiling, test generation, and model generation pipeline",
       "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/accelerate-data/migration-utility.git",
-        "path": "plugin"
+        "source": "url",
+        "url": "https://github.com/accelerate-data/migration-utility.git"
       },
       "author": { "name": "Accelerate Data" },
       "license": "Elastic-2.0",
