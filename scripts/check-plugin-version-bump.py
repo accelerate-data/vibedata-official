@@ -28,7 +28,7 @@ def git_output(args: list[str]) -> str:
 
 def changed_files(base_ref: str) -> list[str]:
     outputs = [
-        git_output(["git", "diff", "--name-only", f"{base_ref}...HEAD"]),
+        git_output(["git", "diff", "--name-only", base_ref, "HEAD"]),
         git_output(["git", "diff", "--name-only", "--cached"]),
         git_output(["git", "diff", "--name-only"]),
     ]
