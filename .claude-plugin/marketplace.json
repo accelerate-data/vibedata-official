@@ -14,7 +14,7 @@
     {
       "name": "ad-migration",
       "source": {
-        "source": "git-subdir",
+        "source": "url",
         "url": "https://github.com/accelerate-data/migration-utility.git",
         "path": "plugin"
       },
