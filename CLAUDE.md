@@ -10,7 +10,8 @@ No build scripts or test runners. All changes are Markdown or JSON edits.
 
 - Only plugins get entries — skills are auto-discovered from each plugin's `skills/` directory
 - Local plugin entries: `{ "name", "description", "source": "./plugins/<dir>" }`
-- External plugin entries use `"source": { "source": "git-subdir", "url": "...", "path": "..." }`
+- External whole-repo plugins: `"source": { "source": "url", "url": "https://github.com/org/repo.git" }`
+- External subdirectory plugins: `"source": { "source": "git-subdir", "url": "https://github.com/org/repo", "path": "subdir" }` — only when the plugin lives in a real subpath, never with `path: "."`
 - No `$schema` field, no `strict` field, no `version` field in entries — version lives in each plugin's `plugin.json`
 - Run `/update-marketplace` to sync after adding or moving plugins
 
@@ -36,3 +37,4 @@ claude plugin validate ./plugins/<plugin-name>   # validate structure
 - `version` field in marketplace entries — version lives in `plugin.json`
 - Bumping `version` in both `plugin.json` and the marketplace entry — manifest always wins
 - Entries for individual skills — only plugins get marketplace entries
+- `git-subdir` with `path: "."` — use `"source": "url"` with a `.git` URL for whole-repo external plugins

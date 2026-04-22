@@ -27,9 +27,8 @@
     {
       "name": "fabric-semantic-model",
       "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/accelerate-data/fabric-semantic-model.git",
-        "path": "."
+        "source": "url",
+        "url": "https://github.com/accelerate-data/fabric-semantic-model.git"
       },
       "description": "Build, validate, and manage Microsoft Fabric semantic models using TMDL with AI-assisted DAX authoring and model design",
       "version": "0.1.0",
