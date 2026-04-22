@@ -15,7 +15,7 @@ No build scripts or test runners. All changes are Markdown or JSON edits.
 
 ## Bundled skills (`plugins/<plugin>/skills/`)
 
-Skills should live inside a plugin bundle. They are primarily used to align VibeData agents to organizational standards for ingestion, extraction, source customization, and business rules; they can also be installed standalone in Claude Code. Directory name must **exactly match** the `name` field in `SKILL.md` front matter.
+Skills live inside a plugin bundle. Directory name must **exactly match** the `name` field in `SKILL.md` front matter.
 
 ```
 plugins/
@@ -40,11 +40,6 @@ domain: dbt on Microsoft Fabric
 version: 1.0.0
 ---
 ```
-
-| Type | Appears in Vibedata |
-|---|---|
-| `platform`, `domain`, `source`, `data-engineering` | Installed plugin skill library |
-| `skill-builder` | Settings → Skills (active every session) |
 
 ### Structural constraints
 
@@ -90,7 +85,7 @@ claude plugin validate ./plugins/<plugin-name>   # validate structure
 - No individual entries for `skills/` directories — they are found automatically
 - No `$schema` field, no `skills` field in entries
 
-To sync this file after adding or moving plugins, run `/update-marketplace` (see Custom Skills below).
+To sync this file after adding or moving plugins, run `/update-marketplace`.
 
 ---
 
@@ -109,30 +104,3 @@ To sync this file after adding or moving plugins, run `/update-marketplace` (see
 - Single-line `plugin.json` — format as pretty-printed JSON
 - Bumping `version` in both `plugin.json` and the marketplace entry — manifest always wins
 
----
-
-## Custom Skills
-
-### /update-marketplace
-
-When the user runs `/update-marketplace`, or asks to sync, refresh, or update the marketplace,
-or says a new skill or plugin has been added and the marketplace needs updating,
-read and follow the skill at `.claude/skills/update-marketplace/SKILL.md`.
-
-### /create-linear-issue
-When the user runs /create-linear-issue or asks to create a Linear issue, log a bug, file a ticket,
-track a feature idea, break down a large issue, or decompose an issue into smaller ones
-(e.g. "break down VD-123", "decompose VD-123", "split VD-123"),
-read and follow the skill at `.claude/skills/create-linear-issue/SKILL.md`.
-
-Default Linear project: **Studio Skills** — use this unless the user specifies a different project.
-
-### /implement-linear-issue
-When the user runs /implement-linear-issue, or mentions a Linear issue identifier (e.g. "VD-123", "implement VD-123",
-"work on VD-452", "working on VD-100", "build VD-100", "fix VD-99"), or asks to implement, build, fix, or work on a Linear issue,
-read and follow the skill at `.claude/skills/implement-linear-issue/SKILL.md`.
-
-### /close-linear-issue
-When the user runs /close-linear-issue, or asks to close, complete, merge, or ship a Linear issue (e.g. "close VD-123",
-"merge VD-453", "ship VD-100", "complete VD-99"), read and follow the skill at
-`.claude/skills/close-linear-issue/SKILL.md`.
