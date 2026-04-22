@@ -1,0 +1,23 @@
+name: marketplace-validate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  marketplace-validate:
+    name: marketplace-validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+
+      - name: Fetch main branch
+        run: git fetch origin main --depth=1
+
+      - name: Validate marketplace
+        run: python3 scripts/validate-marketplace.py --base-ref origin/main

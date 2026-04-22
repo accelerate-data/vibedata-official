@@ -1,54 +1,54 @@
-name: CI
+name: ci
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
-  validate:
-    name: Validate
+  ci:
+    name: ci
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate JSON files
+      - name: Fetch main branch
+        run: git fetch origin main --depth=1
+
+      - name: Validate JSON
         run: |
-          echo "Validating JSON files..."
-          find . -name "*.json" \
-            -not -path "./.git/*" \
-            -not -path "./node_modules/*" \
-            | while read -r file; do
-              if ! python3 -m json.tool "$file" > /dev/null 2>&1; then
-                echo "Invalid JSON: $file"
-                exit 1
-              fi
-              echo "  OK: $file"
-            done
-          echo "All JSON files are valid."
+          python3 -m json.tool .claude-plugin/plugin.json >/dev/null
+          python3 -m json.tool .claude-plugin/marketplace.json >/dev/null
 
-      - name: Check plugin structure
+      - name: Validate marketplace
+        run: python3 scripts/validate-marketplace.py --base-ref origin/main
+
+      - name: Check plugin version bump
+        run: python3 scripts/check-plugin-version-bump.py --base-ref origin/main
+
+      - name: Install dev tools
+        run: python3 -m pip install --upgrade -r requirements-dev.txt
+
+      - name: Lint Python
+        run: python3 -m ruff check scripts tests
+
+      - name: Check Python formatting
+        run: python3 -m ruff format --check scripts tests
+
+      - name: Compile Python
+        run: python3 -m py_compile scripts/validate-marketplace.py scripts/check-plugin-version-bump.py
+
+      - name: Run tests with coverage
         run: |
-          echo "Checking plugin structure..."
-          for plugin_dir in plugins/*/; do
-            plugin_name=$(basename "$plugin_dir")
+          python3 -m coverage run -m unittest discover -s tests
+          python3 -m coverage report --fail-under=70
 
-            # plugin.json must exist inside .claude-plugin/
-            manifest="$plugin_dir.claude-plugin/plugin.json"
-            if [ ! -f "$manifest" ]; then
-              echo "Missing plugin.json in $plugin_dir.claude-plugin/"
-              exit 1
-            fi
-
-            # Check for unexpected files inside .claude-plugin/
-            extra=$(find "$plugin_dir.claude-plugin/" -not -name "plugin.json" -not -type d)
-            if [ -n "$extra" ]; then
-              echo "Unexpected files in .claude-plugin/: $extra"
-              exit 1
-            fi
-
-            echo "  OK: $plugin_name"
-          done
-          echo "Plugin structure is valid."
+      - name: Check whitespace
+        run: git diff --check

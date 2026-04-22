@@ -1,31 +1,31 @@
-name: Claude Code Review
+name: claude-review
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
-  claude-code-review:
+  claude-review:
+    name: claude-review
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Claude Code Review
+      - name: Claude PR review
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           direct_prompt: |
-            Review this pull request against the repository conventions in CLAUDE.md. Check for:
-            - Valid JSON in all plugin.json and marketplace.json files
-            - SKILL.md frontmatter has required fields: name, description, tools, type, domain, version
-            - Skill directory name matches the name field in SKILL.md frontmatter exactly
-            - No files other than plugin.json inside .claude-plugin/ directories
-            - No nested subdirectories inside references/
-            - No process artifacts in references/ (they belong in context/)
-            - No time-sensitive language ("before/after X date") in skills
-            - marketplace.json has entries only for plugins, not individual skills
-            Report any issues found. If the PR looks clean, say so briefly.
+            Review this plugin marketplace change.
+            Focus on marketplace schema drift, unsafe source URLs, missing version bumps,
+            governance regressions, and documentation conflicts.
