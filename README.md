@@ -43,6 +43,16 @@ Install the flagship plugin:
 
 Then explore the rest of the catalog from the same marketplace. Skill bundles are intended for VibeData agent customization first, and can also be installed directly in Claude Code.
 
+### Codex
+
+Add the Codex marketplace:
+
+```bash
+codex plugin marketplace add accelerate-data/vibedata-plugins-official
+```
+
+The Codex marketplace is declared in `.agents/plugins/marketplace.json`, and each bundled plugin exposes a `.codex-plugin/plugin.json` manifest.
+
 ## Featured Plugin: ad-migration
 
 `ad-migration` helps teams modernize legacy data warehouses into governed Fabric Lakehouse platforms.

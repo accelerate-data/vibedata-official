@@ -41,6 +41,33 @@ def valid_marketplace() -> dict:
     }
 
 
+def valid_codex_marketplace() -> dict:
+    return {
+        "name": "vibedata-plugins-official",
+        "interface": {"displayName": "VibeData Official"},
+        "plugins": [
+            {
+                "name": "alpha-plugin",
+                "source": {"source": "local", "path": "./plugins/alpha-plugin"},
+                "policy": {
+                    "installation": "AVAILABLE",
+                    "authentication": "ON_INSTALL",
+                },
+                "category": "Data Engineering",
+            },
+            {
+                "name": "beta-plugin",
+                "source": {"source": "local", "path": "./plugins/beta-plugin"},
+                "policy": {
+                    "installation": "INSTALLED_BY_DEFAULT",
+                    "authentication": "ON_USE",
+                },
+                "category": "Data Engineering",
+            },
+        ],
+    }
+
+
 class MarketplaceValidationTests(unittest.TestCase):
     def test_valid_marketplace_passes(self) -> None:
         errors = validate_marketplace.validate_marketplace(
@@ -195,6 +222,125 @@ class MarketplaceValidationTests(unittest.TestCase):
         )
 
         self.assertEqual(errors, [])
+
+    def test_same_marketplace_version_must_bump_when_codex_entries_added(self) -> None:
+        base = valid_marketplace()
+        current = valid_marketplace()
+        base_codex = valid_codex_marketplace()
+        base_codex["plugins"] = base_codex["plugins"][:1]
+        current_codex = valid_codex_marketplace()
+
+        errors = validate_marketplace.validate_codex_version_bump(
+            current_codex, base_codex, current, base, "origin/main"
+        )
+
+        self.assertTrue(any("Codex marketplace entries" in error for error in errors))
+
+    def test_same_marketplace_version_bump_covers_codex_entries(self) -> None:
+        base = valid_marketplace()
+        current = valid_marketplace()
+        current["metadata"]["version"] = "1.0.1"
+        base_codex = valid_codex_marketplace()
+        base_codex["plugins"] = base_codex["plugins"][:1]
+        current_codex = valid_codex_marketplace()
+
+        errors = validate_marketplace.validate_codex_version_bump(
+            current_codex, base_codex, current, base, "origin/main"
+        )
+
+        self.assertEqual(errors, [])
+
+    def test_valid_codex_marketplace_shape_passes_except_missing_local_dirs(
+        self,
+    ) -> None:
+        errors = validate_marketplace.validate_codex_marketplace(
+            valid_codex_marketplace(), "current"
+        )
+
+        self.assertTrue(
+            all("does not exist" in error for error in errors) or errors == []
+        )
+
+    def test_codex_marketplace_accepts_remote_sources(self) -> None:
+        data = valid_codex_marketplace()
+        data["plugins"][0]["source"] = {
+            "source": "url",
+            "url": "https://github.com/example/alpha-plugin.git",
+        }
+
+        errors = validate_marketplace.validate_codex_marketplace(data, "current")
+
+        self.assertFalse(
+            any("source.source must be local" in error for error in errors)
+        )
+
+    def test_codex_marketplace_requires_policy(self) -> None:
+        data = valid_codex_marketplace()
+        del data["plugins"][0]["policy"]
+
+        errors = validate_marketplace.validate_codex_marketplace(data, "current")
+
+        self.assertTrue(any("policy object is required" in error for error in errors))
+
+    def test_codex_marketplace_rejects_invalid_authentication_policy(self) -> None:
+        data = valid_codex_marketplace()
+        data["plugins"][0]["policy"]["authentication"] = "ALWAYS"
+
+        errors = validate_marketplace.validate_codex_marketplace(data, "current")
+
+        self.assertTrue(any("policy.authentication" in error for error in errors))
+
+    def test_codex_marketplace_requires_category(self) -> None:
+        data = valid_codex_marketplace()
+        del data["plugins"][0]["category"]
+
+        errors = validate_marketplace.validate_codex_marketplace(data, "current")
+
+        self.assertTrue(any("category is required" in error for error in errors))
+
+    def test_marketplace_catalog_parity_passes_when_plugin_names_match(self) -> None:
+        errors = validate_marketplace.validate_catalog_parity(
+            valid_marketplace(), valid_codex_marketplace()
+        )
+
+        self.assertEqual(errors, [])
+
+    def test_marketplace_catalog_parity_rejects_missing_codex_plugin(self) -> None:
+        codex = valid_codex_marketplace()
+        codex["plugins"] = codex["plugins"][1:]
+
+        errors = validate_marketplace.validate_catalog_parity(
+            valid_marketplace(), codex
+        )
+
+        self.assertTrue(
+            any("missing Claude marketplace plugins" in error for error in errors)
+        )
+
+    def test_marketplace_catalog_parity_rejects_extra_codex_plugin(self) -> None:
+        codex = valid_codex_marketplace()
+        codex["plugins"].append(
+            {
+                "name": "gamma-plugin",
+                "source": {
+                    "source": "url",
+                    "url": "https://github.com/example/gamma-plugin.git",
+                },
+                "policy": {
+                    "installation": "AVAILABLE",
+                    "authentication": "ON_INSTALL",
+                },
+                "category": "Data Engineering",
+            }
+        )
+
+        errors = validate_marketplace.validate_catalog_parity(
+            valid_marketplace(), codex
+        )
+
+        self.assertTrue(
+            any("not present in Claude marketplace" in error for error in errors)
+        )
 
 
 if __name__ == "__main__":

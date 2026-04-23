@@ -1,0 +1,18 @@
+{
+  "name": "vibedata-domain-skills",
+  "version": "1.0.0",
+  "description": "Customize VibeData modeling agents with organizational business rules, including revenue recognition patterns for dbt on Microsoft Fabric.",
+  "author": {
+    "name": "accelerate-data"
+  },
+  "license": "Elastic-2.0",
+  "keywords": ["domain-modeling", "revenue-recognition", "dbt", "fabric"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "VibeData Domain Skills",
+    "shortDescription": "Business domain modeling rules.",
+    "developerName": "Accelerate Data",
+    "category": "Data Engineering",
+    "capabilities": []
+  }
+}

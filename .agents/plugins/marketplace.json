@@ -1,0 +1,92 @@
+{
+  "name": "vibedata-plugins-official",
+  "interface": {
+    "displayName": "VibeData Official"
+  },
+  "plugins": [
+    {
+      "name": "ad-migration",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/accelerate-data/migration-utility.git"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Data Engineering"
+    },
+    {
+      "name": "fabric-cli",
+      "source": {
+        "source": "local",
+        "path": "./plugins/fabric-cli"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Data Engineering"
+    },
+    {
+      "name": "fabric-semantic-model",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/accelerate-data/fabric-semantic-model.git"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Data Engineering"
+    },
+    {
+      "name": "vibedata-dbt-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/vibedata-dbt-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Data Engineering"
+    },
+    {
+      "name": "vibedata-dlt-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/vibedata-dlt-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Data Engineering"
+    },
+    {
+      "name": "vibedata-domain-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/vibedata-domain-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Data Engineering"
+    },
+    {
+      "name": "vibedata-ingestion-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/vibedata-ingestion-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Data Engineering"
+    }
+  ]
+}
