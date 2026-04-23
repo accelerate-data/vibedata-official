@@ -1,0 +1,16 @@
+{
+  "name": "fabric-cli",
+  "version": "1.0.0",
+  "description": "Microsoft Fabric CLI operations for workspace management, notebook execution, pipeline orchestration, OneLake file I/O, lakehouse SQL queries, and MCP server integration.",
+  "author": {
+    "name": "accelerate-data"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Fabric CLI",
+    "shortDescription": "Microsoft Fabric CLI operations.",
+    "developerName": "Accelerate Data",
+    "category": "Data Engineering",
+    "capabilities": []
+  }
+}

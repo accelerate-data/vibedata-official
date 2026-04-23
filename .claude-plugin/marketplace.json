@@ -3,7 +3,7 @@
   "owner": { "name": "accelerate-data" },
   "metadata": {
     "description": "Skills and plugins for customizing VibeData data engineering agents with organizational standards for ingestion, extraction, source systems, and business rules",
-    "version": "1.0.0"
+    "version": "1.0.1"
   },
   "plugins": [
     {

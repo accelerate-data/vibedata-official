@@ -1,0 +1,18 @@
+{
+  "name": "vibedata-ingestion-skills",
+  "version": "1.0.0",
+  "description": "Customize VibeData extraction agents with organizational source-system standards, including Salesforce extraction patterns with dlt and dbt on Microsoft Fabric.",
+  "author": {
+    "name": "accelerate-data"
+  },
+  "license": "Elastic-2.0",
+  "keywords": ["ingestion", "salesforce", "dlt", "dbt", "fabric"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "VibeData Ingestion Skills",
+    "shortDescription": "Source-system extraction standards.",
+    "developerName": "Accelerate Data",
+    "category": "Data Engineering",
+    "capabilities": []
+  }
+}
