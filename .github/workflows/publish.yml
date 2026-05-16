@@ -1,0 +1,199 @@
+# Public publish pipeline for VibeData Studio.
+#
+# Triggered by repository_dispatch from accelerate-data/vd-studio's release.yml
+# after a stable release has been built, signed (cosign keyless), and pushed
+# to private GHCR. This workflow:
+#
+#   1. Verifies the cosign signature on the source digests against Studio's
+#      GitHub OIDC identity (refuses to promote untrusted images).
+#   2. Pulls private digests and re-tags them to public coordinates owned
+#      by this repo (vibedata-studio-{frontend,backend}:vX.Y.Z).
+#   3. Pushes to public packages.
+#   4. Commits releases/vX.Y.Z/release-manifest.json to this repo.
+#   5. Creates a GitHub Release tagged vX.Y.Z with the manifest attached.
+#   6. Smoke-tests anonymous `docker pull` from a logged-out runner.
+#
+# Tracking: VD-2014.
+
+name: publish
+
+on:
+  repository_dispatch:
+    types: [studio-release]
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+concurrency:
+  group: publish-${{ github.event.client_payload.version }}
+  cancel-in-progress: false
+
+env:
+  STUDIO_REPO: accelerate-data/vd-studio
+  PUBLIC_FE_PACKAGE: ghcr.io/accelerate-data/vibedata-studio-frontend
+  PUBLIC_BE_PACKAGE: ghcr.io/accelerate-data/vibedata-studio-backend
+  COSIGN_OIDC_ISSUER: https://token.actions.githubusercontent.com
+  COSIGN_IDENTITY_REGEXP: ^https://github\.com/accelerate-data/vd-studio/\.github/workflows/release\.yml@refs/tags/v.*$
+
+jobs:
+  publish:
+    name: Promote private digest → public
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Validate dispatch payload
+        id: payload
+        env:
+          PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+        run: |
+          echo "$PAYLOAD" > /tmp/payload.json
+
+          # Required fields
+          VERSION=$(jq -r '.version // empty' /tmp/payload.json)
+          FE_IMAGE=$(jq -r '.frontend.private_image // empty' /tmp/payload.json)
+          FE_DIGEST=$(jq -r '.frontend.digest // empty' /tmp/payload.json)
+          BE_IMAGE=$(jq -r '.backend.private_image // empty' /tmp/payload.json)
+          BE_DIGEST=$(jq -r '.backend.digest // empty' /tmp/payload.json)
+          HAS_MANIFEST=$(jq -r 'has("release_manifest") | tostring' /tmp/payload.json)
+
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid or missing version (got: '$VERSION') — must be stable semver"
+            exit 1
+          fi
+          if [[ ! "$FE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]] || [[ ! "$BE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "::error::Missing or malformed image digest(s) in payload"
+            exit 1
+          fi
+          if [ -z "$FE_IMAGE" ] || [ -z "$BE_IMAGE" ]; then
+            echo "::error::Missing private_image reference(s) in payload"
+            exit 1
+          fi
+          if [ "$HAS_MANIFEST" != "true" ]; then
+            echo "::error::Dispatch payload is missing release_manifest"
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "fe_image=$FE_IMAGE" >> "$GITHUB_OUTPUT"
+          echo "fe_digest=$FE_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "be_image=$BE_IMAGE" >> "$GITHUB_OUTPUT"
+          echo "be_digest=$BE_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "Validated payload for v$VERSION"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Trust boundary: cosign keyless verify against Studio's OIDC identity.
+      # The source digest must have been signed by vd-studio's release.yml on a
+      # vX.Y.Z tag. If verification fails, promotion stops here.
+      - name: Verify cosign signature — frontend
+        env:
+          IMAGE: ${{ steps.payload.outputs.fe_image }}@${{ steps.payload.outputs.fe_digest }}
+        run: |
+          cosign verify \
+            --certificate-identity-regexp "${COSIGN_IDENTITY_REGEXP}" \
+            --certificate-oidc-issuer "${COSIGN_OIDC_ISSUER}" \
+            "${IMAGE}"
+
+      - name: Verify cosign signature — backend
+        env:
+          IMAGE: ${{ steps.payload.outputs.be_image }}@${{ steps.payload.outputs.be_digest }}
+        run: |
+          cosign verify \
+            --certificate-identity-regexp "${COSIGN_IDENTITY_REGEXP}" \
+            --certificate-oidc-issuer "${COSIGN_OIDC_ISSUER}" \
+            "${IMAGE}"
+
+      # Pull-by-digest preserves the exact bytes that were signed. The retag
+      # adds a new public name; the underlying digest is unchanged.
+      - name: Pull, retag, and push frontend (private digest → public tag)
+        env:
+          SRC: ${{ steps.payload.outputs.fe_image }}@${{ steps.payload.outputs.fe_digest }}
+          DST: ${{ env.PUBLIC_FE_PACKAGE }}:v${{ steps.payload.outputs.version }}
+        run: |
+          docker pull "$SRC"
+          docker tag "$SRC" "$DST"
+          docker push "$DST"
+          echo "Published $DST"
+
+      - name: Pull, retag, and push backend (private digest → public tag)
+        env:
+          SRC: ${{ steps.payload.outputs.be_image }}@${{ steps.payload.outputs.be_digest }}
+          DST: ${{ env.PUBLIC_BE_PACKAGE }}:v${{ steps.payload.outputs.version }}
+        run: |
+          docker pull "$SRC"
+          docker tag "$SRC" "$DST"
+          docker push "$DST"
+          echo "Published $DST"
+
+      - name: Commit release-manifest.json
+        env:
+          VERSION: ${{ steps.payload.outputs.version }}
+          PAYLOAD_FILE: /tmp/payload.json
+        run: |
+          mkdir -p "releases/v${VERSION}"
+          jq '.release_manifest' "$PAYLOAD_FILE" > "releases/v${VERSION}/release-manifest.json"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet "releases/v${VERSION}/release-manifest.json"; then
+            echo "Manifest for v${VERSION} unchanged — skipping commit (idempotent re-run)"
+          else
+            COMMIT_MSG=$(mktemp)
+            printf 'release: publish v%s manifest\n\nGenerated by publish.yml on repository_dispatch from %s.\nTracking: VD-2014.\n' \
+              "${VERSION}" "${STUDIO_REPO}" > "$COMMIT_MSG"
+            git add "releases/v${VERSION}/release-manifest.json"
+            git commit -F "$COMMIT_MSG"
+            git push origin HEAD:main
+          fi
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.payload.outputs.version }}
+          FE_PUBLIC: ${{ env.PUBLIC_FE_PACKAGE }}
+          BE_PUBLIC: ${{ env.PUBLIC_BE_PACKAGE }}
+        run: |
+          MANIFEST_PATH="releases/v${VERSION}/release-manifest.json"
+          NOTES="docker pull ${FE_PUBLIC}:v${VERSION}
+          docker pull ${BE_PUBLIC}:v${VERSION}"
+
+          if gh release view "v${VERSION}" >/dev/null 2>&1; then
+            gh release upload "v${VERSION}" "${MANIFEST_PATH}" --clobber
+          else
+            gh release create "v${VERSION}" "${MANIFEST_PATH}" \
+              --title "v${VERSION}" \
+              --notes "${NOTES}"
+          fi
+
+      # Smoke test: prove anonymous pull works. Uses a logged-out Docker
+      # context (separate from GHCR_TOKEN auth above) so a misconfigured
+      # package visibility surfaces here, before the release is considered
+      # complete. Failure means: customers cannot pull v${VERSION} publicly.
+      - name: Smoke test — anonymous docker pull
+        env:
+          FE_PUBLIC: ${{ env.PUBLIC_FE_PACKAGE }}
+          BE_PUBLIC: ${{ env.PUBLIC_BE_PACKAGE }}
+          VERSION: ${{ steps.payload.outputs.version }}
+        run: |
+          docker logout ghcr.io || true
+
+          set -e
+          docker pull "${FE_PUBLIC}:v${VERSION}"
+          docker pull "${BE_PUBLIC}:v${VERSION}"
+
+          echo "Anonymous pull succeeded for v${VERSION}"
