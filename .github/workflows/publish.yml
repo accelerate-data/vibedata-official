@@ -134,11 +134,19 @@ jobs:
             git push origin HEAD:main
           fi
 
+      - name: Mint cross-repo token (vd-studio)
+        # App token (vibedata-gha-app) — GITHUB_TOKEN can't read another repo's
+        # run artifacts; this scopes a short-lived token to vd-studio (Actions: read).
+        uses: actions/create-github-app-token@v1
+        id: studio-token
+        with:
+          app-id: ${{ secrets.VIBEDATA_GHA_APP_ID }}
+          private-key: ${{ secrets.VIBEDATA_GHA_APP_PRIVATE_KEY }}
+          owner: accelerate-data
+          repositories: vd-studio
       - name: Download studio release artifacts
         env:
-          # PAT / App token with actions:read on accelerate-data/vd-studio
-          # (GITHUB_TOKEN cannot read another repo's run artifacts).
-          GH_TOKEN: ${{ secrets.STUDIO_ARTIFACTS_TOKEN }}
+          GH_TOKEN: ${{ steps.studio-token.outputs.token }}
           RUN_ID: ${{ steps.payload.outputs.run_id }}
         run: |
           gh run download "$RUN_ID" --repo "$STUDIO_REPO" --dir artifacts

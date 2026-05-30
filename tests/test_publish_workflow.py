@@ -78,6 +78,13 @@ class PublishWorkflowShape(unittest.TestCase):
         self.assertIn("--offline", self.raw)
         self.assertIn("cosign-release: v2.5.2", self.raw)
 
+    def test_uses_app_token_not_personal_pat(self) -> None:
+        # Cross-repo read of vd-studio's run artifacts uses a minted GitHub App
+        # token (vibedata-gha-app), not a personal PAT.
+        self.assertIn("create-github-app-token", self.raw)
+        self.assertIn("VIBEDATA_GHA_APP_ID", self.raw)
+        self.assertNotIn("STUDIO_ARTIFACTS_TOKEN", self.raw)
+
     def test_minimal_permissions(self) -> None:
         perms = self.wf["permissions"]
         self.assertEqual(perms.get("contents"), "write")
