@@ -33,14 +33,14 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  STUDIO_REPO: accelerate-data/vd-studio
+  STUDIO_REPO: accelerate-data/studio
   GHCR: ghcr.io
   OWNER: accelerate-data
   PUBLIC_BACKEND: studio-backend
   PUBLIC_FRONTEND: studio-frontend
   THIRD_PARTY_APP_DB: postgres:16-alpine
   COSIGN_OIDC_ISSUER: https://token.actions.githubusercontent.com
-  COSIGN_IDENTITY_REGEXP: ^https://github\.com/accelerate-data/vd-studio/\.github/workflows/release\.yml@.*$
+  COSIGN_IDENTITY_REGEXP: ^https://github\.com/accelerate-data/studio/\.github/workflows/release\.yml@.*$
 
 jobs:
   publish:
@@ -143,7 +143,7 @@ jobs:
           app-id: ${{ secrets.VIBEDATA_GHA_APP_ID }}
           private-key: ${{ secrets.VIBEDATA_GHA_APP_PRIVATE_KEY }}
           owner: accelerate-data
-          repositories: vd-studio
+          repositories: studio
       - name: Download studio release artifacts
         env:
           GH_TOKEN: ${{ steps.studio-token.outputs.token }}

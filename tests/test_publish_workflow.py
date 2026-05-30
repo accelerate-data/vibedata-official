@@ -60,7 +60,7 @@ class PublishWorkflowShape(unittest.TestCase):
 
     def test_downloads_studio_run_artifacts(self) -> None:
         self.assertIn("gh run download", self.raw)
-        self.assertIn("accelerate-data/vd-studio", self.raw)
+        self.assertIn("accelerate-data/studio", self.raw)
 
     def test_attaches_cli_binaries_install_script_and_wiki_tarball(self) -> None:
         self.assertIn("vibedatactl-", self.raw)  # the 4 platform binaries
