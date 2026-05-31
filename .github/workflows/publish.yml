@@ -1,0 +1,192 @@
+# Public release publish pipeline for VibeData Studio.
+#
+# Triggered by a `studio-release` repository_dispatch from
+# accelerate-data/vd-studio's deploy.yml AFTER that workflow has already:
+#   - verified the candidate's cosign signature + SBOM + SLSA attestations,
+#   - promoted BOTH images via `crane copy` (sigstore referrers preserved, no
+#     re-sign) into the public ghcr.io/accelerate-data/studio-{backend,frontend}
+#     packages under the same vX.Y.Z tag,
+#   - synced the operator wiki.
+#
+# So this workflow must NOT re-promote the images — a docker pull/tag/push would
+# drop the cosign/SBOM/SLSA referrers and ship unsigned public images. It only:
+#   1. Sanity-verifies the promoted PUBLIC images are signed (referrers survived).
+#   2. Generates + commits release-manifest.json (latest pointer).
+#   3. Downloads the studio-built release artifacts (CLI binaries, install
+#      script, wiki tarball) from the source workflow run.
+#   4. Creates the GitHub Release vX.Y.Z with the manifest + all artifacts.
+#
+# Canonical contract: vd-studio docs/design/devops/03-release-promotion.md.
+
+name: publish
+
+on:
+  repository_dispatch:
+    types: [studio-release]
+
+permissions:
+  contents: write # commit release-manifest.json + create the GitHub Release
+  packages: read # crane digest on the public studio-* packages
+
+concurrency:
+  group: publish-${{ github.event.client_payload.candidate_tag }}
+  cancel-in-progress: false
+
+env:
+  STUDIO_REPO: accelerate-data/studio
+  GHCR: ghcr.io
+  OWNER: accelerate-data
+  PUBLIC_BACKEND: studio-backend
+  PUBLIC_FRONTEND: studio-frontend
+  THIRD_PARTY_APP_DB: postgres:16-alpine
+  COSIGN_OIDC_ISSUER: https://token.actions.githubusercontent.com
+  COSIGN_IDENTITY_REGEXP: ^https://github\.com/accelerate-data/studio/\.github/workflows/release\.yml@.*$
+
+jobs:
+  publish:
+    name: Publish Studio release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Validate dispatch payload
+        id: payload
+        env:
+          PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+        run: |
+          echo "$PAYLOAD" > /tmp/payload.json
+          TAG=$(jq -r '.candidate_tag // empty' /tmp/payload.json)
+          VERSION=$(jq -r '.version // empty' /tmp/payload.json)
+          RUN_ID=$(jq -r '.source_workflow_run_id // empty' /tmp/payload.json)
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::candidate_tag must be vMAJOR.MINOR.PATCH (got '$TAG')"; exit 1
+          fi
+          [ -n "$VERSION" ] || VERSION="$TAG"
+          if [ -z "$RUN_ID" ]; then echo "::error::missing source_workflow_run_id"; exit 1; fi
+          jq -r '.release_notes_body // ""' /tmp/payload.json > /tmp/release-notes.md
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "Validated payload for $TAG (source run $RUN_ID)"
+
+      - uses: actions/checkout@v4
+
+      - name: Install crane
+        uses: imjasonh/setup-crane@v0.4
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          # Pin cosign; v2.5.2 supports --offline. The nightly self-verify hung
+          # 40+ min on an online Rekor lookup during a sigstore slow window
+          # (vd-studio cc217782) — verifying --offline here avoids that.
+          cosign-release: v2.5.2
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Trust sanity: the promoted PUBLIC images must carry a valid signature
+      # from vd-studio's release.yml identity — proves crane copy carried the
+      # referrers across. --offline verifies the bundle SET without an online
+      # Rekor call (no hang).
+      - name: Verify public images are signed
+        env:
+          TAG: ${{ steps.payload.outputs.tag }}
+        run: |
+          for repo in "$PUBLIC_BACKEND" "$PUBLIC_FRONTEND"; do
+            echo "Verifying ${GHCR}/${OWNER}/${repo}:${TAG}"
+            cosign verify --offline \
+              --certificate-identity-regexp "$COSIGN_IDENTITY_REGEXP" \
+              --certificate-oidc-issuer "$COSIGN_OIDC_ISSUER" \
+              "${GHCR}/${OWNER}/${repo}:${TAG}"
+          done
+
+      - name: Generate release-manifest.json
+        env:
+          TAG: ${{ steps.payload.outputs.tag }}
+        run: |
+          BE_DIGEST=$(crane digest "${GHCR}/${OWNER}/${PUBLIC_BACKEND}:${TAG}")
+          FE_DIGEST=$(crane digest "${GHCR}/${OWNER}/${PUBLIC_FRONTEND}:${TAG}")
+          RELEASED=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          jq -n \
+            --arg version "$TAG" \
+            --arg released "$RELEASED" \
+            --arg backend "${GHCR}/${OWNER}/${PUBLIC_BACKEND}@${BE_DIGEST}" \
+            --arg frontend "${GHCR}/${OWNER}/${PUBLIC_FRONTEND}@${FE_DIGEST}" \
+            --arg app_db "$THIRD_PARTY_APP_DB" \
+            '{version:$version, released:$released, images:{backend:$backend, frontend:$frontend}, third_party:{app_db:$app_db}}' \
+            > release-manifest.json
+          echo "--- release-manifest.json ---"; cat release-manifest.json
+
+      - name: Commit release-manifest.json (latest pointer)
+        env:
+          TAG: ${{ steps.payload.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add release-manifest.json
+          if git diff --cached --quiet; then
+            echo "manifest unchanged — skipping commit (idempotent re-run)"
+          else
+            git commit -m "release: publish ${TAG} manifest"
+            git push origin HEAD:main
+          fi
+
+      - name: Mint cross-repo token (vd-studio)
+        # App token (vibedata-gha-app) — GITHUB_TOKEN can't read another repo's
+        # run artifacts; this scopes a short-lived token to vd-studio (Actions: read).
+        uses: actions/create-github-app-token@v1
+        id: studio-token
+        with:
+          app-id: ${{ secrets.VIBEDATA_GHA_APP_ID }}
+          private-key: ${{ secrets.VIBEDATA_GHA_APP_PRIVATE_KEY }}
+          owner: accelerate-data
+          repositories: studio
+      - name: Download studio release artifacts
+        env:
+          GH_TOKEN: ${{ steps.studio-token.outputs.token }}
+          RUN_ID: ${{ steps.payload.outputs.run_id }}
+        run: |
+          gh run download "$RUN_ID" --repo "$STUDIO_REPO" --dir artifacts
+          # gh nests each artifact in its own directory — flatten into dist/.
+          mkdir -p dist
+          find artifacts -type f -exec cp {} dist/ \;
+          echo "--- downloaded artifacts ---"; ls -la dist
+
+      - name: Verify the release artifact set is complete
+        env:
+          TAG: ${{ steps.payload.outputs.tag }}
+        run: |
+          required=(
+            "vibedatactl-linux-x86_64"
+            "vibedatactl-linux-arm64"
+            "vibedatactl-darwin-arm64"
+            "vibedatactl-windows-x86_64.exe"
+            "install.sh"
+            "wiki-${TAG}.tar.gz"
+          )
+          missing=()
+          for f in "${required[@]}"; do
+            [ -f "dist/${f}" ] || missing+=("${f}")
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "::error::release is incomplete — missing artifacts: ${missing[*]}"
+            exit 1
+          fi
+          echo "all required release artifacts present"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.payload.outputs.tag }}
+        run: |
+          ASSETS=(release-manifest.json)
+          for f in dist/*; do ASSETS+=("$f"); done
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${ASSETS[@]}" --clobber
+          else
+            gh release create "$TAG" "${ASSETS[@]}" --title "$TAG" --notes-file /tmp/release-notes.md
+          fi
+          echo "Published GitHub Release $TAG"
