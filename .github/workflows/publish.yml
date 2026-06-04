@@ -130,7 +130,7 @@ jobs:
       - name: Mint cross-repo token (vd-studio)
         # App token (vibedata-gha-app) — GITHUB_TOKEN can't read another repo's
         # run artifacts; this scopes a short-lived token to vd-studio (Actions: read).
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v3
         id: studio-token
         with:
           app-id: ${{ secrets.VIBEDATA_GHA_APP_ID }}
