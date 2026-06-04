@@ -153,10 +153,10 @@ jobs:
           TAG: ${{ steps.payload.outputs.tag }}
         run: |
           required=(
-            "vibedatactl-linux-x86_64"
-            "vibedatactl-linux-arm64"
-            "vibedatactl-darwin-arm64"
-            "vibedatactl-windows-x86_64.exe"
+            "vibedata-linux-x86_64"
+            "vibedata-linux-arm64"
+            "vibedata-darwin-arm64"
+            "vibedata-windows-x86_64.exe"
             "install.sh"
             "wiki-${TAG}.tar.gz"
           )
