@@ -63,7 +63,7 @@ class PublishWorkflowShape(unittest.TestCase):
         self.assertIn("accelerate-data/studio", self.raw)
 
     def test_attaches_cli_binaries_install_script_and_wiki_tarball(self) -> None:
-        self.assertIn("vibedatactl-", self.raw)  # the 4 platform binaries
+        self.assertIn("vibedata-", self.raw)  # the 4 platform binaries
         self.assertIn("install.sh", self.raw)
         self.assertIn("wiki-", self.raw)
 
