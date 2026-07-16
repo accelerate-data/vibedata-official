@@ -11,12 +11,9 @@
 # So this workflow must NOT re-promote the images — a docker pull/tag/push would
 # drop the cosign/SBOM/SLSA referrers and ship unsigned public images. It only:
 #   1. Sanity-verifies the promoted PUBLIC images are signed (referrers survived).
-#   2. Generates release-manifest.json (shipped as a Release asset, not committed
-#      to main — main is branch-protected and the committed "latest pointer"
-#      mirrors the deferred studio record-release step; see VD-2107).
-#   3. Downloads the studio-built release artifacts (CLI binaries, install
+#   2. Downloads the studio-built release artifacts (CLI binaries, install
 #      script, wiki tarball) from the source workflow run.
-#   4. Creates the GitHub Release vX.Y.Z with the manifest + all artifacts.
+#   3. Creates the GitHub Release vX.Y.Z with those artifacts.
 #
 # Canonical contract: vd-studio docs/design/devops/03-release-promotion.md.
 
@@ -27,7 +24,7 @@ on:
     types: [studio-release]
 
 permissions:
-  contents: write # create the GitHub Release (+ upload the manifest asset)
+  contents: write # create the GitHub Release and upload operator assets
   packages: read # crane digest on the public studio-* packages
 
 concurrency:
@@ -40,7 +37,6 @@ env:
   OWNER: accelerate-data
   PUBLIC_BACKEND: studio-backend
   PUBLIC_FRONTEND: studio-frontend
-  THIRD_PARTY_APP_DB: postgres:16-alpine
   COSIGN_OIDC_ISSUER: https://token.actions.githubusercontent.com
   COSIGN_IDENTITY_REGEXP: ^https://github\.com/accelerate-data/studio/\.github/workflows/release\.yml@.*$
 
@@ -105,28 +101,6 @@ jobs:
               "${GHCR}/${OWNER}/${repo}:${TAG}"
           done
 
-      - name: Generate release-manifest.json
-        env:
-          TAG: ${{ steps.payload.outputs.tag }}
-        run: |
-          BE_DIGEST=$(crane digest "${GHCR}/${OWNER}/${PUBLIC_BACKEND}:${TAG}")
-          FE_DIGEST=$(crane digest "${GHCR}/${OWNER}/${PUBLIC_FRONTEND}:${TAG}")
-          RELEASED=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-          jq -n \
-            --arg version "$TAG" \
-            --arg released "$RELEASED" \
-            --arg backend "${GHCR}/${OWNER}/${PUBLIC_BACKEND}@${BE_DIGEST}" \
-            --arg frontend "${GHCR}/${OWNER}/${PUBLIC_FRONTEND}@${FE_DIGEST}" \
-            --arg app_db "$THIRD_PARTY_APP_DB" \
-            '{version:$version, released:$released, images:{backend:$backend, frontend:$frontend}, third_party:{app_db:$app_db}}' \
-            > release-manifest.json
-          echo "--- release-manifest.json ---"; cat release-manifest.json
-          # Not committed to main: the commit-to-main "latest pointer" was
-          # dropped (VD-2107) — main is branch-protected (push rejected, run
-          # 26722597165) and it mirrors the studio record-release step that was
-          # likewise deferred. The manifest still ships as a GitHub Release asset
-          # (see "Create GitHub Release" below), which is the durable artifact.
-
       - name: Mint cross-repo token (vd-studio)
         # App token (vibedata-gha-app) — GITHUB_TOKEN can't read another repo's
         # run artifacts; this scopes a short-lived token to vd-studio (Actions: read).
@@ -175,8 +149,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.payload.outputs.tag }}
         run: |
-          ASSETS=(release-manifest.json)
-          for f in dist/*; do ASSETS+=("$f"); done
+          ASSETS=(dist/*)
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "${ASSETS[@]}" --clobber
           else

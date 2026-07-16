@@ -4,8 +4,8 @@ The publish pipeline is triggered by a `studio-release` repository_dispatch from
 accelerate-data/vd-studio's deploy.yml AFTER that workflow has already promoted
 the images (crane copy, signatures preserved) into the public studio-* packages
 and synced the operator wiki. This workflow therefore must NOT re-promote the
-images; it downloads the studio-built release artifacts, ships the release
-manifest as a Release asset, and creates the GitHub Release. See vd-studio
+images; it downloads the studio-built release artifacts and creates the GitHub
+Release. See vd-studio
 docs/design/devops/03-release-promotion.md for the canonical contract.
 """
 
@@ -67,12 +67,10 @@ class PublishWorkflowShape(unittest.TestCase):
         self.assertIn("install.sh", self.raw)
         self.assertIn("wiki-", self.raw)
 
-    def test_ships_manifest_asset_and_creates_release(self) -> None:
-        self.assertIn("release-manifest.json", self.raw)
+    def test_creates_release_without_a_separate_image_manifest(self) -> None:
         self.assertIn("gh release create", self.raw)
-        # The manifest ships as a Release asset and is NOT committed to main
-        # (VD-2107): main is branch-protected (push rejected, run 26722597165),
-        # and the committed "latest pointer" mirrors the deferred record-release.
+        self.assertNotIn("release-manifest.json", self.raw)
+        self.assertNotIn("THIRD_PARTY_APP_DB", self.raw)
         self.assertNotIn("push origin HEAD:main", self.raw)
 
     def test_verifies_public_images_offline_no_rekor_hang(self) -> None:
