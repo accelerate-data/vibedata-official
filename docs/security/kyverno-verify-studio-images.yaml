@@ -1,0 +1,85 @@
+# Studio first-party image verification (customer-side, one-time cluster install).
+#
+# Makes the cluster refuse any Studio image that is not provably ours. Studio
+# images are Cosign-signed keyless at release time (GitHub Actions OIDC identity,
+# no long-lived key), so there is no public key to distribute: the policy pins the
+# signing *certificate identity* (the workflow that signed it) + the OIDC issuer.
+# These identities are the same ones the release pipeline verifies before
+# promotion, so a signature that passes here is the exact one we shipped.
+#
+# Third-party images (obot, PostgreSQL) are out of scope — they don't match
+# imageReferences, so Kyverno lets them through unverified.
+#
+# Requires Kyverno >= 1.13 (per-rule failureAction). The nodes must reach the sigstore
+# public-good services (Fulcio, Rekor, the TUF root) to verify keyless
+# signatures; an air-gapped cluster needs a mirrored sigstore trust root.
+#
+# Apply once:  kubectl apply -f security/kyverno-verify-studio-images.yaml
+# Rotation / identity changes: see docs "Supply chain" in the studio repo
+# (docs/design/kubernetes-deployment/README.md).
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-studio-images
+  annotations:
+    policies.kyverno.io/title: Verify Studio image signatures
+    policies.kyverno.io/category: Supply Chain Security
+    policies.kyverno.io/description: >-
+      Admits only Studio first-party images signed keyless by our release
+      pipeline. Rejects unsigned or tampered images.
+spec:
+  # validationFailureAction is deprecated (Kyverno 1.13) and defaults to Audit;
+  # each rule below also sets failureAction: Enforce so the policy can't silently
+  # degrade to audit-only (fail-open) on a Kyverno upgrade that drops this field.
+  validationFailureAction: Enforce
+  webhookTimeoutSeconds: 30
+  # Verification reaches out to sigstore; don't run it against historical/system
+  # workloads at admission.
+  background: false
+  # Hardening: the subjectRegExp below accept the signing workflow on ANY git ref
+  # (@.*$), matching the release pipeline's own verify. To also constrain to the
+  # trusted ref, tighten to `@refs/(heads/main|tags/v.*)$` once you've confirmed
+  # the SAN of a shipped image:
+  #   cosign verify --certificate-identity-regexp '.*release\.yml@.*' \
+  #     --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  #     ghcr.io/accelerate-data/studio-backend:<tag>
+  rules:
+    # Backend + frontend are signed by the release workflow.
+    - name: verify-backend-frontend
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      verifyImages:
+        - imageReferences:
+            - "ghcr.io/accelerate-data/studio-backend*"
+            - "ghcr.io/accelerate-data/studio-frontend*"
+          failureAction: Enforce
+          mutateDigest: true
+          attestors:
+            - entries:
+                - keyless:
+                    subjectRegExp: "^https://github\\.com/accelerate-data/studio/\\.github/workflows/release\\.yml@.*$"
+                    issuer: "https://token.actions.githubusercontent.com"
+                    rekor:
+                      url: https://rekor.sigstore.dev
+    # The agent-server image is signed by its own build workflow.
+    - name: verify-agent-server
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      verifyImages:
+        - imageReferences:
+            - "ghcr.io/accelerate-data/vd-agent-server*"
+          failureAction: Enforce
+          mutateDigest: true
+          attestors:
+            - entries:
+                - keyless:
+                    subjectRegExp: "^https://github\\.com/accelerate-data/studio/\\.github/workflows/agent-server-image\\.yml@.*$"
+                    issuer: "https://token.actions.githubusercontent.com"
+                    rekor:
+                      url: https://rekor.sigstore.dev
