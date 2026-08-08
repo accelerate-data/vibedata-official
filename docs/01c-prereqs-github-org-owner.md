@@ -1,11 +1,17 @@
 ---
 applies-to: vibedata v0.1.26
 verified-against: studio@653beeced
-verified-on: 2026-08-05
+verified-on: 2026-08-08
 sources:
   - docs/functional/github-user-auth-flow/github-app.md
   - src/server/modules/external-services/github-commit-provider.service.ts
+  - src/server/modules/external-services/github-commit-provider.router.ts
+  - src/server/modules/external-services/github-commit-provider-candidate-validator.ts
   - src/server/modules/external-services/external-services.schemas.ts
+  - src/server/modules/auth/providers/github.ts
+  - src/server/modules/user-service-links/connect-github-commits.router.ts
+  - src/server/modules/user-service-links/github-commits-callback-path.ts
+  - src/server/lib/auth/frontend-redirect.ts
   - src/features/settings/components/Settings/OrgSettingsPanel.tsx
   - src/features/settings/components/Settings/panels/GitHubProviderPanel.tsx
   - src/shared/schemas.ts
@@ -15,6 +21,8 @@ sources:
   - src/server/modules/github/services/github-installations.service.ts
   - src/server/modules/github/services/__tests__/github-installations.service.local-mode.test.ts
   - src/server/modules/git-config/git-config.openapi.ts
+  - src/server/lib/github-api.ts
+  - src/server/modules/domains/helpers/domain-repository-values.ts
 ---
 
 # Request for your GitHub organisation owner: create a GitHub App
@@ -27,10 +35,18 @@ Forward this page to the owner of your GitHub organisation. It takes about 10 mi
 GitHub's own settings. Nothing here requires access to Studio or to any Accelerate Data
 system — only to your organisation's GitHub settings.
 
+## What this page consumes
+
+This page needs one value before its step 4 can be done: the **Studio domain**, the DNS name
+Studio will be reached at. It comes from your Azure infrastructure owner — see
+[01d-prereqs-azure-infra](01d-prereqs-azure-infra.md) — and it must be settled before this
+request is sent, because the callback URL in step 4 is built from it. Send it along with this
+page.
+
 ## What is being asked
 
-Create a GitHub App in your own GitHub organisation, install it, and send back four values
-from the App's settings page.
+Create a GitHub App in your own GitHub organisation, install it, and send back the values listed
+under "Values to send back" at the end of this page.
 
 ## Why a GitHub App
 
@@ -57,9 +73,45 @@ directly in GitHub.
 1. Sign in to GitHub as an owner of your organisation.
 2. Go to your organisation's **Settings → Developer settings → GitHub Apps**, and select
    **New GitHub App**.
-3. Give it a name and a homepage URL. Neither needs to be public-facing; any values work.
-4. Under **Webhook**, uncheck **Active**. Studio does not need webhook events for this setup.
-5. Under **Repository permissions**, set exactly these five permissions:
+3. Give it a name and a homepage URL. Neither needs to be public-facing, and GitHub validates
+   both, so they are not free text. The homepage URL is never read again. **The name is.**
+   Studio derives the App's slug from the name when your operator saves the provider, stores it,
+   and matches installations against that stored value. Renaming the App on GitHub afterwards
+   makes the stored slug stale, and Studio stops finding the installation until your operator
+   saves the provider again. Choose a name you are willing to keep.
+
+   | Field | What GitHub requires |
+   | --- | --- |
+   | **GitHub App name** | Unique across all of GitHub, and at most 34 characters. The obvious names are often already taken, so qualify the name with your organisation — for example `VibeData Studio - Acme`. GitHub shows this name, lowercased and hyphenated, every time the App acts on a repository. |
+   | **Homepage URL** | A complete, well-formed URL. If you have no page for this App, use your organisation's own GitHub URL: `https://github.com/<your-org>`. |
+
+4. Under **Identifying and authorizing users**, register this callback URL. Build it by
+   appending the path to your Studio domain, in full. If your Studio domain is
+   `studio.example.com`, the URL is:
+
+   ```
+   https://studio.example.com/api/v1/connect/github-commits/callback
+   ```
+
+   On the `v0.1.26` release this single URL serves **both** flows — an operator saving or
+   testing the GitHub connection in Org Settings, and a person linking their own GitHub
+   account. Studio builds it from one shared constant.
+
+   Register the complete URL, not the path alone. `STUDIO_DOMAIN` — the DNS name for it —
+   comes from your Azure infrastructure owner; see
+   [01d-prereqs-azure-infra](01d-prereqs-azure-infra.md).
+
+   **One callback URL is enough for every published release.** `v0.1.26` through `v0.1.29` all
+   serve exactly the one path above, for both the operator flow and the per-user link flow.
+   Unreleased development builds split the operator-facing flow onto a second path,
+   `/api/v1/github-commit-provider/validation/callback`. If you want to be ready for that
+   without a second visit, register it too: a GitHub App accepts up to ten callback URLs, and an
+   unused one has no effect. It is optional today, not a prerequisite.
+
+   Leave **Request user authorization (OAuth) during installation** unchecked. Studio starts
+   the authorisation flow itself and names the callback URL it needs each time.
+5. Under **Webhook**, uncheck **Active**. Studio does not need webhook events for this setup.
+6. Under **Repository permissions**, set exactly these six permissions:
 
    | Permission | Access |
    | --- | --- |
@@ -68,11 +120,29 @@ directly in GitHub.
    | Pull requests | Read and write |
    | Workflows | Read and write |
    | Variables | Read and write |
+   | Secrets | Read and write |
 
    Leave every other permission, and every organisation and account permission, at **No
    access**.
-6. Under **Where can this GitHub App be installed?**, choose **Only on this account**.
-7. Save the App.
+
+   **`Secrets` is required, not optional.** Studio writes GitHub Actions secrets into each
+   domain repository: `MOTHERDUCK_TOKEN` if your data platform is MotherDuck, and `LLM_API_KEY`
+   on MotherDuck and Microsoft Fabric once the operator sets a default LLM profile. GitHub
+   treats **Variables** and **Secrets** as two separate permissions, so granting Variables does
+   not cover this. Without `Secrets`, creating a domain fails at the secret-write step with a
+   GitHub 403. Studio reports it as `repository_secret_permission_denied`: "A GitHub Actions
+   repository secret could not be written — the calling account lacks permission." The message
+   names the cause, so the failure is recognisable; the fix is this permission.
+
+   If you already created this App with a narrower permission set, add the permission now.
+   GitHub does not extend an existing installation automatically: an organisation owner must
+   approve the updated permission request before the installation gains it.
+7. Under **Where can this GitHub App be installed?**, choose **Only on this account**.
+8. Save the App.
+
+If the callback URL is missing or does not match, GitHub rejects the sign-in with
+`redirect_uri_mismatch` and Studio cannot save the connection. You can add or correct it
+later on the same settings page.
 
 ## Install the App on your organisation
 
@@ -91,7 +161,7 @@ is not on the list later, add it from the same install screen before that Domain
 
 ## Values to send back
 
-Find all four values on the App's own settings page, under **General**:
+Find these values on the App's own settings page, under **General**:
 
 | Value | Where to find it |
 | --- | --- |
@@ -100,16 +170,35 @@ Find all four values on the App's own settings page, under **General**:
 | `GITHUB_APP_CLIENT_SECRET` | **General → Client secrets** — select **Generate a new client secret** and copy it immediately. GitHub shows it only once. |
 | `GITHUB_APP_PRIVATE_KEY` | **General → Private keys** — select **Generate a private key**. GitHub downloads a `.pem` file; send its full contents. |
 
-Send all four values back to the person setting up Studio, together with which repositories
+Send all of them back to the person setting up Studio, together with which repositories
 the App can access. The client secret and the private key are credentials — send them
 through a secret manager, password vault, or another channel your organisation already
 trusts for this kind of handoff, not by email or chat. GitHub downloads the private key as a
 `.pem` file and will not show it again, so keep a copy until it is safely delivered.
 
+Studio's GitHub panel has one further, optional field for this App: the installation's own
+numeric ID. Studio uses it only for background GitHub work that is not tied to a domain yet, so
+your operator may not need it. If they ask, you can read it as an organisation owner:
+
+```
+gh api /orgs/<your-org>/installations --jq '.installations[] | {id, app_slug}'
+```
+
+The `id` on the row for this App is the value they want.
+
 ## Where this goes
 
-Studio stores these four values in **Org Settings → GitHub**, which configures the GitHub
-Commit Provider. From the App ID and private key, together with the installation you
-created above, Studio mints a repository-scoped installation token whenever it needs to act
-on a domain repository without a person driving. The operator enters these values during
-organisation setup — see [05-configure-org](05-configure-org.md).
+Studio stores these values in **Org Settings → GitHub**, which configures the GitHub
+Commit Provider. The two pairs do different jobs, which is why both are needed:
+
+- **App ID and private key.** With the installation you created above, Studio mints a
+  repository-scoped installation token whenever it needs to act on a domain repository
+  without a person driving.
+- **Client ID and client secret.** These drive GitHub's user authorisation flow — the
+  browser redirect that sends a person to GitHub and back to the callback URL in
+  step 4. Studio uses it to confirm the connection works when an operator saves it, and to
+  let each person link their own GitHub account. Without the callback URL registered, this
+  pair cannot be used at all.
+
+The operator enters these values during organisation setup — see
+[05-configure-org](05-configure-org.md).
