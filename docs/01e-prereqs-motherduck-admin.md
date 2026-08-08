@@ -1,7 +1,7 @@
 ---
 applies-to: vibedata v0.1.26
 verified-against: studio@653beeced
-verified-on: 2026-08-05
+verified-on: 2026-08-08
 sources:
   - docs/functional/data-platform/motherduck-backend.md
   - docs/functional/data-platform/README.md
@@ -10,7 +10,6 @@ sources:
   - src/server/modules/data-platforms/data-platforms.schemas.ts
   - src/features/data-platforms/components/data-platform-editors/motherduck-editors.tsx
   - deploy/docker/Dockerfile.backend
-  - src/server/modules/mcp/runtime/motherduck-mcp-proxy.service.ts
   - src/server/modules/data-platforms/helpers/probe.ts
   - src/server/modules/domains/types.ts
   - src/server/modules/domains/services/domain-provisioning-step.ts
@@ -25,16 +24,21 @@ account.
 
 This whole page applies only if your data platform is **MotherDuck**. Skip it entirely if
 you chose **DuckDB** or **Microsoft Fabric**. Everything on this page applies whether your
-deployment style is **Local Docker** or **Kubernetes on Azure** — but one of the asks
-below, seats, works differently depending on which one you chose. Read that section
-carefully; it is the most consequential part of this page.
+deployment style is **Local Docker** or **Kubernetes on Azure** — but two of the asks below
+work differently depending on which one you chose: the Share (step 4) and seats (step 5).
+Read both sections carefully. Seats is the most consequential part of this page.
 
 ## The five things this page asks for
 
-The one hard dependency: the organisation account (step 1) must exist before the Service PAT
-(step 2) can be issued, since a PAT is issued against an account. Steps 3 and 4 need step 1's
+The one hard dependency: the organisation account (step 1) must exist before the token
+(step 2) can be issued, since a token is issued against an account. Steps 3 and 4 need step 1's
 account to hold the database and Share. Otherwise, the order below is a suggestion, not a
 requirement.
+
+**A note on names before you start.** Studio calls the token it stores a **Service PAT**. That
+is Studio's own label, and you will not find it in the MotherDuck console. In MotherDuck's own
+terms, what this page asks for is a **service account** with a **read/write token**. Where this
+page says "Service PAT", read "the read/write token issued for that service account".
 
 ### 1. Provide an organisation account
 
@@ -44,45 +48,77 @@ stores it write-once** — there is no field to change it afterward. To point St
 different account later, your operator registers a new connection rather than editing this
 one.
 
-### 2. Issue a read-write Service PAT
+### 2. Issue a read/write token for a service account
 
-Issue a **Service PAT** with read-write access, and hand it back to your operator. This is
-the only kind of token Studio's MotherDuck connection accepts — there is no read-only option
-and no read-scaling token slot. Do not offer a read-only PAT; Studio has nowhere to put one.
+In your MotherDuck console: create a **service account** in the organisation account from
+step 1, then issue a **read/write token** for it. Hand that token back to your operator. This
+is the value Studio's connection form labels **Service PAT**.
 
-This PAT is rotatable: if it needs to be replaced later, your operator can update it in
+**Issue a read/write token, not a read scaling token.** MotherDuck does publish a read scaling
+token, which permits `SELECT` and blocks writes. Studio has no field for one: its MotherDuck
+connection holds exactly one token, and that token must be able to write. A read scaling token
+entered in that single field will fail as soon as Studio needs to write.
+
+This token is rotatable: if it needs to be replaced later, your operator can update it in
 Studio without re-entering the account name.
 
 ### 3. Create or nominate the database
 
 Create a new MotherDuck database for this domain, or nominate an existing one, and return
 its name. Your operator enters this later, when the domain is created and bound to your
-account — not at the point the account and PAT above are registered.
+account — not at the point the account and token above are registered.
 
-### 4. Create a Share and grant READ, if your team plans to use one
+**Record which identity owns this database.** It decides whether step 4 is optional or
+required, and it is easy to get wrong: a database created under your own personal MotherDuck
+identity is not owned by the service account from step 2. Creating it under the service
+account is the simpler path, because it makes the Share optional.
+
+### 4. Create a Share and grant READ
 
 **Studio never creates a MotherDuck Share and never grants READ on one.** If more than one
 person will work against the database — anyone other than the database's own owner — create
-a Share on the database and grant READ to the identities that need it. If the database will
-only ever be driven by its owner, you can skip this step.
+a Share on the database and grant READ to the identities that need it.
 
-**Grant READ to two different kinds of identity, not just one, under Kubernetes on Azure.**
-Picking a Share when a domain is created uses the operator's own personal MotherDuck
-identity — Studio lists only Shares that identity can already read. Later, a separate,
-retryable check confirms the registered **Service PAT** can also read that same Share; this
-runs under the Service PAT's own identity, not the operator's. These are two distinct
-identities, the same way Microsoft Fabric's operating identity and service principal are
-two distinct identities in
-[01b-prereqs-fabric-admin](01b-prereqs-fabric-admin.md#4-confirm-the-operating-identitys-own-read-access-to-the-workspace).
-Granting the operator's identity READ does not also grant the Service PAT READ — grant both,
-or domain creation can succeed while the domain still lands in `Pending` afterward. Under
-Local Docker there is only the Service PAT to grant, since one operator drives every
-operation through it.
+**Name the Share exactly after the database it carries.** Studio's operator has no field to
+type a Share name into. On `v0.1.26` the domain form binds a database and a schema — both
+required — and it has **no Share field at all**. Studio looks for a Share arriving under the
+same name as the bound database. A Share called anything else is
+invisible to Studio, however correctly you granted READ on it. (Builds after `v0.1.26` add a
+Share picker to the domain form and lift this naming constraint. Match the database name
+anyway — it is correct on both.)
 
-**The Share choice is immutable after the domain is created.** Your operator picks the Share
-(or picks none) when the domain is created in Studio, and there is no edit path afterward.
-Changing your mind later means recreating the domain, not editing it. Decide before domain
-creation, not after.
+**Skipping this step is safe in one case only: the service account from step 2 owns the
+database itself.** Under Kubernetes on Azure, Studio runs a check on every MotherDuck domain
+asking whether the **service account's token** — not any human's — can reach the bound
+database. It is satisfied by either of:
+
+- The service account **owns** that database, or
+- The service account holds a **Share of the same name** as that database, with READ.
+
+So if you created the database under your personal identity and skipped the Share, the check
+fails and the domain lands in `Pending` — even though only one person will ever use it. Either
+create the Share and grant the service account READ, or make the service account the database
+owner in step 3.
+
+Under Local Docker one of the two checks is skipped, but **not** the one that matters here.
+The service-PAT read probe that produces `Pending` does not run without delegated
+authentication. Binding validation still runs on both deployment styles, and it still resolves
+the bound database — through a Share if one exists, otherwise by the database's own name. So a
+database the credential cannot reach still fails on Local Docker; it fails at binding
+validation with `Failed`, rather than sitting in `Pending`.
+
+**Grant READ to every person's identity as well, under Kubernetes on Azure.** The check above
+is the Service PAT's, and satisfying it grants nobody else anything. Each contributor connects
+with their own MotherDuck identity (step 5), and that identity needs its own READ on the
+database or Share to work in the domain. These are distinct identities, the same way Microsoft
+Fabric's operating identity and service principal are distinct in
+[01b-prereqs-fabric-admin](01b-prereqs-fabric-admin.md#5-confirm-the-service-principals-read-access-to-the-domain-workspace).
+Granting one does not grant the other. Under Local Docker there is only the Service PAT to
+grant, since one operator drives every operation through it.
+
+**Get this right before the domain is created.** The database a domain binds is frozen at
+creation, so a Share that has to be renamed to match it means recreating the domain, not
+editing it.
 
 ### 5. Provision seats — read this section before your team commits to a plan
 
@@ -91,11 +127,21 @@ creation, not after.
 > a technical detail to skim.
 
 **Under Kubernetes on Azure**, each person who signs in and works on a domain connects with
-their **own** MotherDuck identity — not the Service PAT above. There is no primitive in
-MotherDuck for one identity to grant another identity access across account boundaries, and
-there is no fallback to the Service PAT if a contributor has not connected their own account.
-**Under Kubernetes on Azure, every contributor needs their own seat in your MotherDuck
-organisation.**
+their **own** MotherDuck identity — not the Service PAT above. Studio stores one MotherDuck
+credential per user, and it has no fallback to the Service PAT for a contributor who has not
+connected their own account: that person simply cannot use the domain. **Under Kubernetes on
+Azure, every contributor needs their own seat in your MotherDuck organisation.**
+
+This is a constraint in how Studio connects, not a limit in MotherDuck. MotherDuck does have
+sharing primitives that cross account boundaries — an unrestricted share, for example, is
+readable by any user signed into any MotherDuck organisation in the same cloud region. Studio
+does not use them as a substitute for per-user identity, so they do not remove the seat
+requirement.
+
+**Each contributor also needs their own MotherDuck token, not only a seat.** A seat lets them
+exist in your organisation; the token is what they paste into Studio to connect their account.
+Plan for issuing one per contributor, through the same secure channel you use for the Service
+PAT.
 
 **Under Local Docker**, there is one operator, and Studio always uses the Service PAT above
 for every operation. Seats are not a constraint under this deployment style.
@@ -125,14 +171,14 @@ Allow outbound access (443/tcp) from wherever Studio runs to:
 
 | Host | Purpose |
 | --- | --- |
-| `api.motherduck.com` | Studio's REST calls: checking the Service PAT is valid and reaches the named account, and its MotherDuck MCP relay. |
+| `api.motherduck.com` | Studio's REST call that checks the Service PAT is accepted (`/v1/active_accounts`). |
 | `extensions.duckdb.org` | Where the DuckDB engine Studio runs on fetches the MotherDuck extension. |
 | `*.motherduck.com` | MotherDuck's data-serving connection, the one that carries queries. Recommended starting point, not vendor-confirmed — see the note below this table. |
 
 **The DuckDB MotherDuck extension is fetched over the network the first time Studio opens a
 MotherDuck connection — it is not built into Studio's container image.** That first
 connection happens during domain creation itself: creating a domain validates that the
-bound database (and Share, if configured) is reachable, and that validation is what opens
+bound database is reachable, and that validation is what opens
 the connection that loads the extension. In a network that blocks `extensions.duckdb.org`,
 **domain creation fails right there** — not later, when someone runs a query. Allow this
 host before your team creates its first MotherDuck domain, not only before installing
@@ -160,18 +206,36 @@ organisation already trusts for credential handoff — not by email or chat.
 
 ## Values to send back
 
-| Token | Comes from |
-| --- | --- |
-| `MOTHERDUCK_ACCOUNT` | The organisation account name from step 1. |
-| `MOTHERDUCK_SERVICE_PAT` | The Service PAT from step 2. |
+Studio has no fixed environment-variable names for these. Each value goes into a named field
+on a screen, so this table gives the field label your operator will be looking at.
 
-Also send back the database name from step 3, and the Share name from step 4 if you created
-one — your operator needs both when the domain is created, though neither is a fixed Studio
-token name the way the two above are.
+| Value | Studio's field | Comes from |
+| --- | --- | --- |
+| Organisation account name | **MotherDuck account** | Step 1 |
+| Read/write token | **Service PAT** | Step 2 |
+| Database name | **Database**, on the domain form | Step 3 |
+
+If you created a Share in step 4, there is nothing to send back for it: on `v0.1.26` the
+domain form has no Share field — it collects a database and a schema, and nothing else — and
+Studio finds the Share by the bound database's own name. Tell
+your operator it exists so they know the Pending check in
+[06-first-domain](06-first-domain.md) should pass.
+
+**Check the account name carefully before you send it.** Studio stores it write-once, and its
+connection test does not verify it. The test only confirms that MotherDuck accepts the token;
+it then reports success in a message that repeats whatever account name was typed in. A token
+issued against a different MotherDuck organisation passes that test, and the mismatch does not
+surface until a domain fails later. Correcting it means registering a new connection, not
+editing the existing one.
+
+The only fixed name in this flow appears later and is not something you supply: when a domain
+runs GitHub Actions setup, Studio writes the token into that domain's repository as a CI
+secret named `MOTHERDUCK_TOKEN`.
 
 ## Where this goes
 
-`MOTHERDUCK_ACCOUNT` and `MOTHERDUCK_SERVICE_PAT` are entered by the operator during
-organisation setup — see [05-configure-org](05-configure-org.md). The database name and the
-optional Share name are entered only in [06-first-domain](06-first-domain.md), when the
-domain is created and bound to your account.
+The account name and the token are entered by the operator during organisation setup — see
+[05-configure-org](05-configure-org.md). The database name is entered only in
+[06-first-domain](06-first-domain.md), when the domain is created and bound to your account.
+The Share, if you created one, is never entered anywhere — Studio resolves it from the
+database name.

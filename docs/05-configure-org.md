@@ -1,7 +1,7 @@
 ---
 applies-to: vibedata v0.1.26
 verified-against: studio@653beeced
-verified-on: 2026-08-05
+verified-on: 2026-08-08
 sources:
   - docs/functional/configure-llm-profile/README.md
   - docs/functional/instance-settings/README.md
@@ -116,7 +116,7 @@ Open **Org Settings → LLM Profiles** and create a profile with these fields:
 
 | Field | What to enter |
 | --- | --- |
-| Profile name | Any name you choose, for your own reference. |
+| Display name | Any name you choose, for your own reference. Up to 80 characters, with no restriction on which characters. The name must be unique across your organisation. Unreleased development builds rename this field to **Profile name** and tighten it to 64 characters from a restricted set; no published release does that yet, `v0.1.26` through `v0.1.29` included. |
 | Provider | Azure Foundry. |
 | API key | Required. Paste the API key for your Azure AI Foundry resource. There is no managed-identity option — a key is the only credential this connection accepts. |
 | Base URL | `https://<resource-name>.openai.azure.com` — see the trap below. |
@@ -144,9 +144,10 @@ moment it exists.
    separate deployment-name field. If you deployed the model `gpt-4o` under the deployment
    name `docs-gpt4o` in Azure AI Foundry, enter `docs-gpt4o` here — entering `gpt-4o` instead
    fails.
-3. **An API key is required.** Azure AI Foundry is the one provider on this form with no
-   managed-identity option. If you don't have a key yet, get one from whoever provisioned
-   your Azure AI Foundry resource before starting this step.
+3. **An API key is required.** This form accepts no other credential type, for any provider
+   it offers — there is no managed-identity option anywhere on it. If you don't have a key
+   yet, get one from whoever provisioned your Azure AI Foundry resource before starting this
+   step.
 
 If saving this profile fails, or a later request to it returns `404`, see
 [90-troubleshooting](90-troubleshooting.md) before re-checking every field by hand.
@@ -211,6 +212,22 @@ one Entra application covers both, and you do not need the separate U2M app regi
 `01a` describes unless you specifically want the two identities kept apart. Untick it to
 enter a distinct U2M client ID and secret instead; U2M client ID is write-once.
 
+**If you leave the checkbox checked, the M2M application must carry a redirect URI.** Keeping
+one application for both roles means Studio runs an interactive, browser-based sign-in against
+your **M2M** app — and an application registered for service credentials alone has no reply
+address. Registration succeeds without one, so nothing fails here. It fails when the first
+person tries to connect their own Fabric access, with:
+
+```
+AADSTS500113: No reply address is registered for the application
+```
+
+Confirm with your Entra administrator that the M2M app registration has a **Web** redirect URI
+of `https://<STUDIO_DOMAIN>/api/auth/fabric/callback` before you save this connection. That ask
+is on [01a-prereqs-entra-admin](01a-prereqs-entra-admin.md), along with the delegated
+permissions the same application needs. A real deployment hit both, one after the other, at
+this exact point.
+
 You can register one connection per Microsoft Fabric tenant. `TENANT_ID`, `U2M_CLIENT_ID` /
 `U2M_CLIENT_SECRET`, and `M2M_CLIENT_ID` / `M2M_CLIENT_SECRET` come from your Entra
 administrator in [01a-prereqs-entra-admin](01a-prereqs-entra-admin.md);
@@ -226,30 +243,50 @@ registering without it is permanent.
 If you chose Local Docker, there is nothing to do in this step — skip to Step 4. Studio uses
 your own signed-in GitHub identity instead of a GitHub App on that deployment style.
 
-Open **Org Settings → GitHub** — the panel that configures the GitHub Commit Provider — and
-enter the four values your GitHub organisation owner sent back after
-[01c-prereqs-github-org-owner](01c-prereqs-github-org-owner.md):
+Open **Org Settings → GitHub** — the panel that configures the GitHub Commit Provider. The
+panel has six inputs. Four of them take the values your GitHub organisation owner sent back
+after [01c-prereqs-github-org-owner](01c-prereqs-github-org-owner.md):
 
 | Field | Value |
 | --- | --- |
-| App ID | `GITHUB_APP_ID` |
 | Client ID | `GITHUB_APP_CLIENT_ID` |
 | Client secret | `GITHUB_APP_CLIENT_SECRET` |
+| App ID | `GITHUB_APP_ID` |
 | Private key | `GITHUB_APP_PRIVATE_KEY` |
+| Default installation ID | Optional. Leave it empty unless your GitHub organisation owner also returned `GITHUB_APP_INSTALLATION_ID`. If they did, enter the bare number and nothing else — Studio rejects any value that is not a positive integer, in the browser, before it sends anything. |
+| Status | Leave it at **Active**. **Archived** retires a connection you already configured; it has no role in first-time setup. |
 
-Enter all four. App ID and private key must arrive together — Studio rejects one without the
-other — and a client secret is effectively required the first time you save this connection.
+The panel has three buttons: **Save**, **Test**, and **Archive**. **Save** stores the values
+and never opens a GitHub window. **Test** is the one that opens GitHub, in a popup, to prove
+the credentials work end to end. Run Test after Save.
+
+A client secret is effectively required the first time you save this connection. App ID and
+private key are best supplied together: on `v0.1.26` Studio accepts one without the other and
+simply does not derive the App identity, so the panel shows no **Derived App** line and you
+get no error explaining why. Builds after `v0.1.26` reject the pair outright with *"GitHub App
+ID and private key must be provided together"*.
+
+The panel shows **one** callback URL, `/api/v1/connect/github-commits/callback`, and on
+`v0.1.26` that single URL carries both flows — the panel's own Test, and each person's later
+"Connect GitHub" action. Register exactly that one URL on the GitHub App. Step 4 of
+[01c-prereqs-github-org-owner](01c-prereqs-github-org-owner.md) covers it.
+
+If that URL is not registered, **Test** sends you to GitHub and GitHub refuses with
+`redirect_uri_mismatch`. Saving alone does not surface this, because saving never reaches
+GitHub — so always run Test before you treat this step as done.
 
 ## Step 4: Users
 
 > **Applies to: Kubernetes on Azure.** Skip if you chose Local Docker.
 
-If you chose Local Docker, skip this step entirely — user management is not merely
-unnecessary there, it is unavailable. Studio requires delegated authentication to manage
-users at all; Local Docker runs without it, so any attempt is refused outright. Signing in
-with your own `gh` session already made you `vibedata_owner`, the one operator this
-deployment has, as described in [03-deploy-docker](03-deploy-docker.md) — there is nothing
-further to configure.
+If you chose Local Docker, skip this step entirely. Signing in with your own `gh` session
+already made you `vibedata_owner`, the one operator this deployment has, as described in
+[03-deploy-docker](03-deploy-docker.md) — there is nothing further to configure. Studio does
+not stop you opening **Org Settings → Users** and adding a record there on `v0.1.26`, but the
+record buys nobody anything: without delegated authentication there is no second identity
+that can sign in against it. Builds after `v0.1.26` hide the **Add user** button on this
+deployment style and explain why. There is no Entra SSO provider to register here either —
+the rest of this step applies only to Kubernetes on Azure.
 
 ### Register the Entra SSO provider
 
@@ -259,9 +296,16 @@ the values your Entra administrator sent back in
 
 | Field | Value |
 | --- | --- |
+| Display name | Required. Any name you choose — it labels this connection on Studio's sign-in page. Nothing in `01a` supplies it. |
 | Tenant ID | `TENANT_ID` |
 | Client ID | `ENTRA_SSO_CLIENT_ID` |
-| Client secret | `ENTRA_SSO_CLIENT_SECRET` |
+| OAuth client credential | `ENTRA_SSO_CLIENT_SECRET` |
+
+The fields appear in that order on the form. Two of these names are easy to get wrong:
+**Display name** is required, so leaving it empty stops you saving; and the secret field is
+labelled **OAuth client credential**, not "Client secret" — Entra calls the same value a
+client secret, and the GitHub panel in Step 3 labels its own secret that way, but this form
+does not.
 
 ### Entra controls sign-in, not what a person can do inside Studio
 

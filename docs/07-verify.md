@@ -1,7 +1,7 @@
 ---
 applies-to: vibedata v0.1.26
 verified-against: studio@653beeced
-verified-on: 2026-08-05
+verified-on: 2026-08-08
 sources:
   - src/shared/schemas.ts
   - src/server/modules/domains/services/domain-provisioning-step.ts
@@ -35,8 +35,8 @@ sources:
 # Confirm you're done
 
 This page continues from [06-first-domain](06-first-domain.md). It applies to **all six
-combinations**. It is the last instructional page in this set — after this, the doc set
-points you to Studio's own user guide for building pipelines.
+combinations**. It closes the deployment and setup sequence. Two pages follow it and cover
+how work happens inside a finished domain.
 
 ## Why `Active` is not the finish line
 
@@ -75,12 +75,22 @@ If no instance LLM profile exists yet when you run GitHub Actions setup, the `LL
 `LLM_MODEL`, and `LLM_API_KEY` entries are **omitted** from what gets seeded — not written as
 blank values, and nothing reports an error at the time. The failure surfaces later, the first
 time your domain's CI tries to call the LLM. Configuring the instance LLM profile before
-running GitHub Actions setup avoids this. If you set it up afterward, the values fill in the
-next time setup, reconcile, or verify runs.
+running GitHub Actions setup avoids this.
+
+If you set it up afterward, **re-run Set up GitHub Actions** on the domain. Exactly two controls
+on the domain's settings panel write repository values: **Set up GitHub Actions**, and **Sync
+GitHub Actions profile**, which overwrites the Studio-managed variables and secrets from the
+domain's current configuration. Either one seeds the missing `LLM_*` entries; **Set up GitHub
+Actions** is the one to use, because it also re-runs the setup steps.
+
+Nothing else writes them. Re-opening the settings panel re-runs the readiness check, and **Retry
+provisioning** re-runs provisioning, but neither touches repository values — readiness
+deliberately does not look at GitHub Actions configuration at all. So a domain can pass every
+readiness check, show no warning, and still have no `LLM_*` values in its repository.
 
 *A related but different case, already covered on [06](06-first-domain.md): if the
-MotherDuck extension host is unreachable, you'll see it loudly — either the Database/Schema/
-Share picker failing while you're still filling in the creation form, or, if none of those
+MotherDuck extension host is unreachable, you'll see it loudly — either the Database/Schema
+picker failing while you're still filling in the creation form, or, if none of those
 connections ran, domain creation itself failing outright with `Failed`. Either way it's
 immediate, not a later surprise. That is a loud failure, the opposite of the two silent
 cases above, so it isn't one of them.*
@@ -116,10 +126,22 @@ Open the domain's settings (the same "Provisioning status" panel from
   below), grouped by your connections and the domain's own automation.
 
 A domain that shows `Active` at the top can still show a step **Failed** further down this
-same panel — that combination is the whole point of this page. (A step that is `hard`
-severity failing would have kept the domain out of `Active` in the first place, so any
-`Failed` step you see on an `Active` domain is a soft one — exactly the federated-credential
-case above.)
+same panel — that combination is the whole point of this page. A step that is `hard` severity
+failing would have kept the domain out of `Active` in the first place, so any `Failed` step
+you see on an `Active` domain is a soft one. There are two soft steps, not one:
+
+- `fabric_federated_credential` — the federated-credential case described above. Microsoft
+  Fabric only.
+- `github_branch_protection` — runs for **both** MotherDuck and Microsoft Fabric domains,
+  every time GitHub Actions setup runs. It fails when the domain repository's default branch
+  is unprotected, when `delete-branch-on-merge` is switched off, or when Studio cannot read
+  the branch protection settings with the credentials it has. The warning message names which
+  of those applies.
+
+The second one surprises people. A MotherDuck operator, who skips every Fabric block on this
+page, can still land on an `Active` domain with a `Failed` step and a warning about branch
+rules. That is this check, and it does not mean your domain is broken — see
+[90-troubleshooting](90-troubleshooting.md) for what to change.
 
 If you have permission to update the domain — true for the `vibedata_owner` or
 `domain_owner` following this guide — re-opening this panel also re-runs the readiness check
@@ -137,13 +159,14 @@ below.
    repository you picked on [06](06-first-domain.md). Don't expect to find `.github/workflows/`
    files yet: Studio seeds the CI workflow bundle into this repository when you clone your
    **first intent workspace**, not at domain creation or during GitHub Actions setup — that
-   step is still ahead of you, past the end of this doc set.
+   step is still ahead of you. See
+   [08-getting-started-contributor](08-getting-started-contributor.md) for what an intent is.
    > **Applies to: DuckDB.** A DuckDB domain never receives a CI workflow bundle, at any
    > point — only the domain-owned skeleton files. An empty `.github/workflows/` here isn't
    > something to fix; it's expected for DuckDB, before and after your first intent.
 4. **Re-run readiness if anything is unclear.**
    - If the domain is `Active` and a step in the Provisioning steps list shows `Failed`
-     (the federated-credential case above), re-running **Set up GitHub Actions** is the
+     (either soft step described above), re-running **Set up GitHub Actions** is the
      idempotent retry — it re-checks that step without disturbing the ones that already
      succeeded.
    - If the domain is `Pending` or `Failed`, select **Retry provisioning** instead — the same
@@ -214,12 +237,52 @@ lives depends on your deployment style:
 > narrower, but not impossible. See [90-troubleshooting](90-troubleshooting.md) for what
 > this looks like and how to recover.
 
+## One thing that looks broken and is not
+
+> **Applies to: Kubernetes on Azure.** Skip if you chose Local Docker — there is no Argo CD
+> and no `studio-obot` application there.
+
+If you look at the cluster's Argo CD applications — and you may well have, because the
+installer's own guidance points you at `kubectl -n argocd get applications` whenever an
+install is blocked — you will probably see this:
+
+```
+studio-obot   ...   Degraded
+```
+
+**This is not something you caused, but it is not finished either.** The `obot` component
+reports `Degraded` because of a defect in `v0.1.26`: the installer never creates the
+`obot-tunnel-peer` object that `obot` cannot boot without, even though the vault secret behind it
+is present and correct.
+
+The checks on this page still pass — none of them depend on `obot`, and the installer waits on
+`studio-app` only, which is why your install reported success. **But your team cannot start a
+conversation on an activated intent until this is fixed**, and that is what the domain you just
+validated exists to do.
+
+Confirm which case you are in:
+
+```
+kubectl -n studio get externalsecret obot-tunnel-peer
+```
+
+`NotFound` confirms the defect.
+
+**Upgrading will not fix this yet.** No released CLI creates the `obot-tunnel-peer` object —
+not `v0.1.26`, and not `v0.1.27`, `v0.1.28` or `v0.1.29`. The installer that renders it exists
+only in unreleased development builds, so re-running the install from any published version
+changes nothing here. Check what is currently published before you plan an upgrade around this.
+
+**Do not roll back, re-run the install from `v0.1.26`, or change vault secrets** — none of those
+creates the missing object either. Use the manual workaround: see
+[90-troubleshooting](90-troubleshooting.md) for the full entry and the manual workaround. Its cost
+is narrower than it may sound: the missing secret object survives Argo CD sync on its own, and
+only the accompanying Deployment patch requires turning off automated sync for that one
+application until you upgrade.
+
 ## What's next
 
-This is the end of this doc set. From here, continue in Studio's own user guide, published
-at:
-
-https://accelerate-data.github.io/studio/
-
-That guide covers building pipelines and everything else you do inside a domain once it's
-genuinely ready.
+Your domain is ready. Continue to
+[08-getting-started-contributor](08-getting-started-contributor.md) to learn how work happens
+inside a domain, then [09-worked-example-salesforce](09-worked-example-salesforce.md) to walk
+one example end to end.
