@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Require plugin.json version bumps when bundled plugin content changes."""
 
 from __future__ import annotations
