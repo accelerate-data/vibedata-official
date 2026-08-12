@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Validate the VibeData plugin marketplace registry."""
 
 from __future__ import annotations
