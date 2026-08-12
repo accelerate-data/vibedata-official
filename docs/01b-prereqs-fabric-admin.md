@@ -1,7 +1,7 @@
 ---
-applies-to: vibedata v0.1.26
-verified-against: studio@653beeced
-verified-on: 2026-08-08
+applies-to: vibedata v0.1.33
+verified-against: studio@e46fae533
+verified-on: 2026-08-12
 sources:
   - docs/functional/data-platform/fabric-backend.md
   - docs/functional/data-platform/README.md
@@ -11,6 +11,8 @@ sources:
   - src/server/modules/data-platforms/providers/fabric.descriptor.ts
   - src/server/modules/data-platforms/providers/fabric/helpers/fabric-catalog-client.ts
   - src/server/modules/data-platforms/providers/fabric/helpers/fabric-route-access.ts
+  - src/features/settings/components/Settings/modals/FabricConfigSection.tsx
+  - src/features/settings/components/Settings/modals/FabricSchemaField.tsx
   - src/server/modules/domains/services/domain-provisioning-diagnostic.ts
   - src/server/modules/intents/services/ephemeral-access-grant.service.ts
   - src/server/lib/graph/federated-credential-client.ts
@@ -197,4 +199,4 @@ Allow outbound access (443/tcp) to all six hosts below. Allowing only the first 
 
 ## Where this goes
 
-`FABRIC_CAPACITY_ID` is entered by the operator during organisation setup — see [05-configure-org](05-configure-org.md) — and used again in [06-first-domain](06-first-domain.md). `FABRIC_WORKSPACE_ID`, `FABRIC_LAKEHOUSE_NAME`, `FABRIC_LAKEHOUSE_ID`, and `FABRIC_SCHEMA` are entered only in [06-first-domain](06-first-domain.md), when the domain is created and bound to this workspace.
+`FABRIC_CAPACITY_ID` is entered by the operator during organisation setup — see [05-configure-org](05-configure-org.md) — and used again in [06-first-domain](06-first-domain.md). `FABRIC_WORKSPACE_ID`, `FABRIC_LAKEHOUSE_NAME`, and `FABRIC_LAKEHOUSE_ID` are entered when the domain is created and bound to this workspace. After the operator selects that Lakehouse, Studio pre-fills **Schema Name** from its default schema; `FABRIC_SCHEMA` confirms that value rather than supplying a correction for a wrong default. The operator may intentionally select or create another schema before creating the domain.

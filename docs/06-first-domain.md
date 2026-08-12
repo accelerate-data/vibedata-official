@@ -1,7 +1,7 @@
 ---
-applies-to: vibedata v0.1.26
-verified-against: studio@653beeced
-verified-on: 2026-08-08
+applies-to: vibedata v0.1.33
+verified-against: studio@e46fae533
+verified-on: 2026-08-12
 sources:
   - src/shared/schemas.ts
   - src/server/modules/domains/services/create-domain.service.ts
@@ -25,6 +25,7 @@ sources:
   - src/features/settings/components/Settings/panels/domain-settings/DomainsIndexSection.tsx
   - src/features/settings/components/Settings/modals/DomainModal.tsx
   - src/features/settings/components/Settings/modals/FabricConfigSection.tsx
+  - src/features/settings/components/Settings/modals/FabricSchemaField.tsx
   - src/features/settings/components/Settings/modals/MotherDuckConfigSection.tsx
   - src/features/settings/components/Settings/modals/DuckdbConfigSection.tsx
   - src/features/settings/components/Settings/modals/domain-destination/fabric.tsx
@@ -251,16 +252,17 @@ see
 Select the registered Fabric data platform from `05`, then pick or create a **Fabric
 Workspace** and a **Lakehouse Name**, then a **Schema Name**. All three are required.
 
-**Change the pre-filled Schema Name. It is wrong for Fabric.** Studio fills this field with
-`main`, which is a DuckDB default applied to a Fabric form. A schema-enabled Fabric lakehouse
-gets `dbo` by default. Studio accepts any non-empty value here, so **Create Domain** stays
-available with the wrong value in the box, and the failure only appears afterwards: the
-binding check fails and the domain lands `Failed`.
+**Schema Name starts with the selected Lakehouse's default schema.** For a schema-enabled
+Lakehouse this is usually `dbo`. Use the `FABRIC_SCHEMA` value your Fabric administrator
+returned in [01b-prereqs-fabric-admin](01b-prereqs-fabric-admin.md) to confirm the prefilled
+value, then select or create another schema only if you intend to bind the domain to it.
 
-Use the `FABRIC_SCHEMA` value your Fabric administrator returned in
-[01b-prereqs-fabric-admin](01b-prereqs-fabric-admin.md). If you do not have it, `dbo` is the
-default for a lakehouse created the way that page instructs. Confirm it against the
-lakehouse's own `defaultSchema` property rather than assuming.
+**Create Domain stays unavailable until Studio knows a schema.** If Studio cannot list schemas,
+it shows **Retry**. When the Lakehouse reported a default, that value remains selected; when it
+reported no default, the Schema Name field and **Create Domain** remain unavailable while
+discovery is failing. Resolve the problem and select **Retry**. When discovery succeeds, select,
+create, or — if no schemas are listed — enter the schema you intend to bind before creating the
+domain.
 
 Optionally set **Ephemeral Workspace Capacity** — the Fabric capacity used for the
 per-intent ephemeral workspaces this domain creates later. Picking an existing
