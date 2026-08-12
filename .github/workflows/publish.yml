@@ -38,7 +38,7 @@ env:
   PUBLIC_BACKEND: studio-backend
   PUBLIC_FRONTEND: studio-frontend
   COSIGN_OIDC_ISSUER: https://token.actions.githubusercontent.com
-  COSIGN_IDENTITY_REGEXP: ^https://github\.com/accelerate-data/studio/\.github/workflows/release\.yml@.*$
+  COSIGN_IDENTITY_REGEXP: ^https://github\.com/accelerate-data/studio/\.github/workflows/create-candidate-image\.yml@refs/heads/main$
 
 jobs:
   publish:
@@ -86,7 +86,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Trust sanity: the promoted PUBLIC images must carry a valid signature
-      # from vd-studio's release.yml identity — proves crane copy carried the
+      # from Studio's main-branch candidate-build identity — proves crane copy carried the
       # referrers across. --offline verifies the bundle SET without an online
       # Rekor call (no hang).
       - name: Verify public images are signed
