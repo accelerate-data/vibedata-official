@@ -1,7 +1,7 @@
 ---
-applies-to: vibedata v0.1.26
-verified-against: studio@653beeced
-verified-on: 2026-08-08
+applies-to: vibedata v0.1.33
+verified-against: studio@a121fc466
+verified-on: 2026-08-13
 sources:
   - docs/design/kubernetes-deployment/cloud.md
   - docs/design/kubernetes-deployment/README.md
@@ -61,43 +61,53 @@ have it, not a repeat of that page.
 **Count the secrets in the vault before you start.** The set depends on the monitoring profile
 you install with:
 
-| Profile | Secrets, on `v0.1.26` |
+| Profile | Secrets, on `v0.1.33` |
 | --- | --- |
-| Core (no flag, or `--no-observability`) | 6 |
-| `--with-observability` | 8 |
-| `--full-observability` | 17 |
+| Core (no flag, or `--no-observability`) | 9 |
+| `--with-observability` | 11 |
+| `--full-observability` | 21 |
 
 `01d` lists every name and its required value format. Check the formats, not just the names —
 `data-encryption-key` must be base64-encoded 32 random bytes, and a hex value is the most
 common cause of a failed install on this page.
 
-Some builds of the CLI offer `vibedata install kubernetes --list-secrets` to print this set.
-The `v0.1.26` release does not have it: the command answers `No such option: --list-secrets`.
-Use the counts above and `01d`'s tables.
+**Ask the CLI rather than trusting the table.** From `v0.1.32` the installer prints the exact
+set and exits without touching anything:
+
+```bash
+vibedata install kubernetes --list-secrets --full-observability
+```
+
+The list is derived from the manifests the install actually renders, so it cannot drift. The
+counts above came from running it against the released `v0.1.33` binary. On `v0.1.26` the flag
+does not exist and answers `No such option: --list-secrets`; use `01d`'s tables there.
 
 ## Bring Studio up
 
 This is the full command. Every flag in it is needed; the sections below explain each one.
 
 ```bash
-yes '' | vibedata install kubernetes \
+vibedata install kubernetes \
   --cloud azure \
   --kube-context <your-context> \
   --domain "$STUDIO_DOMAIN" \
   --storage-url "$AZURE_FILES_SHARE_URL" \
   --vault-url "$KEY_VAULT_URL" \
   --vault-identity-client-id "$AKS_KUBELET_CLIENT_ID" \
-  --version 0.1.26
+  --version 0.1.33
 ```
 
 Azure is the only cloud this command supports today.
 
-**Why `yes '' |`.** On the `v0.1.26` release the CLI opens a
-`Cluster (kubeconfig) [~/.kube/config]:` prompt even when you pass `--kube-context`. If stdin
-is closed — a script, a pipeline, `< /dev/null` — the prompt reads end-of-file and the command
-**aborts** instead of taking its own default. Piping a newline answers the prompt with its
-default. This looks like a broken pipeline or a permissions problem, so it is worth
-recognising: the cause is the prompt, not your harness.
+**This runs unattended on `v0.1.33`.** With `--kube-context` given, the command asks nothing —
+it was checked with stdin closed and went straight to the cluster check. So it is safe in a
+script, a pipeline, or CI.
+
+> **Applies to: releases before v0.1.32.** Earlier releases opened a
+> `Cluster (kubeconfig) [~/.kube/config]:` prompt even when `--kube-context` was passed, and
+> with stdin closed the prompt read end-of-file and **aborted** the command. The workaround was
+> to pipe a newline — `yes '' | vibedata install kubernetes …` — which answered the prompt with
+> its own default. Harmless to keep, and unnecessary from `v0.1.32`.
 
 **`--vault-identity-client-id` is not optional.** It carries `AKS_KUBELET_CLIENT_ID` from
 `01d`. This flag chooses how Studio authenticates to the Key Vault. Pass it and Studio uses
@@ -133,8 +143,8 @@ install with a different flag.
 ### Which cluster it installs into
 
 - **`--kube-context <name>`** — the context is named explicitly and kubectl resolves which
-  file holds it. On `v0.1.26` you are still prompted for the kubeconfig file first, which is
-  why the command above pipes a newline into it.
+  file holds it. From `v0.1.32` nothing else is asked; on earlier releases you were prompted
+  for the kubeconfig file first, which is why older copies of this page piped a newline in.
 - **`--kubeconfig <file>`** — that file is used.
 - **Neither, at a terminal** — the CLI prompts for the kubeconfig file (default
   `~/.kube/config`), then, only if that file holds more than one context, prompts again for
@@ -183,23 +193,28 @@ Argo pulls Studio from the public OCI registry:
 oci://ghcr.io/accelerate-data/studio-charts/studio
 ```
 
-version `0.1.26` — observed at digest
-`sha256:4a050dc31a1f2bc8cb27a274425e763980a30a920a400c3288d7cd1c507b650d` as of this page's
+version `0.1.33` — observed at digest
+`sha256:87e502699651d0102537cf1647a66f12dc78149569dc3ad19481b952972bccc4` as of this page's
 stamp date. A republish of the same version can move the digest, so treat the version
 number as the durable identity and the digest as a point-in-time observation, not a pin.
 The pull is anonymous — no registry credentials needed.
 
 **Without `--version`, Argo does not stay on the version you installed.** The installer hands
-Argo an open-ended range — "0.1.26 or newer" — rather than a fixed version. Argo then upgrades
+Argo an open-ended range — "0.1.33 or newer" — rather than a fixed version. Argo then upgrades
 the cluster to any newer chart Accelerate Data publishes, on its own schedule, with no
-operator action and across major versions. Passing `--version 0.1.26` collapses that range to
+operator action and across major versions. Passing `--version 0.1.33` collapses that range to
 a single pinned version, which is why the install command above includes it. To move to a new
 version afterwards, re-run the install with the new `--version`.
 
-**Watch the tag prefix.** The chart is tagged `0.1.26`, with no `v`. Studio's images and the
-`vibedata` CLI itself are tagged `v0.1.26`, with the `v`. The chart's own `Chart.yaml`
-carries both forms side by side — `version: 0.1.26` and `appVersion: v0.1.26` — which is a
+**Watch the tag prefix.** The chart is tagged `0.1.33`, with no `v`. Studio's images and the
+`vibedata` CLI itself are tagged `v0.1.33`, with the `v`. The chart's own `Chart.yaml`
+carries both forms side by side — `version: 0.1.33` and `appVersion: v0.1.33` — which is a
 clean illustration of the difference. Copy the `v` prefix into a chart pull and it fails.
+
+**Not every release publishes a chart.** The registry holds `0.1.25`, `0.1.26`, `0.1.32` and
+`0.1.33` — there is no chart for `0.1.27` through `0.1.31`. So a `--version` taken from a CLI
+release number will not always resolve. Check the tag list before pinning a version this page
+does not name.
 
 **Chart defaults are not what you get, for scheme and host.** The chart's own default values
 target a local install (`scheme: http`, `host: studio.localhost`), and the CLI overrides
@@ -248,31 +263,34 @@ and the installer prints it only once.
 kubectl -n argocd get applications
 ```
 
-On `v0.1.26`, `studio-app` and the monitoring applications report `Healthy`, and
-**`studio-obot` may report `Degraded`**, with the pod logging
-`invalid tunnel peer configuration: ... missing ID, Token`.
+On `v0.1.33`, `studio-app` and the monitoring applications report `Healthy`, and
+**`studio-obot` should reach `Healthy` on `v0.1.33`.** Earlier releases could not: they never
+rendered the object obot's tunnel configuration reads, so obot logged
+`invalid tunnel peer configuration: ... missing ID, Token` and sat `Degraded`. That was fixed at
+`v0.1.31`, and the vault secret it needs is now part of the core set rather than an extra.
 
-**Do not treat this as finished.** The installer's health gate waits only on `studio-app`, so
-the install reports success either way — but a Degraded `studio-obot` means a required object
-was never created, and **starting a conversation on an activated intent will fail** later, at
-the last step of this guide.
-
-Check which case you are in:
+If `studio-obot` is `Degraded`, check the object exists and that its secret synced:
 
 ```
 kubectl -n studio get externalsecret obot-tunnel-peer
+kubectl -n studio get secret obot-tunnel-peer
 ```
 
-On `v0.1.26` this is **always** `NotFound`: the release never renders that object, so there is
-no second case to be in. The check is worth running only to confirm you are on a build that
-behaves this way. It reproduced identically on two separate clean installs.
+On `v0.1.33` the ExternalSecret is always rendered, so `NotFound` here means something went
+wrong with the install rather than a missing feature. A `SecretSyncedError` instead points at
+the vault: confirm `obot-tunnel-peer-token` exists there — it is one of the nine core secrets in
+[01d](01d-prereqs-azure-infra.md), and a vault built against an older copy of that page will not
+have it.
 
-Nothing you put in the vault fixes it. `01d`'s secret list for `v0.1.26` does not include
-`obot-tunnel-peer-token`, and creating it changes nothing, because the object that would read
-it is never created. Do not re-run the install or tear the cluster down either — neither
-creates the missing object. The real fix is a newer release. See
-[90-troubleshooting](90-troubleshooting.md) for what to do, including the cost of the manual
-workaround, and report it to Accelerate Data.
+**Do not treat a Degraded `studio-obot` as cosmetic.** The installer's health gate waits only on
+`studio-app`, so the install reports success either way, and **starting a conversation on an
+activated intent will fail** later, at the last step of this guide.
+
+> **Applies to: releases before v0.1.31.** On `v0.1.26` through `v0.1.30`, `kubectl -n studio get
+> externalsecret obot-tunnel-peer` is **always** `NotFound` and nothing fixes it from the outside:
+> the vault secret has no consumer, and re-running the install or rebuilding the cluster does not
+> create the object. Upgrading is the fix. See
+> [90-troubleshooting](90-troubleshooting.md) for the manual workaround and its cost.
 
 ## Go live: wire Front Door to the private ingress
 
@@ -297,9 +315,14 @@ The Azure load balancer defaults its probe path to `/`, and ingress-nginx answer
 404. Every node then reads as unhealthy and the load balancer **silently drops all inbound
 traffic**. Nothing crashes; requests just never arrive.
 
-**Run this on every released CLI version.** No released version sets the annotation for you —
-checked against `v0.1.26`, `v0.1.27`, `v0.1.28` and `v0.1.29`. Do not skip it because you are on
-a newer release. Confirm the annotation is present rather than assuming, on any version:
+**From `v0.1.32` the installer sets this for you.** `k8s/providers.py:110` applies
+`service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: /healthz` to the
+ingress service, so a fresh `v0.1.33` install arrives with it already correct.
+
+Confirm it rather than assuming, because it is cheap and the failure is silent — and because an
+**upgraded** cluster is not covered by that: releases `v0.1.26` through `v0.1.31` set no
+annotation, so a cluster first installed on one of them keeps whatever it has until something
+reapplies the service:
 
 ```bash
 kubectl -n ingress-nginx get svc ingress-nginx-controller \

@@ -1,7 +1,7 @@
 ---
-applies-to: vibedata v0.1.26
-verified-against: studio@653beeced
-verified-on: 2026-08-08
+applies-to: vibedata v0.1.33
+verified-against: studio@a121fc466
+verified-on: 2026-08-13
 sources:
   - cli/vibedata/src/vibedata/auth/github_container_auth.py
   - cli/vibedata/src/vibedata/commands/install.py
@@ -68,7 +68,9 @@ search this page for a distinctive part of it.
 - [MotherDuck domain stays Pending — service PAT read check](#motherduck-domain-stays-pending--service-pat-read-check)
 - [A user is rejected with a connect-required error](#a-user-is-rejected-with-a-connect-required-error)
 - [GitHub rejects the sign-in with `redirect_uri_mismatch`](#github-rejects-the-sign-in-with-redirect_uri_mismatch)
+- [Saving a data platform fails with `AADSTS50011`](#saving-a-data-platform-fails-with-aadsts50011)
 - [Connecting Fabric fails with `AADSTS500113`](#connecting-fabric-fails-with-aadsts500113)
+- [GitHub Actions setup fails, reading "Confirm repository access"](#github-actions-setup-fails-reading-confirm-repository-access)
 - [Fabric work fails with `AADSTS65001` consent required](#fabric-work-fails-with-aadsts65001-consent-required)
 - [DuckDB reports a lock error](#duckdb-reports-a-lock-error)
 
@@ -225,35 +227,29 @@ secrets it could not read and reports them together, and its second suggested ne
 the complete set your profile requires. So create everything the message names, then re-run once.
 You are not facing a sequence of 600-second attempts that each reveal one more name.
 
-**`--list-secrets` does not exist in any released CLI.** `vibedata install kubernetes
---list-secrets` fails with `No such option: --list-secrets` on `v0.1.26`, and on every release
-up to and including `v0.1.29`. The flag exists only in unreleased development builds, so
-upgrading will not give it to you. Where the CLI's own suggested next actions recommend running
-it, ignore that suggestion and use the secret list on this page instead:
-
-```
-vibedata install kubernetes --help
-```
-
-If `--list-secrets` appears in that help output, use it — with the same profile flag you install
-with, so the list matches the profile:
+**Use `--list-secrets` rather than this page's list.** From `v0.1.32` the CLI prints the exact
+set its own install renders, so it cannot drift. Pass the same profile flag you install with, so
+the list matches the profile:
 
 ```
 vibedata install kubernetes --list-secrets --full-observability
 ```
 
-If it does not appear, your build is `v0.1.26` or older. Use the blocked message as the list; it
-names exactly what is missing.
+It reads nothing and changes nothing — no cluster, no vault, no share needed.
+
+If it answers `No such option: --list-secrets`, your CLI is `v0.1.31` or older. The flag exists
+in no release before `v0.1.32`, so upgrading the CLI is what gives it to you. Until then, use the
+blocked message as the list — it names exactly what is missing — or the tables in
+[01d-prereqs-azure-infra](01d-prereqs-azure-infra.md).
 
 ### A scripted or unattended install hangs, or reports "Aborted"
 
 > **Applies to: Kubernetes on Azure.** Skip if you chose Local Docker.
 
-**Read this only if your CLI is `v0.1.26`.** This is fixed in builds after `v0.1.26`, where the
-installer skips the kubeconfig prompt when `--kube-context` is given, and skips it whenever no
-human can answer — `--json`, or a piped, closed, or absent standard input. If you are on a newer
-build, neither symptom below occurs, and upgrading the CLI is the fix. Check with
-`vibedata version`.
+**Read this only if your CLI is older than `v0.1.32`.** Check with `vibedata version`. From
+`v0.1.32` the installer skips the kubeconfig prompt when `--kube-context` is given, and whenever
+no human can answer — `--json`, or a piped, closed, or absent standard input. Neither symptom
+below occurs there; upgrading the CLI is the fix.
 
 **Symptom:** one of two things, depending on how the job supplies standard input. Run from a
 terminal, the install stops at a prompt you did not expect:
@@ -265,15 +261,16 @@ Cluster (kubeconfig) [~/.kube/config]:
 Run from CI, a cron job, or with standard input redirected from `/dev/null`, it exits with
 `Aborted` and no other explanation. Both happen even when you passed `--kube-context`.
 
-**Cause:** on `v0.1.26` the installer opens the kubeconfig confirmation prompt regardless of
-whether `--kube-context` was supplied. It suppresses the prompt only for `--json`. When standard
-input is at end-of-file, the prompt reads that as a cancellation rather than as acceptance of the
-bracketed default.
+**Cause:** on releases before `v0.1.32` the installer opens the kubeconfig confirmation prompt
+regardless of whether `--kube-context` was supplied. It suppresses the prompt only for `--json`.
+When standard input is at end-of-file, the prompt reads that as a cancellation rather than as
+acceptance of the bracketed default.
 
-**Fix, if you can upgrade:** move to a CLI newer than `v0.1.26` and pass `--kube-context` as you
-already were. No workaround is then needed.
+**Fix: upgrade to `v0.1.32` or later** and pass `--kube-context` as you already were. Checked on
+the released `v0.1.33` binary with stdin closed: it asks nothing and goes straight to the cluster
+check. No workaround is needed.
 
-**Fix on `v0.1.26`:** feed the prompt a real newline instead of letting it hit end-of-file:
+**Fix without upgrading:** feed the prompt a real newline instead of letting it hit end-of-file:
 
 ```
 yes "" | vibedata install kubernetes --kube-context <context> ...
@@ -310,12 +307,18 @@ Helm chart. See [Helm chart pull fails](#helm-chart-pull-fails) for the tag-form
 **Symptom:** `helm pull` (or an install driven from it) fails to find the chart at the tag
 you gave it.
 
-**Cause:** the tag form differs between artefact types. Helm charts are tagged `0.1.26` —
-no `v` prefix. Container images and CLI releases are tagged `v0.1.26` — with the prefix. A
-`v` copied over from an image or CLI tag breaks the chart pull.
+**Cause:** one of two things.
 
-**Fix:** check the tag you passed to `helm pull`. Drop any leading `v` for a chart tag. If
-you are also unsure the version number itself is right, see
+**The tag form differs between artefact types.** Helm charts are tagged `0.1.33` — no `v`
+prefix. Container images and CLI releases are tagged `v0.1.33` — with the prefix. A `v` copied
+over from an image or CLI tag breaks the chart pull.
+
+**Or there is no chart at that version.** Not every release publishes one: the registry holds
+`0.1.25`, `0.1.26`, `0.1.32` and `0.1.33`, and nothing for `0.1.27` through `0.1.31`. A version
+number taken from a CLI release will not always resolve to a chart.
+
+**Fix:** drop any leading `v` from the chart tag, and check the version exists before pinning
+it. If you are also unsure the version number itself is right, see
 [The CLI version you looked up does not exist](#the-cli-version-you-looked-up-does-not-exist).
 
 ### Windows: the `vibedata` command is not found
@@ -360,30 +363,35 @@ Everything else is `Healthy` and the install reported success.
 configure the organisation and create a domain — but **starting a conversation on an activated
 intent will fail** until this is fixed. That is the last step this doc set leads you to.
 
-**Cause:** a defect in `v0.1.26`. `obot` needs a Kubernetes `ExternalSecret` named
-`obot-tunnel-peer`, which exposes the vault secret `obot-tunnel-peer-token` to the pod as
-`OBOT_SERVER_TUNNEL_PEER_TOKEN`. The `v0.1.26` installer does not create that object at all. The
-vault secret is present and correct the whole time; only the Kubernetes object is missing.
-Confirm with:
+**Cause:** `obot` needs a Kubernetes `ExternalSecret` named `obot-tunnel-peer`, which exposes
+the vault secret `obot-tunnel-peer-token` to the pod as `OBOT_SERVER_TUNNEL_PEER_TOKEN`. Two
+different things break it, and they need different fixes. Start here:
 
 ```
 kubectl -n studio get externalsecret obot-tunnel-peer
+kubectl -n studio get secret obot-tunnel-peer
 ```
 
-`NotFound` confirms this cause. Reproduced identically on two independent fresh deployments, so
-this is not specific to your cluster.
+**If the ExternalSecret exists but reports `SecretSyncedError`**, the vault is missing
+`obot-tunnel-peer-token`. It became a core secret at `v0.1.32` — nine keys, not six — so a vault
+built from an older checklist will not have it. Add it to the vault, then force a resync:
 
-**Upgrading the CLI does not fix this yet.** `obot-tunnel-peer` appears in no released CLI —
-not `v0.1.26`, and not `v0.1.27`, `v0.1.28` or `v0.1.29`. The installer that renders and applies
-that `ExternalSecret` exists only in unreleased development builds, so re-running the install
-from any published version creates nothing and leaves `studio-obot` Degraded. Use the manual
-workaround below until a release carries the fix, and check what is currently published from
-`vibedata-official` — see
-[The CLI version you looked up does not exist](#the-cli-version-you-looked-up-does-not-exist).
-This is the fix to reach for first.
+```
+kubectl -n studio annotate externalsecret obot-tunnel-peer force-sync="$(date -u +%s)" --overwrite
+```
 
-**Do not roll back, and do not re-run the install from `v0.1.26`** — neither creates the missing
-object. Only a newer CLI does.
+Confirm the required set with `vibedata install kubernetes --list-secrets`, which derives the
+list from what the install actually renders.
+
+**If the ExternalSecret is `NotFound` on `v0.1.31` or later**, the install did not render an
+object it should have. That is unexpected — re-run the install and read its output rather than
+patching around it.
+
+**If the ExternalSecret is `NotFound` on `v0.1.26` through `v0.1.30`**, this is the known defect
+in those releases: the installer does not create the object at all, and the vault secret has no
+consumer. `NotFound` is the only possible result there, and it reproduced identically on two
+independent fresh deployments. **Upgrade to `v0.1.31` or later** — that is the fix, and rolling
+back, re-running the install, or changing vault secrets creates nothing.
 
 **If you cannot upgrade yet**, a manual workaround has been confirmed to restore conversations.
 Ask Accelerate Data for the current procedure rather than improvising one. Two things about its
@@ -496,17 +504,26 @@ time, so start it early.
 domain's settings panel.
 
 **Cause:** the domain's M2M service principal lacks Viewer-or-higher access on the bound
-Fabric workspace, **and Studio could not add it**. On `v0.1.26` this step does not just check —
-it tries to assign Viewer to the service principal itself. It makes that assignment using **the
-operator's own Fabric credential**, so it fails when the signed-in operator holds only Viewer,
-or no role at all, on that workspace. Assigning a role requires Member or Admin.
+Fabric workspace. From `v0.1.32` this step **verifies and never grants**, so the message means
+exactly what it says — the grant was never made. The check runs under the service principal's
+own credential, not yours, so your role on the workspace has no bearing on whether it passes.
+The failure names both halves: *"Service Principal `<client-id>` does not have at least Viewer
+access to Fabric workspace `<workspace-id>`."*
 
-So the step failing usually means the operator lacks the rights to grant, not that anyone
-forgot to ask.
+Only a denial, or a workspace invisible to that identity, fails this step. A network error, a
+5xx, or a 401 propagates untouched instead — so this message is reliable evidence of a missing
+grant rather than of a transient problem.
 
-**Fix:** either have a Fabric workspace admin grant the M2M service principal Viewer or higher
-directly, or give the operator Member or Admin on the workspace so Studio's own assignment can
-succeed. Then select **Retry provisioning**.
+**Fix:** have a Fabric workspace admin grant the M2M service principal a role on that workspace,
+then select **Retry provisioning**. Grant **Contributor or Member** rather than Viewer: Viewer
+satisfies this check and still leaves the GitHub Actions deploy unable to push — see
+[01b-prereqs-fabric-admin](01b-prereqs-fabric-admin.md#4-grant-the-service-principal-a-deploy-capable-workspace-role).
+
+> **Applies to: releases before v0.1.32.** Earlier releases tried to **assign** Viewer to the
+> service principal, using the operator's own Fabric credential — so this step failed when the
+> signed-in operator held only Viewer, or no role, on the workspace, and the fix was to give the
+> operator Member or Admin so Studio's own assignment could succeed. The diagnostic read *"the
+> calling account lacks permission. This check runs under your credentials."*
 
 ### Domain Failed — Microsoft Fabric host identity lacks workspace access (Local Docker)
 
@@ -715,12 +732,56 @@ case — this domain got further before stalling.
 domain's settings panel.
 
 **Cause:** a separate, retryable check — whether the registered service PAT can read the
-bound **database** — failed. On `v0.1.26` the domain form has no Share field, so the probe
-targets the database name the domain is bound to. It passes if that database reaches the
-identity either way: received through a Share, or owned by the identity itself.
+bound **database** — failed. The probe targets the database name the domain is bound to, and on
+`v0.1.33` that is the only name a binding carries: the form sends no Share. So the check passes
+only when the service PAT's own identity **owns** the bound database.
 
-**Fix:** confirm the service PAT can read the bound database — either grant it READ on a Share
-carrying that database, or make it the database's owner — then select **Retry provisioning**.
+**The diagnostic names a remedy that no longer exists.** It reads *"Confirm the service PAT can
+access the bound share, then retry"* — but there is no Share, no field that would bind one, and
+the binding is frozen after create. Read "the bound share" as "the bound database".
+
+**Fix:** there is no fix inside domain settings. Either have the database's owner drive the work,
+or recreate the domain against a database the service PAT owns. See
+[01e-prereqs-motherduck-admin](01e-prereqs-motherduck-admin.md#4-make-the-service-account-own-the-database).
+
+> **Applies to: releases before v0.1.33.** `v0.1.28` through `v0.1.32` offered a Share picker, so
+> granting the service PAT READ on a Share carrying that database was a real second remedy —
+> provided the Share was bound at create time.
+
+### GitHub Actions setup fails, reading "Confirm repository access"
+
+> **Applies to: MotherDuck and Microsoft Fabric.** Skip if you chose DuckDB — there is no GitHub
+> Actions setup for a DuckDB domain.
+
+**Symptom:** the domain is `Active`, but its GitHub Actions setup reports:
+
+> GitHub Actions configuration could not be completed. Confirm repository access, then retry.
+
+Meanwhile `github_repository_exists` and `default_branch_materialization` both show **Passed** in
+the same run, and every `github_variable:` and `github_secret:` step sits at **Pending** — they
+never started.
+
+**The message is not reliable here.** Repository access is demonstrably working: two steps in the
+same run proved it. When the GHA phase fails for any other reason, this is still the message you
+get, and no step row carries the real cause. Do not spend time auditing repository access.
+
+**Check these instead, in order:**
+
+1. **The App's permissions, and whether the installation has them.** `Secrets` and `Variables` are
+   both required, and they are separate GitHub permissions. More subtly, adding a permission
+   raises a request an organisation owner must **approve on the installation** — until then the
+   App runs with its old permissions, with no error and no prompt. An App whose settings page
+   lists `Secrets` but whose installation was never approved fails exactly like one without it.
+   See step 6 of [01c-prereqs-github-org-owner](01c-prereqs-github-org-owner.md).
+2. **Whether a default LLM profile exists.** The secret steps write `LLM_API_KEY` from it.
+3. **The `github_branch_protection` warning, if present.** It is advisory and does not block, so
+   it is not the cause — but *"cannot verify default-branch protection (insufficient permission)"*
+   is itself a sign the App is missing `Administration: read`, which suggests the permission set
+   was never completed.
+
+**Then select Retry provisioning.** If it fails again with the same message and none of the above
+applies, the cause is not visible from the product — capture the backend logs for the domain
+before retrying further.
 
 ### A user is rejected with a connect-required error
 
@@ -780,8 +841,9 @@ redirect_uri_mismatch
 
 **Cause:** the callback URL Studio sent is not registered on your GitHub App.
 
-On the `v0.1.26` release Studio uses **one** callback URL, and the same one for both the
-operator's save-and-test in Org Settings and each person's own GitHub link:
+Studio uses **one** callback URL, and only one flow uses it — a person linking their own GitHub
+account. The operator's save in Org Settings is non-interactive and never sends a `redirect_uri`,
+so this error always comes from a user's **Connect GitHub**, never from a save:
 
 ```
 https://<STUDIO_DOMAIN>/api/v1/connect/github-commits/callback
@@ -801,12 +863,108 @@ Check three things before you conclude the URL is missing:
 - There is no trailing slash or extra query string. GitHub matches the registered value
   exactly.
 
-> **Applies to: builds newer than `v0.1.26`.** Skip if you are on `v0.1.26`.
+**There is no second callback URL to look for.** Some releases between `v0.1.26` and `v0.1.33`
+carried a second path, `/api/v1/github-commit-provider/validation/callback`, for an
+operator-facing validation flow. `v0.1.33` removed it along with the flow, so it corresponds to no
+route. A stale registration for it is harmless but points at nothing.
+
+**Because saving cannot detect this, nothing in Org Settings will warn you.** A wrong callback
+URL passes organisation setup silently and surfaces later, for whoever links their account first.
+Confirm the registration from the GitHub side rather than waiting for Studio to object.
+
+### One person cannot connect GitHub, while the operator can
+
+> **Applies to: Local Docker and Kubernetes on Azure.** Skip only if you have not registered a
+> GitHub App and configured a GitHub connection in **Org Settings → GitHub**.
 >
-> Later builds move the operator's save-and-test onto a second path,
-> `/api/v1/github-commit-provider/validation/callback`. If your operator hits this error while
-> saving, but individual users can link their accounts, that second URL is the one missing.
-> Registering both is safe on any build — an unused callback URL has no effect.
+> In practice this only bites on `Kubernetes on Azure`, because that is the deployment style with
+> more than one person signing in. A `Local Docker` deployment has one operator, and if that
+> operator owns the App the case cannot arise.
+
+**Symptom:** the connection saves cleanly in **Org Settings → GitHub**, and the operator can
+link their own GitHub account, but another user's **Connect GitHub** does not come back with a
+linked account. The failure happens on GitHub's side, not in Studio: Studio reports no
+configuration error, and nothing in **Org Settings → GitHub** looks wrong.
+
+**Cause:** the GitHub App is private, and that user is not a member of the account that owns it.
+GitHub's rule is a property of the App, not of Studio: "If you set your GitHub App registration
+to private, it can only be installed on the account that owns the app. Only members of the
+organization that owns it can authorize it." Two shapes produce this:
+
+- The App is owned by your GitHub organisation and set to **Only on this account**, and the
+  blocked user is not a member of that organisation — a contractor, or a colleague who signs in
+  to Studio through Entra but was never added to GitHub.
+- The App was registered under a **personal** GitHub account and left at **Only on this
+  account**. Then only the person who owns it can ever authorize it, and every other user is
+  blocked.
+
+**A successful save is not evidence against this.** Saving validates the App's Client ID and
+private key against GitHub and says nothing about who may authorize the App. Nor does the
+operator's own successful link: the operator is normally a member of the owning organisation, so
+they are exactly the person this restriction does not block.
+
+**Fix:** pick one, at the App's own settings page on GitHub — both are changes to the App, and
+neither is done in Studio:
+
+- Set **Where can this GitHub App be installed?** to **Any account**. This is the only option
+  when the App is owned by a personal account. See step 7 of
+  [01c-prereqs-github-org-owner](01c-prereqs-github-org-owner.md), which also states what **Any
+  account** does not expose.
+- Or add the blocked people to the GitHub organisation that owns the App, and leave visibility at
+  **Only on this account**.
+
+Installing the App on more repositories does not fix this. Installation and authorization are
+separate grants: installation decides which repositories the App can reach, visibility decides
+which people can authorize it.
+
+### Saving a data platform fails with `AADSTS50011`
+
+> **Applies to: Microsoft Fabric on Kubernetes on Azure.** Skip if you chose DuckDB or
+> MotherDuck, or if your deployment style is Local Docker.
+
+**Symptom:** saving the Fabric data platform in **Org Settings → Data Platforms** fails, and the
+Entra error names a URI you did not configure:
+
+```
+AADSTS50011: The redirect URI 'https://<STUDIO_DOMAIN>/api/v1/data-platforms/validation/callback'
+specified in the request does not match the redirect URIs configured for the application '<app-id>'.
+```
+
+**Cause:** two different flows sign in against this app registration, on two different paths.
+Registering only `/api/auth/fabric/callback` — the one people use to connect their own Fabric
+access — leaves the **validation** path unregistered. Saving runs the validation flow, so sign-in
+works and saving does not.
+
+Studio began sending the validation URI at **`v0.1.32`**. A registration built for an earlier
+release was complete when it was made and stopped being complete at that upgrade, with nothing to
+announce it. The gap appears the first time somebody saves a data platform, which may be weeks
+later — so a working deployment that suddenly cannot save a data platform is the expected shape
+of this, not a sign that something else changed.
+
+**This error misdirects.** It names the Azure portal and an application ID, so it reads as an
+infrastructure problem. The cause is a Studio release adding a path.
+
+**Fix:** ask your Entra administrator to add the missing URI as a **Web** redirect URI on the app
+registration your operator entered for this data platform — the M2M app by default, the U2M app
+if the identities were kept separate. See
+[01a-prereqs-entra-admin](01a-prereqs-entra-admin.md#the-interactive-app-also-needs-redirect-uris).
+
+**Whoever adds it must pass the complete set.** `az ad app update --web-redirect-uris` replaces
+the list rather than appending, so passing only the new URI silently removes the existing one and
+breaks Fabric sign-in:
+
+```bash
+az ad app update --id <app-id> \
+  --web-redirect-uris \
+    "https://<STUDIO_DOMAIN>/api/auth/fabric/callback" \
+    "https://<STUDIO_DOMAIN>/api/v1/data-platforms/validation/callback"
+```
+
+Entra applies redirect-URI changes within about a minute. Retry the save after that.
+
+**Expect the same shape for Azure Key Vault secret stores.** They carry their own pair —
+`/api/auth/secret-store-links/callback` and `/api/v1/secret-stores/validation/callback` — on
+whichever app registration the secret store names, which is not necessarily the Fabric one.
 
 ### Connecting Fabric fails with `AADSTS500113`
 

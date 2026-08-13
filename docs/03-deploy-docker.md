@@ -1,7 +1,7 @@
 ---
-applies-to: vibedata v0.1.26
-verified-against: studio@653beeced
-verified-on: 2026-08-08
+applies-to: vibedata v0.1.33
+verified-against: studio@a121fc466
+verified-on: 2026-08-13
 sources:
   - cli/vibedata/src/vibedata/commands/install.py
   - cli/vibedata/src/vibedata/compose/lifecycle.py
@@ -253,3 +253,16 @@ that runs the same command.
 
 This is the command to reach for — there is no `vibedata` command that reports service
 status.
+
+**What lives in the data directory, and why it matters for backups.** Everything Studio keeps
+between runs is under the directory you installed into. From `v0.1.33` that includes two paths
+per-intent work writes to directly:
+
+| Path | Holds |
+| --- | --- |
+| `<data-dir>/uploads` | Files uploaded into an intent, and files an agent generated. Re-mounted read-write at `/uploads` inside every agent session for that intent |
+| `<data-dir>/cache` | Persistent scratch space for an intent, mounted at `/cache`. Studio does not prescribe what goes here |
+
+Both are new in `v0.1.33`. A backup routine written against an earlier release, or one that
+copies only the database, will miss every uploaded and generated file. `vibedata backup` covers
+the data directory; a hand-rolled copy needs these two paths added.

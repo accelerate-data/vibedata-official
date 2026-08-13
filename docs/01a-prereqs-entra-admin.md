@@ -1,7 +1,7 @@
 ---
-applies-to: vibedata v0.1.26
-verified-against: studio@653beeced
-verified-on: 2026-08-05
+applies-to: vibedata v0.1.33
+verified-against: studio@a121fc466
+verified-on: 2026-08-13
 sources:
   - docs/functional/data-platform/fabric-backend.md
   - docs/functional/data-platform/README.md
@@ -14,6 +14,9 @@ sources:
   - src/server/modules/auth/sso-providers/sso-providers.service.ts
   - src/server/modules/user-data-platform-links/oauth-flow.ts
   - src/server/modules/user-data-platform-links/fabric-u2m-scopes.ts
+  - src/server/modules/data-platforms/helpers/fabric-candidate-validator.ts
+  - src/server/modules/secret-stores/helpers/secret-store-link-oauth-flow.ts
+  - src/server/modules/secret-stores/helpers/azure-key-vault-candidate-validator.ts
   - src/server/lib/graph/federated-credential-client.ts
   - src/server/modules/data-platforms/providers/fabric.provider.ts
   - src/server/modules/data-platforms/data-platforms.schemas.ts
@@ -128,30 +131,53 @@ your operator keeps the identities separate leaves the U2M app with no reply add
 permissions — and the first person who connects Fabric gets `AADSTS500113`, the exact failure
 those sections exist to prevent.
 
-### The interactive app also needs a redirect URI
+### The interactive app also needs redirect URIs
 
 > **Applies to: Microsoft Fabric on Kubernetes on Azure.** Skip if your deployment style is
 > Local Docker — Studio shows no U2M section there at all, so no interactive sign-in runs
 > against this app and no reply address is needed.
 
-Your team members sign into this app when they connect their own Fabric access inside Studio.
-An interactive sign-in needs a reply address, and an app registered for service credentials
-alone has none — which is why a pure M2M app fails here when it is also carrying the
-interactive flow.
+Two different flows sign into this app. Your team members sign in when they connect their own
+Fabric access inside Studio, and Studio signs in again when an operator saves the Fabric data
+platform in Org Settings. An interactive sign-in needs a reply address, and an app registered
+for service credentials alone has none — which is why a pure M2M app fails here when it is
+also carrying the interactive flow.
 
-Register this as a **Web** redirect URI on the interactive app — **the M2M app by default, the
-U2M app if your operator keeps the identities separate**:
+Register both of these as **Web** redirect URIs on the interactive app — **the M2M app by
+default, the U2M app if your operator keeps the identities separate**:
+
+| Redirect URI | Which flow uses it | Fails with |
+| --- | --- | --- |
+| `https://<STUDIO_DOMAIN>/api/auth/fabric/callback` | A person connecting their own Fabric access inside Studio | `AADSTS500113: No reply address is registered for the application` |
+| `https://<STUDIO_DOMAIN>/api/v1/data-platforms/validation/callback` | An operator saving the Fabric data platform in Org Settings | `AADSTS50011: The redirect URI … does not match the redirect URIs configured for the application` |
+
+**Register both.** They are two separate flows on two different paths, and Studio builds each
+one itself — neither falls back to the other. An app carrying only the first signs your team
+in correctly and then rejects the operator's save, which reads as a Studio problem rather than
+an app registration problem.
+
+The second URI is new. Studio began sending it at release **v0.1.32**; releases up to and
+including v0.1.31 used only the first. If your app registration was built for an earlier
+release and has been carrying one URI since, it stopped being complete at that upgrade. Nothing
+announces this: sign-in keeps working, and the gap appears the next time somebody saves a data
+platform, which may be weeks later.
+
+Neither URI can be pointed somewhere else. Studio builds the second from its own base URL in
+code, with no setting an operator can change, so it must be registered exactly as shown.
+
+**If you add these with the Azure CLI, pass the complete set.** `az ad app update
+--web-redirect-uris` replaces the whole list rather than adding to it, so passing only the new
+URI silently removes the one already there and breaks Fabric sign-in:
 
 ```
-https://<STUDIO_DOMAIN>/api/auth/fabric/callback
+az ad app update --id <app-id> \
+  --web-redirect-uris \
+    "https://<STUDIO_DOMAIN>/api/auth/fabric/callback" \
+    "https://<STUDIO_DOMAIN>/api/v1/data-platforms/validation/callback"
 ```
 
-This is a second, different redirect URI from the Studio SSO one further down this page, on a
-different app registration. Register both if both sections apply to you.
-
-Nothing fails when you skip this. The first person who tries to connect Fabric inside Studio sees
-`AADSTS500113: No reply address is registered for the application`, long after you have finished
-and moved on.
+These are separate from the Studio SSO redirect URI further down this page, which sits on a
+different app registration. Register both sets if both sections apply to you.
 
 ### Delegated API permissions on the interactive app
 
@@ -187,6 +213,22 @@ The Azure Key Vault row is conditional. Studio asks for it only when a domain's 
 Azure Key Vault; if every domain keeps its secrets in a local file instead, the check is skipped
 and the scope is never needed. Grant it if you do not yet know which store your domains will use
 — an unused delegated scope costs nothing, and a missing one blocks the domain.
+
+**An Azure Key Vault secret store needs its own two redirect URIs.** Studio asks for a tenant ID
+and client credentials on each Azure Key Vault secret store, so the app registration behind a
+secret store is whichever one your operator enters there. It is a separate registration from the
+Fabric one unless your operator deliberately reuses the same app. Whichever app it is needs both
+of these as **Web** redirect URIs:
+
+| Redirect URI | Which flow uses it | Since |
+| --- | --- | --- |
+| `https://<STUDIO_DOMAIN>/api/auth/secret-store-links/callback` | A person linking their own Key Vault access inside Studio | Every release this documentation has covered |
+| `https://<STUDIO_DOMAIN>/api/v1/secret-stores/validation/callback` | An operator saving the secret store | **v0.1.32** |
+
+This pair follows the same rule as the Fabric pair above: two flows, two paths, both built by
+Studio, neither able to stand in for the other. If your operator reuses one app registration for
+both the Fabric data platform and the Key Vault secret store, that single app needs all four
+URIs — and the `az ad app update` warning above applies with all four in the command.
 
 Each missing scope fails at a different moment, and the error names the scope. Without the Azure
 SQL Database scope, activating an intent fails with `AADSTS65001 consent_required` for
@@ -292,7 +334,7 @@ Create a federated credential on the M2M app registration with exactly these par
 | Name | `vibedata-{domain-slug}-{repo}`, with `{domain-slug}` replaced by the domain's slug in Studio and `{repo}` by the GitHub repository name. Shorten `{repo}` from the end if the whole name would exceed 120 characters. |
 | Issuer | `https://token.actions.githubusercontent.com` |
 | Audience | `api://AzureADTokenExchange` |
-| Subject | `repo:{org}/{repo}:ref:refs/heads/main`, with `{org}/{repo}` replaced by the domain's actual GitHub repository |
+| Subject | `repo:{org}/{repo}:ref:refs/heads/{default-branch}`, with `{org}/{repo}` replaced by the domain's actual GitHub repository and `{default-branch}` by that repository's default branch |
 
 **The name is not a label — Studio finds the credential by it.** Studio asks Microsoft Graph for
 this exact name. If the name differs, Graph returns nothing and Studio reports the credential as
@@ -302,10 +344,25 @@ the domain's slug; it is shown with the domain in Studio.
 Keep the full repository name in the **Subject** even when you shortened it in the **Name**. Token
 matching uses the subject, so it must stay exact.
 
-**Use the literal `main` in the subject, even when the domain repository's default branch is
-not `main`.** Studio's own check for this credential accepts only `refs/heads/main` — it
-does not read the repository's configured default branch. Creating the credential against
-any other branch name will fail Studio's verification.
+**Use the repository's real default branch in the subject.** Studio builds the subject it
+verifies against from the default branch it recorded for that repository, so `master`, `develop`
+or any other name belongs in the subject exactly as GitHub reports it. Studio falls back to
+`main` only when it holds no recorded default branch for the repository.
+
+> **Applies to: releases before v0.1.33.** On v0.1.32 and every earlier release the opposite was
+> true — Studio's check accepted only `refs/heads/main` regardless of the repository's actual
+> default branch, so a credential created against `master` was created correctly and then failed
+> verification, with no way to clear the warning. If you are following this page against an
+> older release, use the literal `main`. On v0.1.33 and later, use the real branch.
+
+The credential is only half the trust: GitHub Actions must present a token whose subject matches
+it. Both sides follow the repository's default branch, so a repository that renames its default
+branch after the credential is created needs the credential replaced.
+
+**Replacing means deleting first.** Studio reports a credential whose subject no longer matches
+as **invalid**, not missing, and the credential name is built from the domain slug and the
+repository — not from the branch. Creating a corrected credential without deleting the old one
+therefore fails on a duplicate name. Delete the named credential, then create its replacement.
 
 **Permissions this needs — on Kubernetes on Azure.** Add Microsoft Graph
 **`Application.ReadWrite.All`** as a **delegated** permission on the app registration Studio

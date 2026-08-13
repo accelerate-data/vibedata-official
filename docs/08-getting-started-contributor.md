@@ -1,7 +1,11 @@
 ---
-applies-to: vibedata v0.1.26
-verified-against: studio@653beeced
-verified-on: 2026-08-07
+applies-to: vibedata v0.1.33
+verified-against: studio@a121fc466
+verified-on: 2026-08-13
+submodules:
+  ext/vd-data-engineering: 7e0163a92
+  ext/domain-cicd: 70baf2c45
+plugin-version: vibedata-data-engineering 0.39.1
 sources:
   - ext/vd-data-engineering/agents/build.md
   - ext/vd-data-engineering/agents/detect.md
@@ -84,6 +88,32 @@ You choose the identity in your first turn, and it is fixed for the intent's ent
 even across a Studio upgrade. Pick `build` for the wrong reason and you cannot switch this
 intent to `fix` later; you open a new intent instead. The **LLM profile** behind the agent is
 different: you can change which model answers your intent at any time, on any identity.
+
+## Three things you can do inside an intent
+
+These are the parts of the interface most worth knowing early. All three are per-intent and
+leave your repository untouched unless the agent commits something.
+
+**Fork, when you want to try a second approach.** A fork creates a parallel, independent intent
+from an existing conversation, without interrupting the work already in it. Use it when you want
+to explore an alternative without losing the thread you have — the source intent keeps running
+as it was. A fork is a new intent, so it fixes its own agent identity and repeats resource
+selection; it does not inherit a decision you are trying to change.
+
+**Attach a file to a message.** You can supply a text, Markdown, JSON, JSONL, NDJSON, CSV, image
+or Excel file with a message. It is staged privately to that intent, mounted into the agent's
+session, and referenced from the message you send it with. Treat an attachment as input to a
+conversation, not as stored data: the bytes stay with the conversation, but there is no record
+for the file of its own, no recovery workflow, and no guaranteed way to download it later. If it
+matters beyond the conversation, it belongs in the repository.
+
+**Ask for a profile or a chart of a file you are working with.** The agent can produce a data
+profile of one session-local tabular file, and can render read-only charts and tables inline in
+the conversation. Two limits are worth knowing. They describe **only the file supplied** — a
+profile is not a statement about the completeness of an upstream query or the platform behind
+it. And a chart is a snapshot, not a live view: it is retained and replayed exactly as it was,
+including when you reopen the intent later or switch between light and dark, and it is never
+recalculated from the source.
 
 ## The loop
 

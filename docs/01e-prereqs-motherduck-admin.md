@@ -1,7 +1,7 @@
 ---
-applies-to: vibedata v0.1.26
-verified-against: studio@653beeced
-verified-on: 2026-08-08
+applies-to: vibedata v0.1.33
+verified-against: studio@a121fc466
+verified-on: 2026-08-13
 sources:
   - docs/functional/data-platform/motherduck-backend.md
   - docs/functional/data-platform/README.md
@@ -25,15 +25,14 @@ account.
 This whole page applies only if your data platform is **MotherDuck**. Skip it entirely if
 you chose **DuckDB** or **Microsoft Fabric**. Everything on this page applies whether your
 deployment style is **Local Docker** or **Kubernetes on Azure** — but two of the asks below
-work differently depending on which one you chose: the Share (step 4) and seats (step 5).
-Read both sections carefully. Seats is the most consequential part of this page.
+work differently depending on which one you chose: database ownership (step 4) and seats
+(step 5). Read both sections carefully. Seats is the most consequential part of this page.
 
 ## The five things this page asks for
 
 The one hard dependency: the organisation account (step 1) must exist before the token
 (step 2) can be issued, since a token is issued against an account. Steps 3 and 4 need step 1's
-account to hold the database and Share. Otherwise, the order below is a suggestion, not a
-requirement.
+account to hold the database. Otherwise, the order below is a suggestion, not a requirement.
 
 **A note on names before you start.** Studio calls the token it stores a **Service PAT**. That
 is Studio's own label, and you will not find it in the MotherDuck console. In MotherDuck's own
@@ -68,57 +67,71 @@ Create a new MotherDuck database for this domain, or nominate an existing one, a
 its name. Your operator enters this later, when the domain is created and bound to your
 account — not at the point the account and token above are registered.
 
-**Record which identity owns this database.** It decides whether step 4 is optional or
-required, and it is easy to get wrong: a database created under your own personal MotherDuck
-identity is not owned by the service account from step 2. Creating it under the service
-account is the simpler path, because it makes the Share optional.
+**Record which identity owns this database, and choose the owner deliberately.** From `v0.1.33`
+ownership is the only thing that grants access to a domain's database, so this decision is the
+whole of step 4. It is easy to get wrong: a database created under your own personal MotherDuck
+identity is **not** owned by the service account from step 2.
 
-### 4. Create a Share and grant READ
+### 4. Make the service account own the database
 
-**Studio never creates a MotherDuck Share and never grants READ on one.** If more than one
-person will work against the database — anyone other than the database's own owner — create
-a Share on the database and grant READ to the identities that need it.
+**This step changed at `v0.1.33`, and the change removes an option rather than adding one.**
+Earlier releases let a Share stand in for ownership. That route is gone: Studio's domain form no
+longer sends a Share name at all, so every MotherDuck domain created on `v0.1.33` is bound with
+**no Share**. The consequence is worth stating plainly, because nothing in the product will tell
+you:
 
-**Name the Share exactly after the database it carries.** Studio's operator has no field to
-type a Share name into. On `v0.1.26` the domain form binds a database and a schema — both
-required — and it has **no Share field at all**. Studio looks for a Share arriving under the
-same name as the bound database. A Share called anything else is
-invisible to Studio, however correctly you granted READ on it. (Builds after `v0.1.26` add a
-Share picker to the domain form and lift this naming constraint. Match the database name
-anyway — it is correct on both.)
+> **A MotherDuck domain now works for exactly one identity — the owner of the bound database —
+> for the whole life of that domain.**
 
-**Skipping this step is safe in one case only: the service account from step 2 owns the
-database itself.** Under Kubernetes on Azure, Studio runs a check on every MotherDuck domain
-asking whether the **service account's token** — not any human's — can reach the bound
-database. It is satisfied by either of:
+There is no Share picker to add one later, and the binding is frozen at creation, so this is not
+recoverable by editing the domain. It is recoverable only by recreating it against a database the
+right identity owns.
 
-- The service account **owns** that database, or
-- The service account holds a **Share of the same name** as that database, with READ.
+**So the ask is simpler than it used to be: the identity that will drive the domain must own the
+database.** In practice that means one of two things, decided with your operator before the
+domain is created:
 
-So if you created the database under your personal identity and skipped the Share, the check
-fails and the domain lands in `Pending` — even though only one person will ever use it. Either
-create the Share and grant the service account READ, or make the service account the database
-owner in step 3.
+| Who will drive work in this domain | What must own the database |
+| --- | --- |
+| Studio's own service account, for scheduled and CI work | The **service account** from step 2 |
+| One named person, working interactively | **That person's** MotherDuck identity |
+
+Under Kubernetes on Azure, Studio runs a check on every MotherDuck domain asking whether the
+**service account's token** — not any human's — can reach the bound database. With no Share in
+play, only ownership satisfies it. A database created under your personal identity and bound to a
+domain leaves that domain in `Pending`, even when only one person will ever use it.
+
+> **Applies to: releases before v0.1.33.** On `v0.1.26` through `v0.1.32` a Share was the
+> alternative to ownership, and the check was satisfied by either the service account owning the
+> database **or** holding a **Share of the same name as the database** with READ. The name had to
+> match exactly, because the form had no Share field and Studio looked one up by the database's
+> name. If you are following this page against one of those releases, creating that Share is a
+> real option; on `v0.1.33` it is not, because no domain will be bound to it.
+
+**Existing Shares are not harmful, just unused.** If your organisation already has Shares for
+other purposes, leave them. Studio will not look at them for a domain created on `v0.1.33`.
 
 Under Local Docker one of the two checks is skipped, but **not** the one that matters here.
 The service-PAT read probe that produces `Pending` does not run without delegated
 authentication. Binding validation still runs on both deployment styles, and it still resolves
-the bound database — through a Share if one exists, otherwise by the database's own name. So a
-database the credential cannot reach still fails on Local Docker; it fails at binding
-validation with `Failed`, rather than sitting in `Pending`.
+the bound database by name. So a database the credential cannot reach still fails on Local
+Docker; it fails at binding validation with `Failed`, rather than sitting in `Pending`.
 
-**Grant READ to every person's identity as well, under Kubernetes on Azure.** The check above
-is the Service PAT's, and satisfying it grants nobody else anything. Each contributor connects
-with their own MotherDuck identity (step 5), and that identity needs its own READ on the
-database or Share to work in the domain. These are distinct identities, the same way Microsoft
-Fabric's operating identity and service principal are distinct in
+**Do not plan for a second contributor on a MotherDuck domain.** Granting another person READ on
+the database does not make them able to work in the domain, because driving it requires write
+access to a database only its owner holds. Studio no longer offers the actions that would imply
+otherwise: sharing an intent and reassigning it are **absent** from the interface on a MotherDuck
+domain, not merely disabled, and the API refuses both with `422
+platform_single_writable_identity`. This is a real difference from Microsoft Fabric, where an
+operating identity and a service principal are distinct and each can be granted separately — see
 [01b-prereqs-fabric-admin](01b-prereqs-fabric-admin.md#5-confirm-the-service-principals-read-access-to-the-domain-workspace).
-Granting one does not grant the other. Under Local Docker there is only the Service PAT to
-grant, since one operator drives every operation through it.
+
+If a second person must take over the work, the route is to **fork** the intent — which
+provisions a fresh database under the new person's identity — or to recreate the domain. There
+is no grant you can make that changes this.
 
 **Get this right before the domain is created.** The database a domain binds is frozen at
-creation, so a Share that has to be renamed to match it means recreating the domain, not
-editing it.
+creation, so binding the wrong owner's database means recreating the domain, not editing it.
 
 ### 5. Provision seats — read this section before your team commits to a plan
 
@@ -148,15 +161,25 @@ for every operation. Seats are not a constraint under this deployment style.
 
 The MotherDuck tiers, and what they cap:
 
-| Tier | Users | Service accounts | Cost |
+| Tier | Active users | Service accounts | Cost |
 | --- | --- | --- | --- |
 | Lite | 3 | 2 | $0/mo |
 | Business | 10 | unlimited | $250/mo plus usage |
 | Enterprise | unlimited | unlimited | custom |
 
-These figures are MotherDuck's own published pricing, current as of this page's verification
-date above — confirm current pricing and terms with MotherDuck directly, since a vendor can
-change either at any time.
+**"Active users" is a monthly measure, not a headcount.** MotherDuck counts a user as active
+when they sign in during a calendar month, and bills on that count. So the cap constrains how
+many contributors work in a given month, not how many accounts exist. A team of twelve where
+only eight sign in during a month is within the Business tier that month. Plan against your
+realistic monthly working set rather than your roster — but do not rely on it, because a busy
+month puts everyone over at once.
+
+**Service accounts are metered and billed separately from active users.** The Service PAT's
+service account does not consume one of your ten.
+
+These figures are MotherDuck's own published pricing, confirmed against their pricing page,
+pricing documentation and Fees Addendum on this page's verification date above. Confirm current
+pricing and terms with MotherDuck directly, since a vendor can change either at any time.
 
 Under Kubernetes on Azure, a ten-person contributor team sits exactly on the Business tier's
 cap, with no headroom. The Business tier's ten seats are what the plan includes, not a hard
@@ -215,11 +238,11 @@ on a screen, so this table gives the field label your operator will be looking a
 | Read/write token | **Service PAT** | Step 2 |
 | Database name | **Database**, on the domain form | Step 3 |
 
-If you created a Share in step 4, there is nothing to send back for it: on `v0.1.26` the
-domain form has no Share field — it collects a database and a schema, and nothing else — and
-Studio finds the Share by the bound database's own name. Tell
-your operator it exists so they know the Pending check in
-[06-first-domain](06-first-domain.md) should pass.
+**Send the database's owner along with its name.** The domain form collects a database and a
+schema and nothing else, so the owner is not something your operator can enter or check — but it
+decides whether the domain activates. Tell them which identity owns it, so the `Pending` check in
+[06-first-domain](06-first-domain.md) is expected to pass rather than investigated when it does
+not.
 
 **Check the account name carefully before you send it.** Studio stores it write-once, and its
 connection test does not verify it. The test only confirms that MotherDuck accepts the token;
@@ -237,5 +260,4 @@ secret named `MOTHERDUCK_TOKEN`.
 The account name and the token are entered by the operator during organisation setup — see
 [05-configure-org](05-configure-org.md). The database name is entered only in
 [06-first-domain](06-first-domain.md), when the domain is created and bound to your account.
-The Share, if you created one, is never entered anywhere — Studio resolves it from the
-database name.
+Nothing about Shares is entered anywhere, because `v0.1.33` binds no Share to a domain.

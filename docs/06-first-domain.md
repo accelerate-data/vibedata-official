@@ -1,7 +1,7 @@
 ---
-applies-to: vibedata v0.1.26
-verified-against: studio@653beeced
-verified-on: 2026-08-08
+applies-to: vibedata v0.1.33
+verified-against: studio@a121fc466
+verified-on: 2026-08-13
 sources:
   - src/shared/schemas.ts
   - src/server/modules/domains/services/create-domain.service.ts
@@ -88,8 +88,10 @@ Confirm before you start:
   repository's default branch, with the message `chore: initialize repo via Vibe Data
   Studio`. Without write access this is a hard failure and the domain lands `Failed`. If the
   repository already has at least one commit, Studio writes nothing and this does not apply.
-- **The GitHub App has the permissions the flow uses.** Studio publishes no permission list,
-  so check the installation against this table before you create the first domain.
+- **The GitHub App has the permissions the flow uses.** Step 6 of
+  [01c-prereqs-github-org-owner](01c-prereqs-github-org-owner.md) is where they are granted, and
+  it lists the full set. The table below is the subset this page's flow exercises, so you can
+  tell which step fails when one is missing.
 
 | Permission | Level | Used for | When |
 | --- | --- | --- | --- |
@@ -102,6 +104,12 @@ Confirm before you start:
 `Administration: read` is the one you can safely leave out. Without it, GitHub Actions setup
 still completes; it just reports a warning that it cannot verify branch protection. Without
 any of the other four, the matching step fails.
+
+**If a permission was added to the App recently, confirm the installation actually has it.**
+GitHub raises a permission change as a request that an organisation owner must approve on the
+installation; until then the App keeps its old permissions with no error and no prompt. An App
+whose settings page lists `Secrets` but whose installation has not been approved fails the
+secret-write step exactly as an App without `Secrets` would.
 
 > **Applies to: Local Docker.** Skip if you chose Kubernetes on Azure. The table above
 > describes a GitHub App, and you have none. Studio uses your own signed-in `gh` session
@@ -164,9 +172,16 @@ creates the first commit in it — see "GitHub access the repository needs" abov
 > to pick an installation from. The dropdowns instead list the organisations and repositories
 > your own signed-in `gh` session can see.
 
-If Studio asks you to connect GitHub before it shows any organisations, do that first. This
-needs nothing set up in advance — it's a one-time, per-operator, in-app step, separate from
-the org-level GitHub App from `05`, and Studio walks you through it right when it asks.
+If Studio asks you to connect GitHub before it shows any organisations, do that first. It is a
+per-person, in-app step, and Studio walks you through it right when it asks.
+
+What that step needs behind it depends on your deployment style. Under `Local Docker` it needs
+nothing set up in advance — it uses your own `gh` session. Under `Kubernetes on Azure` it is an
+authorization of the org-level GitHub App from `05`, so it can fail for a reason that is nothing
+to do with you or with Studio's configuration: a private GitHub App can only be authorized by
+members of the account that owns it. If the connect does not come back with a linked GitHub
+account, see [90-troubleshooting](90-troubleshooting.md) — the fix is a visibility setting on the
+App, and only its owner can make it.
 
 ## Secret store
 
@@ -231,18 +246,27 @@ arbitrary location on the host. Studio shows you where the file will land, as
 > **Applies to: MotherDuck.** Skip if you chose DuckDB or Microsoft Fabric.
 
 Select the registered MotherDuck data platform from `05`, then pick or create a **Database**
-and a **Schema**. Both are required. That is the whole binding — **there is no Share field on
-this form.** Builds after `v0.1.26` add an optional Share picker here; on `v0.1.26` a domain
-reaches its database by name alone, and nothing on this screen lets you name a Share.
+and a **Schema**. Both are required, and that is the whole binding — **there is no Share
+field on this form**, and no way to add one later.
 
-**That does not mean Shares are irrelevant — it means you cannot choose one here.** Under
-Kubernetes on Azure, Studio still runs a check asking whether the registered Service PAT can
-reach the bound database, and a Share is one of the two ways to satisfy it. Because you cannot
-pick the Share, it has to be arranged before you get here: either the Service PAT's own
-identity owns the database, or a Share **named exactly like the database** has been granted to
-it. Read the Pending check under "Create the domain" below before you create the domain, and
-see
-[01e-prereqs-motherduck-admin](01e-prereqs-motherduck-admin.md#4-create-a-share-and-grant-read).
+**So ownership of the database decides everything here.** Under Kubernetes on Azure, Studio runs
+a check asking whether the registered Service PAT can reach the bound database. With no Share
+bound, only ownership satisfies it: bind a database the Service PAT's own identity owns, or the
+domain lands in `Pending`. Arrange this before you reach this screen — see
+[01e-prereqs-motherduck-admin](01e-prereqs-motherduck-admin.md#4-make-the-service-account-own-the-database),
+and read the Pending check under "Create the domain" below.
+
+**A MotherDuck domain is single-contributor for its whole life.** Only the bound database's
+owner can drive work in it. Studio does not offer intent sharing or reassignment on a MotherDuck
+domain — the actions are absent from the interface, not disabled — and the binding is frozen at
+creation, so this is a decision you are making permanently on this screen. If more than one
+person needs to work on this data, that is a reason to reconsider the platform for this domain,
+not something to configure later.
+
+> **Applies to: releases before v0.1.33.** `v0.1.28` through `v0.1.32` offered an optional Share
+> picker on this form, and a Share named exactly like the database was the second way to satisfy
+> the Service PAT check. `v0.1.33` removed the picker; a domain created on it is always bound
+> without a Share.
 
 ### Microsoft Fabric
 
@@ -251,11 +275,14 @@ see
 Select the registered Fabric data platform from `05`, then pick or create a **Fabric
 Workspace** and a **Lakehouse Name**, then a **Schema Name**. All three are required.
 
-**Change the pre-filled Schema Name. It is wrong for Fabric.** Studio fills this field with
-`main`, which is a DuckDB default applied to a Fabric form. A schema-enabled Fabric lakehouse
-gets `dbo` by default. Studio accepts any non-empty value here, so **Create Domain** stays
-available with the wrong value in the box, and the failure only appears afterwards: the
-binding check fails and the domain lands `Failed`.
+**Schema Name arrives empty, and you must fill it.** Studio accepts any non-empty value here,
+so **Create Domain** stays available with a wrong value in the box and the failure only appears
+afterwards: the binding check fails and the domain lands `Failed`.
+
+> **Applies to: releases before v0.1.33.** Earlier releases pre-filled this field with `main` —
+> a DuckDB default applied to a Fabric form, and wrong for a schema-enabled Fabric lakehouse,
+> which gets `dbo`. If you are on one of those releases, change the value rather than accepting
+> it.
 
 Use the `FABRIC_SCHEMA` value your Fabric administrator returned in
 [01b-prereqs-fabric-admin](01b-prereqs-fabric-admin.md). If you do not have it, `dbo` is the
@@ -329,36 +356,43 @@ What can fail, per platform:
   > here leaves the domain **Pending**, not Failed. Under `Local Docker` this check is a no-op
   > that always records success, so it cannot produce a `Pending` MotherDuck domain.
   >
-  > **The check is always resolved against the bound database's name**, because on `v0.1.26`
-  > that is the only name the binding carries. The Service PAT must either **own** the bound
-  > database, or hold a Share **of the same name**. Nothing you do on the create form changes
-  > what this check asks.
+  > **The check is always resolved against the bound database's name**, because that is the
+  > only name the binding carries — `v0.1.33` binds no Share. The Service PAT must **own** the
+  > bound database. Nothing you do on the create form changes what this check asks.
   >
   > This is the case that catches people out: if you created the database under your own
   > personal MotherDuck identity and the Service PAT belongs to a service account, the Service
   > PAT owns nothing and sees nothing, and the domain lands `Pending`. The diagnostic reads
   > *"MotherDuck service read validation failed. Confirm the service PAT can access the bound
-  > share, then retry."* — even though you were never offered a Share to bind. Read "the bound
-  > share" as "the bound database". Fix it by creating a
-  > Share named after the database and granting the Service PAT READ, or by making the Service
-  > PAT's identity the database owner. See
-  > [01e-prereqs-motherduck-admin](01e-prereqs-motherduck-admin.md#4-create-a-share-and-grant-read).
+  > share, then retry."*
+  >
+  > **That message names a remedy that does not exist on this release.** There is no Share to
+  > confirm, no field that would bind one, and the binding is frozen — so there is nothing to
+  > change in domain settings that satisfies it. Read "the bound share" as "the bound database".
+  > The only ways forward are to have the database's owner drive the work, or to recreate the
+  > domain against a database the Service PAT owns. See
+  > [01e-prereqs-motherduck-admin](01e-prereqs-motherduck-admin.md#4-make-the-service-account-own-the-database).
 - **Microsoft Fabric.** Studio checks that the workspace and lakehouse you picked are still
   accessible and that the schema exists — under your own operating identity. A failure here
   (workspace or lakehouse deleted or inaccessible, schema missing) is **Failed**.
   > **Applies to: Microsoft Fabric on Kubernetes on Azure.** Skip if you chose Local Docker.
   > A second, separate step runs after the first, `fabric_workspace_grant`: Studio checks
-  > whether the domain's M2M service principal already holds at least Viewer on the bound
-  > workspace and, on `v0.1.26`, **assigns Viewer itself if it does not**. It makes that call
-  > under **your own** Fabric credential, not the service principal's, so what fails here is
-  > your own permission to assign a role — you need Member or Admin on that workspace. The
-  > diagnostic says so: *"the calling account lacks permission. This check runs under your
-  > credentials; a Domain Owner or Vibedata Owner can retry using their own access."* A failure
-  > leaves the domain **Pending**, not Failed. Under `Local Docker` this step is a no-op that
-  > always records success. Unreleased development builds change this step so it no longer
-  > assigns anything and only verifies the service principal's read baseline, which would make a
-  > Viewer grant a hard prerequisite. **No published release does that yet** — `v0.1.26` through
-  > `v0.1.29` all still assign the role here.
+  > whether the domain's M2M service principal can read the bound workspace. It **verifies and
+  > never grants**: the service principal must already hold at least Viewer, arranged in
+  > [01b-prereqs-fabric-admin](01b-prereqs-fabric-admin.md#4-grant-the-service-principal-a-deploy-capable-workspace-role).
+  > The check runs under the **service principal's own** credential rather than yours, so your
+  > workspace role has no bearing on whether it passes. The failure names both halves:
+  > *"Service Principal `<client-id>` does not have at least Viewer access to Fabric workspace
+  > `<workspace-id>`."* Only a denial, or a workspace invisible to that identity, fails the
+  > step — a network error or a 401 propagates untouched rather than being reported as missing
+  > access. A failure leaves the domain **Pending**, not Failed. Under `Local Docker` this step
+  > is a no-op that always records success.
+  >
+  > > **Applies to: releases before v0.1.32.** Earlier releases **assigned** Viewer themselves
+  > > when it was missing, using **your own** Fabric credential — so the failure was your
+  > > permission to assign a role, needing Member or Admin on the workspace, and the diagnostic
+  > > read *"the calling account lacks permission. This check runs under your credentials; a
+  > > Domain Owner or Vibedata Owner can retry using their own access."*
 
 ## Set up GitHub Actions
 

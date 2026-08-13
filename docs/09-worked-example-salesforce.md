@@ -1,7 +1,11 @@
 ---
-applies-to: vibedata v0.1.26
-verified-against: studio@653beeced
-verified-on: 2026-08-07
+applies-to: vibedata v0.1.33
+verified-against: studio@a121fc466
+verified-on: 2026-08-13
+submodules:
+  ext/vd-data-engineering: 7e0163a92
+  ext/domain-cicd: 70baf2c45
+plugin-version: vibedata-data-engineering 0.39.1
 sources:
   - github.com/dlt-hub/verified-sources@master — sources/salesforce/__init__.py
   - github.com/dlt-hub/verified-sources@master — sources/salesforce/helpers/client.py
@@ -377,11 +381,15 @@ and they differ by platform. All this step does is name where your rows arrive.
 
 > **Applies to: MotherDuck.** Skip if you chose DuckDB or Microsoft Fabric. Your rows land in
 > the **Database** and **Schema** set at domain creation, inside your MotherDuck account. The
-> binding is those two fields and nothing else. A database another account shared with you
-> appears in the same **Database** list as one you own, so a share is not a separate setting
-> and there is nothing extra to pick. Both fields are fixed once the domain exists: the
-> domain's settings panel shows them read-only and offers no edit path for either. That
-> decision is already made; do not reopen it here.
+> binding is those two fields and nothing else — there is no Share to pick, on this release or
+> any earlier one this guide covers. Both fields are fixed once the domain exists: the domain's
+> settings panel shows them read-only and offers no edit path for either. That decision is
+> already made; do not reopen it here.
+>
+> One consequence is worth knowing before you start work rather than after: only the bound
+> database's **owner** can drive a MotherDuck domain. If the database belongs to somebody else,
+> you will not be able to run this example in it, and no grant fixes that — sharing an intent
+> and reassigning it are not offered on a MotherDuck domain.
 
 > **Applies to: Microsoft Fabric.** Skip if you chose DuckDB or MotherDuck. Your rows land in
 > the **Fabric Workspace**, **Lakehouse Name**, and **Schema Name** set at domain creation.

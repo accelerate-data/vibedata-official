@@ -1,7 +1,7 @@
 ---
-applies-to: vibedata v0.1.26
-verified-against: studio@653beeced
-verified-on: 2026-08-08
+applies-to: vibedata v0.1.33
+verified-against: studio@a121fc466
+verified-on: 2026-08-13
 sources:
   - src/shared/schemas.ts
   - src/server/modules/domains/services/domain-provisioning-step.ts
@@ -138,6 +138,13 @@ you see on an `Active` domain is a soft one. There are two soft steps, not one:
   the branch protection settings with the credentials it has. The warning message names which
   of those applies.
 
+  The third case is the one worth recognising, because its message misdirects. *"Cannot verify
+  default-branch protection (insufficient permission). This check runs under your credentials"*
+  points at your own access, but the credential in use is the GitHub App's, and the fix is
+  `Administration: read` on the App — step 6 of
+  [01c-prereqs-github-org-owner](01c-prereqs-github-org-owner.md). Nothing you retry as a
+  different person will clear it.
+
 The second one surprises people. A MotherDuck operator, who skips every Fabric block on this
 page, can still land on an `Active` domain with a `Failed` step and a warning about branch
 rules. That is this check, and it does not mean your domain is broken — see
@@ -250,35 +257,33 @@ install is blocked — you will probably see this:
 studio-obot   ...   Degraded
 ```
 
-**This is not something you caused, but it is not finished either.** The `obot` component
-reports `Degraded` because of a defect in `v0.1.26`: the installer never creates the
-`obot-tunnel-peer` object that `obot` cannot boot without, even though the vault secret behind it
-is present and correct.
-
-The checks on this page still pass — none of them depend on `obot`, and the installer waits on
-`studio-app` only, which is why your install reported success. **But your team cannot start a
-conversation on an activated intent until this is fixed**, and that is what the domain you just
-validated exists to do.
-
-Confirm which case you are in:
+**On `v0.1.33` this should not happen**, so treat it as a real fault rather than a known
+limitation. Work through it in this order:
 
 ```
 kubectl -n studio get externalsecret obot-tunnel-peer
+kubectl -n studio get secret obot-tunnel-peer
 ```
 
-`NotFound` confirms the defect.
+| What you see | What it means |
+| --- | --- |
+| ExternalSecret `NotFound` | The install did not render it. Unexpected on `v0.1.33` — re-run the install and check for errors |
+| ExternalSecret present, `SecretSyncedError` | The vault is missing `obot-tunnel-peer-token`. It is one of the nine core secrets in [01d](01d-prereqs-azure-infra.md); a vault built against an older copy of that page will not have it. Add it, then force a resync |
+| Both present, obot still Degraded | Something else. Read the pod log before changing anything |
 
-**Upgrading will not fix this yet.** No released CLI creates the `obot-tunnel-peer` object —
-not `v0.1.26`, and not `v0.1.27`, `v0.1.28` or `v0.1.29`. The installer that renders it exists
-only in unreleased development builds, so re-running the install from any published version
-changes nothing here. Check what is currently published before you plan an upgrade around this.
+The checks on this page do not depend on `obot`, and the installer waits on `studio-app` only —
+so an install can report success with `obot` Degraded. **Your team cannot start a conversation on
+an activated intent until it is Healthy**, and that is what the domain you just validated exists
+to do. Do not treat this page passing as sufficient.
 
-**Do not roll back, re-run the install from `v0.1.26`, or change vault secrets** — none of those
-creates the missing object either. Use the manual workaround: see
-[90-troubleshooting](90-troubleshooting.md) for the full entry and the manual workaround. Its cost
-is narrower than it may sound: the missing secret object survives Argo CD sync on its own, and
-only the accompanying Deployment patch requires turning off automated sync for that one
-application until you upgrade.
+> **Applies to: releases before v0.1.31.** On `v0.1.26` through `v0.1.30` this was a defect with
+> no fix available: the installer never created the `obot-tunnel-peer` object, `NotFound` was the
+> only possible result, and the vault secret behind it had no consumer. Rolling back, re-running
+> the install, or changing vault secrets all changed nothing. Upgrading is the fix. If you are
+> stuck on one of those releases, [90-troubleshooting](90-troubleshooting.md) has the manual
+> workaround — its cost is narrower than it sounds, since the secret object survives Argo CD sync
+> on its own and only the accompanying Deployment patch needs automated sync turned off for that
+> one application.
 
 ## What's next
 
