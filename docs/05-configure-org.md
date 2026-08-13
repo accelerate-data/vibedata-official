@@ -1,7 +1,7 @@
 ---
-applies-to: vibedata v0.1.26
-verified-against: studio@653beeced
-verified-on: 2026-08-08
+applies-to: vibedata v0.1.33
+verified-against: studio@a121fc466
+verified-on: 2026-08-13
 sources:
   - docs/functional/configure-llm-profile/README.md
   - docs/functional/instance-settings/README.md
@@ -116,7 +116,7 @@ Open **Org Settings → LLM Profiles** and create a profile with these fields:
 
 | Field | What to enter |
 | --- | --- |
-| Display name | Any name you choose, for your own reference. Up to 80 characters, with no restriction on which characters. The name must be unique across your organisation. Unreleased development builds rename this field to **Profile name** and tighten it to 64 characters from a restricted set; no published release does that yet, `v0.1.26` through `v0.1.29` included. |
+| Profile name | 1–64 characters. Must start with a letter or number, and may then contain only letters, numbers, periods, underscores or hyphens — no spaces. It must not end in `.json`. The name must be unique across your organisation. Studio rejects anything else with a message naming the whole rule. On `v0.1.26` this field was called **Display name**, allowed up to 80 characters and accepted any of them, so a name chosen then may not be re-enterable now. |
 | Provider | Azure Foundry. |
 | API key | Required. Paste the API key for your Azure AI Foundry resource. There is no managed-identity option — a key is the only credential this connection accepts. |
 | Base URL | `https://<resource-name>.openai.azure.com` — see the trap below. |
@@ -132,6 +132,18 @@ percentage, and a "default" checkbox. You do not need to touch the default check
 automatically promotes the very first profile you create to the default, so it is ready to
 use — and it is the default profile that a domain's GitHub Actions setup reads from — the
 moment it exists.
+
+**Everything else on this form is optional, and "empty" is a real setting.** `v0.1.33` added a
+large set of execution controls — sampling, prompt caching, reasoning effort and budget, native
+tool calling, per-token cost — plus tracked model-capability signals and metadata an agent uses
+to pick between profiles. Leave them all empty. An empty field means **use default**: Studio
+omits the setting entirely so the model's own default applies, which is what you want until you
+have a reason to change it. Filling one in to "be explicit" replaces a sensible provider default
+with your guess.
+
+**Two of the new fields are Azure-only, and one of them you may need.** **API version** and
+**API mode** are accepted for Azure Foundry and rejected for every other provider. Both can stay
+empty — see the API version note at the end of this section.
 
 ### Three things that go wrong here
 
@@ -152,12 +164,16 @@ moment it exists.
 If saving this profile fails, or a later request to it returns `404`, see
 [90-troubleshooting](90-troubleshooting.md) before re-checking every field by hand.
 
-The API version this form uses to create and validate a profile is fixed at
-`2024-08-01-preview` and is not exposed as a field here — you cannot change it. It governs
-the checks this page runs against your Azure AI Foundry endpoint. Agent chat reaches the
-same endpoint by a different path that supplies its own API version, so a profile that
-saves here is not by itself proof that chat will work — [07](07-verify.md) is where you
-confirm that.
+**The API version is now yours to set, and the default moved.** Studio's default is
+`2024-10-21`, and leaving the **API version** field empty uses it. On `v0.1.26` the version was
+fixed at `2024-08-01-preview` with no field at all.
+
+Setting it explicitly is worth doing only if your Azure AI Foundry resource requires a specific
+version. The reason to leave it empty is that the same value now flows everywhere — the save-time
+check, every probe, and the running agent session all target one version. On `v0.1.26` they did
+not: the form validated against its fixed version while agent chat supplied its own, so a profile
+that saved successfully was no proof that chat would work. That gap is closed, but
+[07](07-verify.md) is still where you confirm chat end to end.
 
 ## Step 2: Data platform
 
@@ -222,11 +238,38 @@ person tries to connect their own Fabric access, with:
 AADSTS500113: No reply address is registered for the application
 ```
 
-Confirm with your Entra administrator that the M2M app registration has a **Web** redirect URI
-of `https://<STUDIO_DOMAIN>/api/auth/fabric/callback` before you save this connection. That ask
-is on [01a-prereqs-entra-admin](01a-prereqs-entra-admin.md), along with the delegated
+Confirm with your Entra administrator that the app registration you are about to enter carries
+**both** of these as **Web** redirect URIs before you save this connection:
+
+```
+https://<STUDIO_DOMAIN>/api/auth/fabric/callback
+https://<STUDIO_DOMAIN>/api/v1/data-platforms/validation/callback
+```
+
+That ask is on [01a-prereqs-entra-admin](01a-prereqs-entra-admin.md), along with the delegated
 permissions the same application needs. A real deployment hit both, one after the other, at
 this exact point.
+
+**The two fail at different moments, which is why one is easy to miss.** Saving this connection
+runs a validation sign-in against the **second** URI. So a registration carrying only the first
+lets your team sign in perfectly well and then rejects your save with:
+
+```
+AADSTS50011: The redirect URI 'https://<STUDIO_DOMAIN>/api/v1/data-platforms/validation/callback'
+specified in the request does not match the redirect URIs configured for the application
+```
+
+That error names the Azure portal, not Studio, so it reads as an infrastructure problem rather
+than a missing prerequisite on this page.
+
+**If you are upgrading rather than installing fresh, re-check this.** Studio began sending the
+validation URI at `v0.1.32`. A registration built for an earlier release was complete when it
+was made and stopped being complete at that upgrade, with nothing to announce it — the gap
+appears the first time somebody saves a data platform, which may be weeks later.
+
+**Whoever adds it must pass both URIs at once.** `az ad app update --web-redirect-uris` replaces
+the list rather than adding to it, so passing only the new URI removes the existing one and
+breaks Fabric sign-in.
 
 You can register one connection per Microsoft Fabric tenant. `TENANT_ID`, `U2M_CLIENT_ID` /
 `U2M_CLIENT_SECRET`, and `M2M_CLIENT_ID` / `M2M_CLIENT_SECRET` come from your Entra
@@ -256,24 +299,41 @@ after [01c-prereqs-github-org-owner](01c-prereqs-github-org-owner.md):
 | Default installation ID | Optional. Leave it empty unless your GitHub organisation owner also returned `GITHUB_APP_INSTALLATION_ID`. If they did, enter the bare number and nothing else — Studio rejects any value that is not a positive integer, in the browser, before it sends anything. |
 | Status | Leave it at **Active**. **Archived** retires a connection you already configured; it has no role in first-time setup. |
 
-The panel has three buttons: **Save**, **Test**, and **Archive**. **Save** stores the values
-and never opens a GitHub window. **Test** is the one that opens GitHub, in a popup, to prove
-the credentials work end to end. Run Test after Save.
+**There are three values to enter and no Test button.** Enter the Client ID, client secret and
+private key from
+[01c-prereqs-github-org-owner](01c-prereqs-github-org-owner.md), then **Save**. There is no App
+ID field: Studio authenticates as the App with the Client ID and private key, asks GitHub who
+that App is, and stores the App's numeric ID and slug from the answer.
 
-A client secret is effectively required the first time you save this connection. App ID and
-private key are best supplied together: on `v0.1.26` Studio accepts one without the other and
-simply does not derive the App identity, so the panel shows no **Derived App** line and you
-get no error explaining why. Builds after `v0.1.26` reject the pair outright with *"GitHub App
-ID and private key must be provided together"*.
+**Save is the check.** It calls GitHub before it stores anything, so a wrong Client ID or a
+malformed private key fails the save with a message naming which: *"Could not authenticate as
+the GitHub App with the provided Client ID and private key."* No browser window opens, and there
+is nothing to run afterwards to confirm it worked. A save that succeeds has already proved the
+App credentials.
 
-The panel shows **one** callback URL, `/api/v1/connect/github-commits/callback`, and on
-`v0.1.26` that single URL carries both flows — the panel's own Test, and each person's later
-"Connect GitHub" action. Register exactly that one URL on the GitHub App. Step 4 of
+> **Applies to: releases before v0.1.33.** Earlier releases had a separate **Test** button that
+> opened GitHub in a popup, and a **GitHub App ID** field alongside the Client ID. Save stored
+> values without contacting GitHub, so Test was the only proof the credentials worked, and it
+> had to be run after every Save. Both are gone: there is no `/test` endpoint and no App ID
+> field on `v0.1.33`.
+
+The panel shows **one** callback URL, `/api/v1/connect/github-commits/callback`. Register
+exactly that one URL on the GitHub App — step 4 of
 [01c-prereqs-github-org-owner](01c-prereqs-github-org-owner.md) covers it.
 
-If that URL is not registered, **Test** sends you to GitHub and GitHub refuses with
-`redirect_uri_mismatch`. Saving alone does not surface this, because saving never reaches
-GitHub — so always run Test before you treat this step as done.
+**Saving does not check the callback URL, and cannot.** Only one flow uses it: a person linking
+their own GitHub account. So an unregistered or mistyped callback URL passes this step silently
+and fails later, for somebody else, with `redirect_uri_mismatch`. Confirm it is registered from
+the GitHub side rather than expecting Studio to tell you.
+
+**A successful save does not prove your team can use this connection either.** It proves the App
+credentials are valid, nothing about who may authorize the App. That is decided by the App's
+visibility, a setting on GitHub that this panel neither shows nor controls: a private App can be
+authorized only by members of the organisation that owns it, and a private App owned by a
+personal account only by that one person. If some of your users are outside that organisation —
+or the App was registered under a personal account — the App must be set to **Any account**.
+Step 7 of [01c-prereqs-github-org-owner](01c-prereqs-github-org-owner.md) covers it, and the
+symptom is in [90-troubleshooting](90-troubleshooting.md).
 
 ## Step 4: Users
 
@@ -281,11 +341,11 @@ GitHub — so always run Test before you treat this step as done.
 
 If you chose Local Docker, skip this step entirely. Signing in with your own `gh` session
 already made you `vibedata_owner`, the one operator this deployment has, as described in
-[03-deploy-docker](03-deploy-docker.md) — there is nothing further to configure. Studio does
-not stop you opening **Org Settings → Users** and adding a record there on `v0.1.26`, but the
-record buys nobody anything: without delegated authentication there is no second identity
-that can sign in against it. Builds after `v0.1.26` hide the **Add user** button on this
-deployment style and explain why. There is no Entra SSO provider to register here either —
+[03-deploy-docker](03-deploy-docker.md) — there is nothing further to configure. Studio hides
+the **Add user** button on this deployment style and says why: without delegated authentication
+there is no second identity that could sign in against a new record. Existing users and their
+access stay manageable. On `v0.1.26` and `v0.1.27` the button was shown and the record could be
+created — it simply bought nobody anything; the gating arrived at `v0.1.28`. There is no Entra SSO provider to register here either —
 the rest of this step applies only to Kubernetes on Azure.
 
 ### Register the Entra SSO provider

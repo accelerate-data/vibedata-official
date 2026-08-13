@@ -1,7 +1,7 @@
 ---
-applies-to: vibedata v0.1.26
-verified-against: studio@653beeced
-verified-on: 2026-08-08
+applies-to: vibedata v0.1.33
+verified-against: studio@a121fc466
+verified-on: 2026-08-13
 sources:
   - docs/functional/data-platform/fabric-backend.md
   - docs/functional/data-platform/README.md
@@ -18,7 +18,8 @@ sources:
   - src/server/modules/domains/services/domain-verification.service.ts
   - src/server/modules/data-platforms/providers/fabric-ephemeral-client.ts
   - src/server/modules/domains/routers/domains-crud.router.ts
-  - src/server/lib/auth/auth-enabled.ts
+  - src/server/config/auth-enabled.ts
+  - src/server/modules/data-platforms/providers/fabric/helpers/fabric-api-config.ts
 ---
 
 # Request for your Microsoft Fabric administrators: capacity, workspace, and service principal access
@@ -69,6 +70,13 @@ Studio never sets this tenant setting. It is entirely your organisation's action
 Provision a Fabric capacity for this domain, or nominate an existing one. Return its **Fabric-side capacity GUID** — see "Which capacity ID to return" below, because it is not the identifier the Azure portal shows you.
 
 **Size: F2 is enough.** F2 is the smallest F SKU. A full Studio stack — the domain workspace, a schema-enabled Lakehouse, and Studio's own short-lived per-intent workspaces — runs on one. Start there and scale up against your own workload. F64, the size most Fabric guidance centres on, is 32 times the capacity units and 32 times the cost, with no benefit at this stage.
+
+**Per-user licences: Free is enough, and Power BI Pro is not required.** Everything Studio creates in Fabric — Lakehouses, schemas, workspaces — is a non-Power BI Fabric item, and Microsoft's licensing rules let a user with a **Microsoft Fabric (Free)** licence create and share those in any workspace backed by an F SKU. There is no per-seat purchase to make for Studio itself, at F2 or at any other size.
+
+Two things follow from that, and both bite in practice:
+
+- **A Free licence is granted automatically the first time a person signs in to the Fabric portal**, and only if Fabric is enabled in your tenant. Somebody who has never opened Fabric has no licence yet. Studio reports this as: *"Fabric rejected the call because the account has no Fabric licence assigned. Ask a Microsoft 365 administrator to assign one, then retry."*
+- **Below F64, viewing Power BI content still needs Pro or PPU.** This does not affect Studio, which creates no Power BI items. It affects your team if they also expect to open Power BI reports from the same workspace. If that matters to you, it is a reason to consider F64 — the only one at this stage.
 
 **Name: lowercase letters and digits only.** The capacity name must match `^[a-z][a-z0-9]*$` — it must start with a letter, and **hyphens are not allowed**. `axeval-fabric` is rejected; `axevalfabric` is accepted.
 
@@ -146,7 +154,7 @@ On the workspace from step 3, grant the M2M service principal (`M2M_CLIENT_ID`) 
 
 This role is needed regardless of deployment style: it is what lets the service principal push changes to the workspace when your team's domain repository deploys through its GitHub Actions workflow.
 
-**Studio never grants a deploy-capable role, and never checks whether one is present.** Viewer is the only role Studio can assign here (step 5), and Viewer cannot deploy. A missing or insufficient deploy role does not show up as a Studio error at any point — not at registration, not at domain activation. It only surfaces the first time a deploy runs, as a failure from Fabric itself.
+**Studio never grants a deploy-capable role, and never checks whether one is present.** Studio's own check on this workspace looks only for read access (step 5), and read access cannot deploy. A missing or insufficient deploy role does not show up as a Studio error at any point — not at registration, not at domain activation. It only surfaces the first time a deploy runs, as a failure from Fabric itself.
 
 ### 5. Confirm the service principal's read access to the domain workspace
 
@@ -154,25 +162,51 @@ This role is needed regardless of deployment style: it is what lets the service 
 
 On the same workspace, make sure the M2M service principal holds at least **Viewer** access — Viewer, Contributor, Member, or Admin all satisfy this. If you already completed step 4, this is already satisfied, since Contributor and Member both include read access.
 
-**Studio acts on this one — but only if your deployment style is Kubernetes on Azure.** When a domain using this workspace activates under Kubernetes on Azure, Studio reads the workspace's role assignments, and **on `v0.1.26` it assigns Viewer to the M2M service principal itself if the role is missing.** So this ask is a convenience, not a hard prerequisite, on that release: completing step 4 makes it a no-op, and leaving it undone usually resolves on its own.
+**This is a hard prerequisite, and Studio will not fix it for you.** When a domain using this
+workspace activates under Kubernetes on Azure, Studio checks that the M2M service principal can
+already read the workspace. If it cannot, activation fails. Studio grants nothing, so nothing
+here resolves on its own — the grant has to exist before activation.
 
-**The catch is whose credential Studio uses.** It makes that call under the **operator's own** Fabric credential — the person creating the domain in Studio — not the service principal's. Assigning a workspace role requires **Member** or **Admin** on the workspace, so if the operator holds only Viewer, or nothing, the step fails and the domain is left `PENDING`. The diagnostic names the cause: *"the calling account lacks permission. This check runs under your credentials; a Domain Owner or Vibedata Owner can retry using their own access."* It is retryable, not a hard failure.
+**Studio proves the access as the service principal, not as you.** The check is a plain workspace
+read issued with the registered M2M credential, which is the identity that actually has to work
+later. When a person triggers activation, Studio still runs the check under that same M2M
+credential rather than the person's own Fabric access, so the operator's workspace role has no
+bearing on whether this step passes. The failure names both halves of the problem:
 
-**So grant one of two things, and know which you chose.** Either give the M2M service principal a workspace role yourself in step 4 above — which satisfies this step outright — or make sure the operator who will create the domain holds Member or Admin on the workspace, so Studio can make the assignment for them. Doing neither leaves the domain `PENDING` with no way forward from inside Studio.
+```
+Service Principal <M2M_CLIENT_ID> does not have at least Viewer access to
+Fabric workspace <workspace-id>.
+```
 
-Unreleased development builds stop assigning the role: the step becomes a read-only verification of the service principal's access, run under the service principal itself, naming which service principal and workspace are missing it. **No published release does this yet** — `v0.1.26`, `v0.1.27`, `v0.1.28` and `v0.1.29` all still assign the role. When that change does ship, the grant in step 4 becomes a true prerequisite rather than a convenience. Completing step 4 is the right answer either way, so do it.
+**Only a genuine denial fails the step.** Studio treats a 403, and a workspace that is invisible
+to the identity, as proof the access is missing. A network error, a 5xx, or a 401 propagates
+untouched instead of being reported as missing access — an important distinction, because those
+send you to Fabric's **Manage access** panel for a problem that panel cannot fix.
+
+**Studio does not read role assignments to decide this.** Listing a workspace's role assignments
+itself requires Member or Admin, which a Viewer-baseline service principal does not hold. Studio
+therefore proves the access by using it rather than by enumerating it.
+
+> **Applies to: releases before v0.1.32.** Earlier releases behaved almost oppositely, and if you
+> are following this page against one of them, the old rules apply. On `v0.1.26` through
+> `v0.1.31`, Studio *assigned* Viewer to the service principal when it was missing — making this
+> step a convenience rather than a prerequisite — but it made that call under the **operator's
+> own** Fabric credential. An operator holding less than Member on the workspace left the domain
+> `PENDING`, retryable by a colleague with more access. From `v0.1.32` the grant is gone: the
+> step verifies and never writes, so step 4's grant became mandatory and the operator's own
+> workspace role stopped mattering.
 
 Under **Local Docker**, Studio records **this step** as succeeded without reading the workspace at all — no service-principal grant is verified or made. That is specific to this step. A different check, binding validation, still reads the workspace on both deployment styles, under the operator's own Azure identity — see [02-prereqs-operator](02-prereqs-operator.md). The service principal still needs real access, because the GitHub Actions deploy in step 4 cannot run without it. Studio will not tell you when *that* grant is missing; you find out at the first deploy.
 
-**Steps 4 and 5 are not the same grant, and Studio treats them very differently.** Studio acts on step 5's read baseline (on Kubernetes on Azure) but never verifies step 4's deploy role, on either deployment style. Viewer access — whether you granted it or Studio assigned it — satisfies Studio's own check and still leaves the deploy workflow unable to push changes. Grant Contributor or Member in step 4 regardless.
+**Steps 4 and 5 are not the same grant, and Studio treats them very differently.** Studio checks step 5's read baseline (on Kubernetes on Azure) but never verifies step 4's deploy role, on either deployment style. Viewer access satisfies Studio's own check and still leaves the deploy workflow unable to push changes. Granting Contributor or Member in step 4 satisfies both at once, which is the simplest way to be done with this: do that and step 5 needs nothing further.
 
-**Studio grants roles in two other places, and neither is anything for you to configure.** On the workspace you nominate in step 3, the only role Studio ever assigns is the Viewer described above, and only on `v0.1.26`. Separately, on the short-lived per-intent workspaces Studio creates and deletes itself on the capacity from step 2, it grants the M2M service principal Admin and grants individual collaborators Contributor when they are added to an intent. Those are not the workspace you nominate, and you act on nothing to make them happen.
+**Studio still grants roles in one place, and it is nothing for you to configure.** On the workspace you nominate in step 3, Studio assigns no role at all. On the short-lived per-intent workspaces it creates and deletes itself on the capacity from step 2, it grants the M2M service principal Admin and grants individual collaborators Contributor when they are added to an intent. Those are not the workspace you nominate, and you act on nothing to make them happen.
 
 ### 6. Allow outbound network access
 
 **Who:** whoever controls outbound network policy where Studio and its deploy workflows run.
 
-Allow outbound access (443/tcp) to all six hosts below. Allowing only the first three is a common mistake: the deployment authenticates and reads workspaces successfully, then fails later with connection timeouts on the data paths.
+Allow outbound access (443/tcp) to all seven hosts below. Allowing only the first three is a common mistake: the deployment authenticates and reads workspaces successfully, then fails later with connection timeouts on the data paths.
 
 | Host | Purpose |
 | --- | --- |
@@ -182,8 +216,12 @@ Allow outbound access (443/tcp) to all six hosts below. Allowing only the first 
 | `api.powerbi.com` | The Power BI service, which publishes Fabric's delegated permission scopes and the admin API that returns the Fabric-side capacity GUID from step 2. |
 | `*.datawarehouse.fabric.microsoft.com` | The Fabric SQL analytics endpoint. Studio queries Lakehouse data through it. This is on the normal data path, not an optional feature. |
 | `onelake.dfs.fabric.microsoft.com` | OneLake storage. Studio reads and writes Lakehouse files here. |
+| `onelake.table.fabric.microsoft.com` | The OneLake table API. Studio lists a Lakehouse's schemas through it when it checks what a domain's Lakehouse contains. A separate host from the `dfs` one above, and allowing only `dfs` leaves schema reads timing out. |
 
-`login.microsoftonline.com` is shared with the Entra-side requests in [01a-prereqs-entra-admin](01a-prereqs-entra-admin.md); the other five are specific to Fabric.
+`login.microsoftonline.com` is shared with the Entra-side requests in [01a-prereqs-entra-admin](01a-prereqs-entra-admin.md); the other six are specific to Fabric.
+
+Two hosts you may see named in Microsoft's own Fabric guidance are **not** needed here.
+`app.fabric.microsoft.com` is the Fabric web UI — Studio builds links to it for people to click, but never calls it. `analysis.windows.net` appears inside the Power BI permission scopes, as part of the scope's name rather than as an address anything connects to.
 
 ## Values to send back
 

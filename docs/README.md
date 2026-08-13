@@ -1,7 +1,7 @@
 ---
-applies-to: vibedata v0.1.26
-verified-against: studio@653beeced
-verified-on: 2026-08-08
+applies-to: vibedata v0.1.33
+verified-against: studio@a121fc466
+verified-on: 2026-08-13
 sources:
   - docs/functional/container-deployment/README.md
   - docs/design/kubernetes-deployment/cloud.md
@@ -115,7 +115,10 @@ you can plan the handoff without reading all five.
   - **Consumes:** `STUDIO_DOMAIN` from `01d` step 4 — the callback URL is built from it, and
     GitHub rejects any sign-in that arrives at an unregistered URL.
   - **Produces:** the GitHub App's App ID, client ID, client secret, and private key · the App
-    installed on your organisation, and the list of repositories it can reach.
+    installed on the account that owns your domain repositories, and the list of repositories it
+    can reach · a visibility setting that lets every Studio user authorize the App. An App
+    registered under a personal account, or an organisation App with users outside that
+    organisation, must be set to **Any account** or those users cannot connect GitHub at all.
 - [01d-prereqs-azure-infra](01d-prereqs-azure-infra.md) — Azure infrastructure owner. This
   page has two independent parts. Its infrastructure requests (AKS, storage, Key Vault,
   front door, DNS) apply only to Kubernetes on Azure. Its Azure AI Foundry request — the LLM

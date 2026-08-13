@@ -1,7 +1,7 @@
 ---
-applies-to: vibedata v0.1.26
-verified-against: studio@653beeced
-verified-on: 2026-08-08
+applies-to: vibedata v0.1.33
+verified-against: studio@a121fc466
+verified-on: 2026-08-13
 sources:
   - docs/design/kubernetes-deployment/cloud.md
   - docs/design/kubernetes-deployment/README.md
@@ -178,19 +178,39 @@ startup, and a wrongly formatted value stops the whole install.
 | `obot-client-secret` | OAuth client secret for Studio's bundled agent runtime (obot) | Any random string |
 | `obot-db-password` | Password for obot's own database | Any password. See the character warning below |
 | `bootstrap-key` | One-time key used to create the first Studio admin | Any random string |
+| `data-encryption-key-id` | The label Studio stamps on data it encrypts | 1–64 characters from `A-Z a-z 0-9 . _ -`. Choose once and never change it — see the warning below |
+| `data-encryption-retired-keys` | Retired key labels and the key material each was used with | A JSON object. `{}` is correct for a deployment that has never rotated |
+| `obot-tunnel-peer-token` | Shared token for obot's tunnel peer | Any random string |
 
-That is the complete core set for `v0.1.26` — **six secrets**, derived from what the installer
-actually renders at that release tag.
+That is the complete core set for `v0.1.33` — **nine secrets**, read from the released binary's
+own `--list-secrets` output rather than from source.
 
-**Three names you may see elsewhere are not needed on this release.**
-`data-encryption-key-id`, `data-encryption-retired-keys` and `obot-tunnel-peer-token` appear in
-newer builds of the installer and in some internal notes, but `v0.1.26` never reads them.
-Creating them is harmless; omitting them costs nothing. Do not treat their absence as a mistake,
-and do not spend time deciding their values.
+**Three names that were optional on older releases are now required.**
+`data-encryption-key-id`, `data-encryption-retired-keys` and `obot-tunnel-peer-token` are part of
+the core set from `v0.1.33`. On `v0.1.26` the installer never read them, and this page previously
+said they could be skipped. If you built a vault against that advice, add all three before an
+upgrade.
 
-(`obot-tunnel-peer-token` is the interesting one: on `v0.1.26` the installer never creates the
-Kubernetes object that would consume it, which is why obot ends up Degraded on this release. See
-[90-troubleshooting](90-troubleshooting.md). Setting the vault secret does not fix that.)
+`data-encryption-retired-keys` is the one to think about rather than generate. It is a JSON
+object mapping a retired key label to the base64 key that label was used with, and `{}` is a
+valid, correct value for a vault that has never rotated its encryption key. What it must not be
+is `{}` on a deployment whose key label *has* changed — see the warning under
+`data-encryption-key-id` below.
+
+**`data-encryption-key-id` deserves a deliberate choice, not a default.** It is a label on the
+encryption key, not a key. When it is unset, Studio labels everything it encrypts `k1`. Setting
+it to any other value on a deployment that has already encrypted data under `k1` makes that data
+unreadable, and Studio reports it as `UnknownKidError: Unknown kid in ciphertext envelope: k1`.
+The recovery is to add the old label to `data-encryption-retired-keys` pointing at the **same**
+key material — the label changed, the key did not:
+
+```
+data-encryption-retired-keys:  {"k1": "<the same value as data-encryption-key>"}
+```
+
+Pick the label once, before the first install, and do not change it afterwards. A deployment
+built on an older release that had no `data-encryption-key-id` secret has been labelling under
+`k1` all along, so supplying a different value at upgrade time is exactly the failure above.
 
 **Do not use hex for `data-encryption-key`.** This is the single most common way this install
 fails. `openssl rand -hex 32` produces a value that looks correct, passes every check a person
@@ -212,25 +232,40 @@ top of the six above:
 - `--with-observability` adds: `grafana-client-secret` · `grafana-admin-password`
 - `--full-observability` (the same monitoring stack, plus Langfuse) adds those two, plus:
   `langfuse-salt` · `langfuse-nextauth-secret` · `langfuse-encryption-key` ·
-  `langfuse-client-secret` · `langfuse-clickhouse-password` · `langfuse-redis-password` ·
-  `langfuse-minio-password` · `langfuse-init-project-public-key` ·
-  `langfuse-init-project-secret-key`
+  `langfuse-client-secret` · `langfuse-clickhouse-password` · `langfuse-db-password` ·
+  `langfuse-redis-password` · `langfuse-minio-password` ·
+  `langfuse-init-project-public-key` · `langfuse-init-project-secret-key`
 
-**Count the secrets before you hand over.** Ask your operator which monitoring profile they
-plan to install, then check the total:
+`langfuse-db-password` is new in `v0.1.33`. Langfuse now connects to Postgres under its own
+role rather than sharing Studio's, so a vault built for an earlier release is one secret short.
 
-| Profile | Secrets in the vault, on `v0.1.26` |
+**Ask the CLI rather than counting by hand.** From `v0.1.32` the installer prints the exact set
+for a profile and exits without touching anything — no cluster, no vault, no share needed:
+
+```
+vibedata install kubernetes --list-secrets
+vibedata install kubernetes --list-secrets --with-observability
+vibedata install kubernetes --list-secrets --full-observability
+```
+
+The list is derived from what the install actually renders, so it cannot drift from what the
+install demands. Prefer it over the lists above, which are a convenience for people who do not
+have the CLI to hand yet.
+
+| Profile | Secrets in the vault, on `v0.1.33` |
 | --- | --- |
-| Core (no monitoring) | 6 |
-| `--with-observability` | 8 |
-| `--full-observability` | 17 |
+| Core (no monitoring) | 9 |
+| `--with-observability` | 11 |
+| `--full-observability` | 21 |
 
-These counts are for the `v0.1.26` release this page is written against. Newer builds read more
-secrets, so a higher number is not evidence that something is missing here.
+These counts were read from the released `v0.1.33` binary, not from source. The set grew twice:
+`v0.1.26` needed 6, 8 and 17; `v0.1.32` moved the core set to 9, 11 and 20; `v0.1.33` added
+`langfuse-db-password` to the full profile only. A vault built against an older copy of this page
+is short regardless of which profile it used.
 
-Some versions of the CLI offer a `--list-secrets` flag to print this set. It is **not** in the
-`v0.1.26` release — running it there answers `No such option: --list-secrets`. Use the lists
-above instead.
+**The flag does not exist before `v0.1.32`.** On `v0.1.26` it answers `No such option:
+--list-secrets`. If you get that error, you are running an older CLI than this page describes;
+use the lists above.
 
 #### Grant access: two different identities
 
@@ -325,7 +360,8 @@ unregistered address:
 | Who | What they build from it | When it applies |
 | --- | --- | --- |
 | Entra administrator — [01a-prereqs-entra-admin](01a-prereqs-entra-admin.md) | The SSO redirect URI | Always, on this deployment style |
-| Entra administrator — [01a-prereqs-entra-admin](01a-prereqs-entra-admin.md) | A **second** redirect URI, `/api/auth/fabric/callback`, on the Fabric M2M app registration | Only when your data platform is Microsoft Fabric |
+| Entra administrator — [01a-prereqs-entra-admin](01a-prereqs-entra-admin.md) | **Two** further redirect URIs — `/api/auth/fabric/callback` and `/api/v1/data-platforms/validation/callback` — on the app registration entered for the Fabric data platform | Only when your data platform is Microsoft Fabric |
+| Entra administrator — [01a-prereqs-entra-admin](01a-prereqs-entra-admin.md) | Two more — `/api/auth/secret-store-links/callback` and `/api/v1/secret-stores/validation/callback` — on the app registration entered for the secret store | Only when a domain will use Azure Key Vault as its secret store |
 | GitHub organisation owner — [01c-prereqs-github-org-owner](01c-prereqs-github-org-owner.md) | The GitHub App's callback URL | Always, on this deployment style |
 
 So the name must not be picked in isolation, and it must not change afterwards. Changing it
@@ -383,6 +419,12 @@ real way this fails if it is missed:
 
    Find this value in the Azure portal, on the resource's **Keys and Endpoint** page, or in
    the Azure AI Foundry portal's **Deployments** view — both show the same endpoint.
+
+   From `v0.1.33` this matters more than it did, because Studio can now call **two** different
+   Azure paths off the endpoint you hand back — `/openai/deployments/<name>/chat/completions`
+   or `/openai/responses`, both with an `api-version`. Your operator chooses between them with
+   a new **API mode** setting. Both are appended to the bare host, so one host-only endpoint
+   serves either choice, and a value carrying a path breaks both.
 
 2. **Hand back the deployment name, not the model's family name.** Studio has one field for
    this ("Model"), and it expects the name you gave the deployment when you created it in
