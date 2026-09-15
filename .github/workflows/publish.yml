@@ -48,6 +48,10 @@ jobs:
     name: Publish Studio release
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      tag: ${{ steps.payload.outputs.tag }}
+      sha: ${{ steps.payload.outputs.sha }}
+      notes: ${{ steps.payload.outputs.notes }}
     steps:
       - name: Validate dispatch payload
         id: payload
@@ -56,7 +60,6 @@ jobs:
         run: |
           echo "$PAYLOAD" > /tmp/payload.json
           TAG=$(jq -r '.candidate_tag // empty' /tmp/payload.json)
-          VERSION=$(jq -r '.version // empty' /tmp/payload.json)
           SHA=$(jq -r '.candidate_sha // empty' /tmp/payload.json)
           RUN_ID=$(jq -r '.source_workflow_run_id // empty' /tmp/payload.json)
           NOTES=$(jq -r '.release_notes_body // ""' /tmp/payload.json)
@@ -69,12 +72,19 @@ jobs:
           if [ -z "$NOTES" ]; then
             echo "::error::missing release_notes_body — the published docs must carry the release notes"; exit 1
           fi
-          [ -n "$VERSION" ] || VERSION="$TAG"
           if [ -z "$RUN_ID" ]; then echo "::error::missing source_workflow_run_id"; exit 1; fi
           jq -r '.release_notes_body // ""' /tmp/payload.json > /tmp/release-notes.md
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
           echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          # Multi-line output via a delimiter; the docs job consumes the same
+          # validated identity rather than re-parsing and re-validating it.
+          DELIM="NOTES_EOF_$(openssl rand -hex 8)"
+          {
+            echo "notes<<${DELIM}"
+            printf '%s\n' "$NOTES"
+            echo "${DELIM}"
+          } >> "$GITHUB_OUTPUT"
           echo "Validated payload for $TAG (source run $RUN_ID, studio $SHA)"
 
       - uses: actions/checkout@v7
@@ -168,8 +178,9 @@ jobs:
 
   docs:
     name: Publish operator documentation
-    # Runs only after the GitHub Release exists. The `publish` job's payload
-    # validation is the gate; this job re-checks it so it also fails on its own.
+    # Runs only after the GitHub Release exists. It consumes the identity the
+    # `publish` job validated from the dispatch payload — the single gate — so a
+    # release cannot publish documentation that does not name its own build.
     needs: publish
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -185,19 +196,13 @@ jobs:
 
       # A release cannot publish documentation that does not name its own build.
       # The version, studio commit, and release notes come from the same dispatch
-      # payload that produced the GitHub Release.
+      # payload that produced the GitHub Release, validated by the `publish` job.
       - name: Generate the release identity and notes
-        id: release
         env:
-          PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+          TAG: ${{ needs.publish.outputs.tag }}
+          SHA: ${{ needs.publish.outputs.sha }}
+          NOTES: ${{ needs.publish.outputs.notes }}
         run: |
-          echo "$PAYLOAD" > /tmp/payload.json
-          TAG=$(jq -r '.candidate_tag // empty' /tmp/payload.json)
-          SHA=$(jq -r '.candidate_sha // empty' /tmp/payload.json)
-          NOTES=$(jq -r '.release_notes_body // ""' /tmp/payload.json)
-          [ -n "$TAG" ] || { echo "::error::missing candidate_tag — docs cannot name the released version"; exit 1; }
-          [ -n "$SHA" ] || { echo "::error::missing candidate_sha — docs cannot name the studio commit"; exit 1; }
-          [ -n "$NOTES" ] || { echo "::error::missing release_notes_body — docs cannot carry the release notes"; exit 1; }
           {
             echo "# Release ${TAG}"
             echo

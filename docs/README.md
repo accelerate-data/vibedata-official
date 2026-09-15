@@ -215,7 +215,7 @@ against a live installation:
 - [Cloud installer](cloud-installer.md) — build the cloud estate and run Studio in Azure.
 
 The version, studio commit, and release notes for the release these docs were published
-with are on [Latest release](release.md).
+with are on the [GitHub Releases page](https://github.com/accelerate-data/vibedata-official/releases/latest).
 
 ## What this does not cover
 

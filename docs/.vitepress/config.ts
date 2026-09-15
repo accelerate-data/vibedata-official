@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -10,11 +10,6 @@ import { defineConfig, type DefaultTheme } from 'vitepress';
 const configDir = dirname(fileURLToPath(import.meta.url));
 const releasePath = resolve(configDir, '..', 'release.md');
 const hasReleasePage = existsSync(releasePath);
-
-// The nav shows the released version on every page, including the index.
-const releaseLabel = hasReleasePage
-  ? `Release ${readFileSync(releasePath, 'utf8').match(/^#\s+Release\s+(\S+)/m)?.[1] ?? 'notes'}`
-  : 'Latest release';
 
 const gettingStarted: DefaultTheme.SidebarItem[] = [
   { text: 'Overview', link: '/' },
@@ -49,19 +44,19 @@ export default defineConfig({
   description: 'Install, operate, and troubleshoot a VibeData Studio deployment.',
   // GitHub Pages project site for accelerate-data/vibedata-official.
   base: '/vibedata-official/',
-  // docs/ is the source root, so docs/README.md is the site index.
-  srcDir: '.',
   // VitePress only treats index.md as the root route; rewrite README.md onto it so
   // the repository-view README is also the site index.
   rewrites: { 'README.md': 'index.md' },
-  // The release page is generated at publish time; tolerate its absence locally.
-  ignoreDeadLinks: [/^\.?\/?release(\.md|\.html)?$/],
+  // Release notes arrive as raw model-generated text in the generated release page.
+  // Disable raw HTML so a crafted PR title or body cannot inject markup onto the
+  // Pages origin; Markdown syntax still renders. No page uses raw HTML.
+  markdown: { html: false },
 
   themeConfig: {
     nav: [
       { text: 'Getting started', link: '/' },
       { text: 'Operate', link: '/update' },
-      ...(hasReleasePage ? [{ text: releaseLabel, link: '/release' }] : []),
+      ...(hasReleasePage ? [{ text: 'Release notes', link: '/release' }] : []),
     ],
     sidebar: [
       { text: 'Getting started', items: gettingStarted },

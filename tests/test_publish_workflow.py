@@ -73,7 +73,10 @@ class PublishWorkflowShape(unittest.TestCase):
     def test_no_longer_requires_a_wiki_tarball(self) -> None:
         # Studio stopped producing wiki-<tag>.tar.gz and the operator wiki is
         # retired to a pointer; the documentation publishes as a site (VD-5700).
-        self.assertNotIn("wiki", self.raw)
+        # Assert the specific retired artifact name (its required-artifact list
+        # entry), not the bare word "wiki", so a future comment mentioning
+        # "wiki" does not break this test.
+        self.assertNotIn("wiki-${TAG}.tar.gz", self.raw)
 
     def test_creates_release_without_a_separate_image_manifest(self) -> None:
         self.assertIn("gh release create", self.raw)
@@ -112,9 +115,27 @@ class PublishWorkflowShape(unittest.TestCase):
         self.assertIn("actions/upload-pages-artifact", self.raw)
         self.assertIn("actions/deploy-pages", self.raw)
 
+    def _docs_release_step_run(self) -> str:
+        docs = self.wf["jobs"]["docs"]
+        for step in docs["steps"]:
+            if step.get("name") == "Generate the release identity and notes":
+                return step["run"]
+        self.fail("docs job has no 'Generate the release identity and notes' step")
+
+    def test_docs_release_page_interpolates_the_released_identity_and_notes(
+        self,
+    ) -> None:
+        # The generated release page must actually carry the released version,
+        # the studio commit, and the release notes. These are the exact shell
+        # tokens in the docs step's heredoc; deleting any interpolation fails.
+        run = self._docs_release_step_run()
+        self.assertIn('echo "# Release ${TAG}"', run)
+        self.assertIn("built from studio commit \\`${SHA}\\`.", run)
+        self.assertIn("printf '%s\\n' \"$NOTES\"", run)
+
     def test_docs_job_is_gated_on_the_publish_job(self) -> None:
         # The docs job only runs after the GitHub Release (and its payload gate)
-        # succeeded, and it re-checks the same identity itself.
+        # succeeded, and it consumes the identity the publish job validated.
         self.assertEqual(self.wf["jobs"]["docs"]["needs"], "publish")
 
     def test_docs_job_has_pages_permissions_and_environment(self) -> None:

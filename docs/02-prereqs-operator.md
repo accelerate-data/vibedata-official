@@ -3,7 +3,6 @@ applies-to: vibedata v0.1.33
 verified-against: studio@a121fc466
 verified-on: 2026-08-13
 sources:
-  - docs/wiki/install.md
   - cli/vibedata/src/vibedata/main.py
   - cli/vibedata/src/vibedata/auth/github_container_auth.py
   - cli/vibedata/src/vibedata/commands/install.py
