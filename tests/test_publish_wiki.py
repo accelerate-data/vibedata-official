@@ -61,11 +61,15 @@ class WikiPagesTests(unittest.TestCase):
 class TextTransformTests(unittest.TestCase):
     def test_strip_front_matter_removes_a_leading_yaml_block(self) -> None:
         text = "---\napplies-to: v1\nverified-on: 2026-01-01\n---\n\n# Body\n"
-        self.assertEqual(publish_wiki.strip_front_matter(text), "\n# Body\n")
+        self.assertEqual(publish_wiki.strip_front_matter(text), "# Body\n")
 
     def test_strip_front_matter_leaves_plain_text_alone(self) -> None:
         text = "# Body\n\nNo front matter here.\n"
         self.assertEqual(publish_wiki.strip_front_matter(text), text)
+
+    def test_strip_front_matter_drops_a_leading_blank_line(self) -> None:
+        # A page must not open with a blank line, which would push its H1 down.
+        self.assertEqual(publish_wiki.strip_front_matter("\n\n# Body\n"), "# Body\n")
 
     def test_rewrite_wiki_links_drops_the_extension(self) -> None:
         self.assertEqual(

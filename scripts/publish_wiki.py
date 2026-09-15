@@ -92,19 +92,21 @@ def wiki_pages(docs_dir: str | Path) -> dict[str, Path]:
 
 
 def strip_front_matter(text: str) -> str:
-    """Drop a leading ``--- ... ---`` YAML block.
+    """Drop a leading ``--- ... ---`` YAML block and any leading blank lines.
 
     The GitHub wiki renderer does not consume YAML front matter, so the block
-    would otherwise render as a stray rule and heading. Text without a leading
-    delimiter, or with an unterminated one, is returned unchanged.
+    would otherwise render as a stray rule and heading; a leading blank line
+    would push the page's H1 down. A text with no leading delimiter keeps its
+    body, minus any leading blank lines; an unterminated block is returned
+    unchanged.
     """
     lines = text.splitlines(keepends=True)
-    if not lines or lines[0].strip() != "---":
-        return text
-    for index in range(1, len(lines)):
-        if lines[index].strip() == "---":
-            return "".join(lines[index + 1 :])
-    return text
+    if lines and lines[0].strip() == "---":
+        for index in range(1, len(lines)):
+            if lines[index].strip() == "---":
+                text = "".join(lines[index + 1 :])
+                break
+    return text.lstrip("\n")
 
 
 def rewrite_wiki_links(text: str) -> str:
