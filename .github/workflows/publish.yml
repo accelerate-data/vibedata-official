@@ -5,15 +5,18 @@
 #   - verified the candidate's cosign signature + SBOM + SLSA attestations,
 #   - promoted BOTH images via `crane copy` (sigstore referrers preserved, no
 #     re-sign) into the public ghcr.io/accelerate-data/studio-{backend,frontend}
-#     packages under the same vX.Y.Z tag,
-#   - synced the operator wiki.
+#     packages under the same vX.Y.Z tag.
 #
 # So this workflow must NOT re-promote the images — a docker pull/tag/push would
 # drop the cosign/SBOM/SLSA referrers and ship unsigned public images. It only:
 #   1. Sanity-verifies the promoted PUBLIC images are signed (referrers survived).
-#   2. Downloads the studio-built release artifacts (CLI binaries, install
-#      script, wiki tarball) from the source workflow run.
+#   2. Downloads the studio-built release artifacts (CLI binaries and install
+#      script) from the source workflow run.
 #   3. Creates the GitHub Release vX.Y.Z with those artifacts.
+#   4. Publishes the operator documentation as a VitePress site, rendered with the
+#      released version, studio commit, and release notes from the same dispatch
+#      payload, and refuses to publish when the payload does not name the build
+#      (VD-5700).
 #
 # Canonical contract: vd-studio docs/design/devops/03-release-promotion.md.
 
@@ -54,16 +57,25 @@ jobs:
           echo "$PAYLOAD" > /tmp/payload.json
           TAG=$(jq -r '.candidate_tag // empty' /tmp/payload.json)
           VERSION=$(jq -r '.version // empty' /tmp/payload.json)
+          SHA=$(jq -r '.candidate_sha // empty' /tmp/payload.json)
           RUN_ID=$(jq -r '.source_workflow_run_id // empty' /tmp/payload.json)
+          NOTES=$(jq -r '.release_notes_body // ""' /tmp/payload.json)
           if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "::error::candidate_tag must be vMAJOR.MINOR.PATCH (got '$TAG')"; exit 1
+          fi
+          if [ -z "$SHA" ]; then
+            echo "::error::missing candidate_sha — the published docs must name the studio commit they describe"; exit 1
+          fi
+          if [ -z "$NOTES" ]; then
+            echo "::error::missing release_notes_body — the published docs must carry the release notes"; exit 1
           fi
           [ -n "$VERSION" ] || VERSION="$TAG"
           if [ -z "$RUN_ID" ]; then echo "::error::missing source_workflow_run_id"; exit 1; fi
           jq -r '.release_notes_body // ""' /tmp/payload.json > /tmp/release-notes.md
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
           echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
-          echo "Validated payload for $TAG (source run $RUN_ID)"
+          echo "Validated payload for $TAG (source run $RUN_ID, studio $SHA)"
 
       - uses: actions/checkout@v7
 
@@ -123,8 +135,6 @@ jobs:
           echo "--- downloaded artifacts ---"; ls -la dist
 
       - name: Verify the release artifact set is complete
-        env:
-          TAG: ${{ steps.payload.outputs.tag }}
         run: |
           required=(
             "vibedata-linux-x86_64"
@@ -132,7 +142,6 @@ jobs:
             "vibedata-darwin-arm64"
             "vibedata-windows-x86_64.exe"
             "install.sh"
-            "wiki-${TAG}.tar.gz"
           )
           missing=()
           for f in "${required[@]}"; do
@@ -156,3 +165,68 @@ jobs:
             gh release create "$TAG" "${ASSETS[@]}" --title "$TAG" --notes-file /tmp/release-notes.md
           fi
           echo "Published GitHub Release $TAG"
+
+  docs:
+    name: Publish operator documentation
+    # Runs only after the GitHub Release exists. The `publish` job's payload
+    # validation is the gate; this job re-checks it so it also fails on its own.
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read # checkout the documentation sources
+      pages: write # publish to GitHub Pages
+      id-token: write # OIDC token the Pages deployment requires
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # A release cannot publish documentation that does not name its own build.
+      # The version, studio commit, and release notes come from the same dispatch
+      # payload that produced the GitHub Release.
+      - name: Generate the release identity and notes
+        id: release
+        env:
+          PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+        run: |
+          echo "$PAYLOAD" > /tmp/payload.json
+          TAG=$(jq -r '.candidate_tag // empty' /tmp/payload.json)
+          SHA=$(jq -r '.candidate_sha // empty' /tmp/payload.json)
+          NOTES=$(jq -r '.release_notes_body // ""' /tmp/payload.json)
+          [ -n "$TAG" ] || { echo "::error::missing candidate_tag — docs cannot name the released version"; exit 1; }
+          [ -n "$SHA" ] || { echo "::error::missing candidate_sha — docs cannot name the studio commit"; exit 1; }
+          [ -n "$NOTES" ] || { echo "::error::missing release_notes_body — docs cannot carry the release notes"; exit 1; }
+          {
+            echo "# Release ${TAG}"
+            echo
+            echo "This documentation was published for **${TAG}**, built from studio commit \`${SHA}\`."
+            echo
+            echo "## Release notes"
+            echo
+            printf '%s\n' "$NOTES"
+          } > docs/release.md
+          echo "Wrote docs/release.md for ${TAG} (${SHA})"
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install docs dependencies
+        working-directory: docs
+        run: npm ci
+
+      - name: Build the operator documentation site
+        working-directory: docs
+        run: npm run docs:build
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs/.vitepress/dist
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v5
