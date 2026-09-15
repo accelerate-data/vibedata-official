@@ -205,6 +205,18 @@ install rather than work that follows step 6.
 If something goes wrong along the way, check
 [90-troubleshooting](90-troubleshooting.md).
 
+## Operating an existing deployment
+
+Once Studio is running, the **Operate** section covers the actions an operator takes
+against a live installation:
+
+- [Update Studio](update.md) — move a Local Docker deployment to a new release.
+- [Roll back a release](rollback.md) — pull a previous release when one goes wrong.
+- [Cloud installer](cloud-installer.md) — build the cloud estate and run Studio in Azure.
+
+The version, studio commit, and release notes for the release these docs were published
+with are on the [GitHub Releases page](https://github.com/accelerate-data/vibedata-official/releases/latest).
+
 ## What this does not cover
 
 This guide stops once a contributor has landed data into a domain and built a mart from it,
@@ -214,5 +226,5 @@ jobs, semantic models, and deploying a merged pipeline are out of scope. For tho
 with the Studio user guide:
 <https://accelerate-data.github.io/studio/>.
 
-Upgrade, backup, and restore are not covered in this pass. They are planned for this same
-doc set later.
+Backup and restore are not covered in this pass. They are planned for this same doc set
+later.
