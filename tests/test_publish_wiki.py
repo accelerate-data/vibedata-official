@@ -174,6 +174,36 @@ class PublishWikiEndToEndTests(unittest.TestCase):
             self.assertIn("Home.md", tree)
             self.assertNotIn("Release.md", tree)
 
+    def test_refuses_a_source_set_without_a_home_page(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wiki = self._bare_with_stale_page(root)
+            before = self._git("-C", str(wiki), "rev-parse", "main").strip()
+
+            empty = root / "empty-docs"
+            empty.mkdir()
+            no_home = root / "no-home-docs"
+            no_home.mkdir()
+            (no_home / "update.md").write_text("# Update\n", encoding="utf-8")
+
+            for docs in (empty, no_home):
+                with self.subTest(docs=docs.name):
+                    self.assertEqual(
+                        self._publish(
+                            docs,
+                            WIKI_REMOTE=str(wiki),
+                            TAG="v1.4.2",
+                            SHA="abc1234",
+                            NOTES="Notes body.",
+                        ),
+                        1,
+                    )
+                    # The guard runs before the clone, so the wiki is untouched.
+                    self.assertEqual(
+                        before, self._git("-C", str(wiki), "rev-parse", "main").strip()
+                    )
+                    self.assertIn("Stale.md", self._tree(wiki))
+
 
 if __name__ == "__main__":
     unittest.main()

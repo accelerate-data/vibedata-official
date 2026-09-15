@@ -86,6 +86,9 @@ def wiki_pages(docs_dir: str | Path) -> dict[str, Path]:
 
 def render_release_page(tag: str, sha: str, notes: str) -> str:
     """Render the generated ``Release.md`` naming the released build."""
+    # The notes are raw model-generated text. GitHub sanitizes wiki markdown on
+    # its own origin; the VitePress `markdown.html:false` control was retired
+    # with the Pages surface (VD-5737).
     body = notes.rstrip("\n")
     return (
         f"# Release {tag}\n"
@@ -140,6 +143,15 @@ def main() -> int:
 
     has_release = bool(tag and sha)
     pages = wiki_pages(docs_dir)
+    # Removing the existing pages is destructive: refuse a source set that is
+    # empty or has no README.md (no Home.md), which would wipe the wiki.
+    if not pages or HOME_PAGE not in pages:
+        print(
+            f"::error::refusing to replace the wiki: {docs_dir} has no README.md "
+            "(no Home.md) — the canonical page set is empty or misconfigured",
+            file=sys.stderr,
+        )
+        return 1
 
     with tempfile.TemporaryDirectory() as tmp:
         workdir = Path(tmp) / "wiki"

@@ -48,6 +48,14 @@ on:
 permissions:
   contents: read # checkout the documentation sources
 
+# One wiki publish at a time: a manual dispatch must not race the release call,
+# and publish.yml's own concurrency is keyed by candidate_tag, which a manual
+# dispatch does not carry. Two overlapping runs each clone→push and the second
+# is rejected (non-fast-forward) or drops pages.
+concurrency:
+  group: operator-wiki
+  cancel-in-progress: false
+
 jobs:
   publish:
     name: Publish operator documentation
@@ -56,15 +64,21 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # A release publishes documentation that names its own build. A manual run
-      # with no inputs has no build to name; publish_wiki.py then skips Release.md.
+      # A release publishes documentation that names its own build: the tag needs
+      # both the studio commit and the release notes. A manual run with no inputs
+      # has no build to name; publish_wiki.py then skips Release.md.
       - name: Require the build identity when a tag is supplied
         if: inputs.candidate_tag != ''
         env:
           CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+          CANDIDATE_NOTES: ${{ inputs.release_notes_body }}
         run: |
           if [ -z "$CANDIDATE_SHA" ]; then
             echo "::error::candidate_tag was supplied without candidate_sha"
+            exit 1
+          fi
+          if [ -z "$CANDIDATE_NOTES" ]; then
+            echo "::error::candidate_tag was supplied without release_notes_body"
             exit 1
           fi
 
