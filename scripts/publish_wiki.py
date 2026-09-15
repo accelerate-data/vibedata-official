@@ -115,12 +115,7 @@ def rewrite_wiki_links(text: str) -> str:
 
 def _rewrite_link(match: re.Match[str]) -> str:
     target = match.group(1)
-    if (
-        target.startswith("#")
-        or target.startswith("//")
-        or target.startswith("mailto:")
-        or "://" in target
-    ):
+    if target.startswith(("#", "//", "mailto:")) or "://" in target:
         return match.group(0)
     path, sep, anchor = target.partition("#")
     if path in ("README", "./README"):
