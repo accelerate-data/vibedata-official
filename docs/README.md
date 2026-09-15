@@ -13,7 +13,7 @@ sources:
   - cli/vibedata/src/vibedata/templates/env.j2
 ---
 
-# VibeData Studio: Deployment and Onboarding
+# VibeData Studio
 
 VibeData Studio is a workspace where an AI agent helps a data team build, test, and run
 data pipelines against a connected data platform, with changes tracked through a connected

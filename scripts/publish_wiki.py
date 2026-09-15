@@ -37,6 +37,11 @@ SIDEBAR_PAGE = "_Sidebar.md"
 RELEASE_PAGE = "Release.md"
 RELEASE_STEM = "Release"
 
+# Always-reachable operator entry points: the latest GitHub Release (release
+# notes + assets) and the CLI installer asset attached to it.
+RELEASES_URL = "https://github.com/accelerate-data/vibedata-official/releases/latest"
+INSTALLER_URL = f"{RELEASES_URL}/download/install.sh"
+
 GIT_AUTHOR_NAME = "github-actions[bot]"
 GIT_AUTHOR_EMAIL = "41898282+github-actions[bot]@users.noreply.github.com"
 
@@ -148,18 +153,20 @@ def render_release_page(tag: str, sha: str, notes: str) -> str:
 
 
 def render_sidebar(has_release: bool) -> str:
-    """Render ``_Sidebar.md``; the Latest release group only when one exists."""
+    """Render ``_Sidebar.md``; the generated Release entry only when one exists."""
     lines = ["### Getting started", ""]
     lines += [f"- [{label}]({page})" for label, page in GETTING_STARTED_PAGES]
     lines += ["", "### Operate", ""]
     lines += [f"- [{label}]({page})" for label, page in OPERATE_PAGES]
+    lines += [
+        "",
+        "### Releases",
+        "",
+        f"- [Latest release notes]({RELEASES_URL})",
+        f"- [Installer]({INSTALLER_URL})",
+    ]
     if has_release:
-        lines += [
-            "",
-            "### Latest release",
-            "",
-            f"- [Release notes]({RELEASE_STEM})",
-        ]
+        lines += [f"- [This release]({RELEASE_STEM})"]
     return "\n".join(lines) + "\n"
 
 

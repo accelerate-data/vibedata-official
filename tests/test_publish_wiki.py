@@ -161,12 +161,22 @@ class RenderSidebarTests(unittest.TestCase):
         self.assertIn("### Getting started", sidebar)
         self.assertIn("### Operate", sidebar)
 
-    def test_release_entry_only_when_a_release_exists(self) -> None:
+    def test_lists_the_latest_release_and_installer_links(self) -> None:
+        # Reachable with or without a generated release page: the GitHub Release
+        # is the release-notes + assets entry point, and the installer is its
+        # attached install.sh asset.
+        for has_release in (False, True):
+            sidebar = publish_wiki.render_sidebar(has_release=has_release)
+            self.assertIn("### Releases", sidebar)
+            self.assertIn(
+                f"- [Latest release notes]({publish_wiki.RELEASES_URL})", sidebar
+            )
+            self.assertIn(f"- [Installer]({publish_wiki.INSTALLER_URL})", sidebar)
+
+    def test_generated_release_entry_only_when_a_release_exists(self) -> None:
         without = publish_wiki.render_sidebar(has_release=False)
         with_release = publish_wiki.render_sidebar(has_release=True)
-        self.assertNotIn("### Latest release", without)
         self.assertNotIn("](Release)", without)
-        self.assertIn("### Latest release", with_release)
         self.assertIn("](Release)", with_release)
 
 
