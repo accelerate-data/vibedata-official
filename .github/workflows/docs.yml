@@ -1,0 +1,107 @@
+# Publish the operator documentation as a VitePress site on GitHub Pages (VD-5700).
+#
+# Two triggers, one implementation:
+#   - workflow_call: invoked by publish.yml on a `studio-release` dispatch, so a
+#     release publishes the documentation that names its own build. The released
+#     version, studio commit, and release notes come from the validated dispatch
+#     payload; the identity step writes the generated release page.
+#   - workflow_dispatch: a manual run that publishes the current docs. Used for
+#     the initial bring-up and for a docs-only republish between releases. With no
+#     inputs it publishes without a release page.
+#
+# Canonical contract: studio docs/design/operator-documentation/README.md.
+
+name: operator-docs
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_tag:
+        description: >-
+          Released version to stamp (e.g. v1.4.2). Optional; omit to publish
+          without a release page.
+        required: false
+        type: string
+      candidate_sha:
+        description: 'Studio commit the release was built from. Required with candidate_tag.'
+        required: false
+        type: string
+      release_notes_body:
+        description: 'Release notes to render on the release page. Optional.'
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      candidate_tag:
+        required: false
+        type: string
+      candidate_sha:
+        required: false
+        type: string
+      release_notes_body:
+        required: false
+        type: string
+
+permissions:
+  contents: read # checkout the documentation sources
+  pages: write # publish to GitHub Pages
+  id-token: write # OIDC token the Pages deployment requires
+
+# One Pages deployment at a time. A manual run and a release run must not race.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Publish operator documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # A release publishes documentation that names its own build (the version,
+      # studio commit, and release notes). A manual run with no inputs has no
+      # build to name and skips this step.
+      - name: Generate the release identity and notes
+        if: inputs.candidate_tag != '' && inputs.candidate_sha != ''
+        env:
+          TAG: ${{ inputs.candidate_tag }}
+          SHA: ${{ inputs.candidate_sha }}
+          NOTES: ${{ inputs.release_notes_body }}
+        run: |
+          {
+            echo "# Release ${TAG}"
+            echo
+            echo "This documentation was published for **${TAG}**, built from studio commit \`${SHA}\`."
+            echo
+            echo "## Release notes"
+            echo
+            printf '%s\n' "$NOTES"
+          } > docs/release.md
+          echo "Wrote docs/release.md for ${TAG} (${SHA})"
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install docs dependencies
+        working-directory: docs
+        run: npm ci
+
+      - name: Build the operator documentation site
+        working-directory: docs
+        run: npm run docs:build
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs/.vitepress/dist
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v5

@@ -106,43 +106,33 @@ class PublishWorkflowShape(unittest.TestCase):
         self.assertIn("missing release_notes_body", self.raw)
         self.assertIn("missing source_workflow_run_id", self.raw)
 
-    def test_publishes_operator_documentation_to_pages(self) -> None:
-        # The docs job writes the generated release page, builds VitePress, and
-        # deploys the artifact to GitHub Pages.
-        self.assertIn("docs/release.md", self.raw)
-        self.assertIn("npm ci", self.raw)
-        self.assertIn("npm run docs:build", self.raw)
-        self.assertIn("actions/upload-pages-artifact", self.raw)
-        self.assertIn("actions/deploy-pages", self.raw)
-
-    def _docs_release_step_run(self) -> str:
+    def test_docs_job_calls_the_reusable_operator_docs_workflow(self) -> None:
+        # The Pages implementation lives in the reusable operator-docs workflow,
+        # which is also dispatchable by hand (initial bring-up, docs-only
+        # republish between releases).
         docs = self.wf["jobs"]["docs"]
-        for step in docs["steps"]:
-            if step.get("name") == "Generate the release identity and notes":
-                return step["run"]
-        self.fail("docs job has no 'Generate the release identity and notes' step")
-
-    def test_docs_release_page_interpolates_the_released_identity_and_notes(
-        self,
-    ) -> None:
-        # The generated release page must actually carry the released version,
-        # the studio commit, and the release notes. These are the exact shell
-        # tokens in the docs step's heredoc; deleting any interpolation fails.
-        run = self._docs_release_step_run()
-        self.assertIn('echo "# Release ${TAG}"', run)
-        self.assertIn("built from studio commit \\`${SHA}\\`.", run)
-        self.assertIn("printf '%s\\n' \"$NOTES\"", run)
+        self.assertEqual(docs["uses"], "./.github/workflows/docs.yml")
+        self.assertEqual(
+            docs["with"]["candidate_tag"], "${{ needs.publish.outputs.tag }}"
+        )
+        self.assertEqual(
+            docs["with"]["candidate_sha"], "${{ needs.publish.outputs.sha }}"
+        )
+        self.assertEqual(
+            docs["with"]["release_notes_body"], "${{ needs.publish.outputs.notes }}"
+        )
 
     def test_docs_job_is_gated_on_the_publish_job(self) -> None:
         # The docs job only runs after the GitHub Release (and its payload gate)
         # succeeded, and it consumes the identity the publish job validated.
         self.assertEqual(self.wf["jobs"]["docs"]["needs"], "publish")
 
-    def test_docs_job_has_pages_permissions_and_environment(self) -> None:
-        docs = self.wf["jobs"]["docs"]
-        self.assertEqual(docs["permissions"].get("pages"), "write")
-        self.assertEqual(docs["permissions"].get("id-token"), "write")
-        self.assertEqual(docs["environment"]["name"], "github-pages")
+    def test_docs_job_grants_pages_permissions_to_the_called_workflow(self) -> None:
+        # A reusable workflow's token is capped by the caller's job permissions,
+        # so the caller must grant Pages + OIDC for the deploy to be allowed.
+        perms = self.wf["jobs"]["docs"]["permissions"]
+        self.assertEqual(perms.get("pages"), "write")
+        self.assertEqual(perms.get("id-token"), "write")
 
     def test_minimal_permissions(self) -> None:
         perms = self.wf["permissions"]
