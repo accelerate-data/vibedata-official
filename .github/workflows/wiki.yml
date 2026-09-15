@@ -1,17 +1,20 @@
-# Publish the operator documentation as a VitePress site on GitHub Pages (VD-5700).
+# Publish the operator documentation to the vibedata-official GitHub wiki (VD-5737).
 #
 # Two triggers, one implementation:
 #   - workflow_call: invoked by publish.yml on a `studio-release` dispatch, so a
 #     release publishes the documentation that names its own build. The released
 #     version, studio commit, and release notes come from the validated dispatch
-#     payload; the identity step writes the generated release page.
+#     payload; publish_wiki.py renders them into the generated Release.md.
 #   - workflow_dispatch: a manual run that publishes the current docs. Used for
 #     the initial bring-up and for a docs-only republish between releases. With no
 #     inputs it publishes without a release page.
 #
+# The authoritative gate is publish.yml's payload validation; publish_wiki.py
+# re-checks the tag/sha/notes identity for the manual trigger too.
+#
 # Canonical contract: studio docs/design/operator-documentation/README.md.
 
-name: operator-docs
+name: operator-wiki
 
 on:
   workflow_dispatch:
@@ -44,64 +47,39 @@ on:
 
 permissions:
   contents: read # checkout the documentation sources
-  pages: write # publish to GitHub Pages
-  id-token: write # OIDC token the Pages deployment requires
 
-# One Pages deployment at a time. A manual run and a release run must not race.
+# One wiki publish at a time: a manual dispatch must not race the release call,
+# and publish.yml's own concurrency is keyed by candidate_tag, which a manual
+# dispatch does not carry. Two overlapping runs each clone→push and the second
+# is rejected (non-fast-forward) or drops pages.
 concurrency:
-  group: pages
+  group: operator-wiki
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  publish:
     name: Publish operator documentation
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
 
-      # A release publishes documentation that names its own build (the version,
-      # studio commit, and release notes). A manual run with no inputs has no
-      # build to name and skips this step.
-      - name: Generate the release identity and notes
-        if: inputs.candidate_tag != '' && inputs.candidate_sha != ''
+      # GITHUB_TOKEN cannot push to the wiki git repository; the app token scoped
+      # to this repository can.
+      - name: Mint the wiki push token
+        id: wiki-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.VIBEDATA_GHA_APP_ID }}
+          private-key: ${{ secrets.VIBEDATA_GHA_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: vibedata-official
+
+      - name: Publish the wiki pages
         env:
+          WIKI_REMOTE: https://x-access-token:${{ steps.wiki-token.outputs.token }}@github.com/${{ github.repository }}.wiki.git
+          DOCS_DIR: docs
           TAG: ${{ inputs.candidate_tag }}
           SHA: ${{ inputs.candidate_sha }}
           NOTES: ${{ inputs.release_notes_body }}
-        run: |
-          {
-            echo "# Release ${TAG}"
-            echo
-            echo "This documentation was published for **${TAG}**, built from studio commit \`${SHA}\`."
-            echo
-            echo "## Release notes"
-            echo
-            printf '%s\n' "$NOTES"
-          } > docs/release.md
-          echo "Wrote docs/release.md for ${TAG} (${SHA})"
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: docs/package-lock.json
-
-      - name: Install docs dependencies
-        working-directory: docs
-        run: npm ci
-
-      - name: Build the operator documentation site
-        working-directory: docs
-        run: npm run docs:build
-
-      - uses: actions/upload-pages-artifact@v5
-        with:
-          path: docs/.vitepress/dist
-
-      - name: Deploy to GitHub Pages
-        id: deploy
-        uses: actions/deploy-pages@v5
+        run: python3 scripts/publish_wiki.py

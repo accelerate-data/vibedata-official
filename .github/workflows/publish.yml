@@ -13,11 +13,12 @@
 #   2. Downloads the studio-built release artifacts (CLI binaries and install
 #      script) from the source workflow run.
 #   3. Creates the GitHub Release vX.Y.Z with those artifacts.
-#   4. Publishes the operator documentation as a VitePress site via the reusable
-#      operator-docs workflow (.github/workflows/docs.yml), rendered with the
-#      released version, studio commit, and release notes from the same dispatch
-#      payload, and refuses to publish when the payload does not name the build
-#      (VD-5700).
+#   4. Publishes the operator documentation to the vibedata-official GitHub wiki
+#      via the reusable operator-wiki workflow (.github/workflows/wiki.yml), with
+#      the released version, studio commit, and release notes from the same
+#      dispatch payload rendered into the wiki's generated Release.md. The payload
+#      gate refuses to publish when the payload does not name the build
+#      (VD-5737).
 #
 # Canonical contract: vd-studio docs/design/devops/03-release-promotion.md.
 
@@ -182,15 +183,14 @@ jobs:
     # Runs only after the GitHub Release exists. It consumes the identity the
     # `publish` job validated from the dispatch payload — the single gate — so a
     # release cannot publish documentation that does not name its own build.
-    # The implementation is the reusable operator-docs workflow, which is also
+    # The implementation is the reusable operator-wiki workflow, which is also
     # dispatchable by hand for the initial bring-up and docs-only republishes.
     needs: publish
     permissions:
       contents: read # checkout the documentation sources
-      pages: write # publish to GitHub Pages
-      id-token: write # OIDC token the Pages deployment requires
-    uses: ./.github/workflows/docs.yml
+    uses: ./.github/workflows/wiki.yml
     with:
       candidate_tag: ${{ needs.publish.outputs.tag }}
       candidate_sha: ${{ needs.publish.outputs.sha }}
       release_notes_body: ${{ needs.publish.outputs.notes }}
+    secrets: inherit
