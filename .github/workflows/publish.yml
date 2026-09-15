@@ -13,7 +13,8 @@
 #   2. Downloads the studio-built release artifacts (CLI binaries and install
 #      script) from the source workflow run.
 #   3. Creates the GitHub Release vX.Y.Z with those artifacts.
-#   4. Publishes the operator documentation as a VitePress site, rendered with the
+#   4. Publishes the operator documentation as a VitePress site via the reusable
+#      operator-docs workflow (.github/workflows/docs.yml), rendered with the
 #      released version, studio commit, and release notes from the same dispatch
 #      payload, and refuses to publish when the payload does not name the build
 #      (VD-5700).
@@ -181,57 +182,15 @@ jobs:
     # Runs only after the GitHub Release exists. It consumes the identity the
     # `publish` job validated from the dispatch payload — the single gate — so a
     # release cannot publish documentation that does not name its own build.
+    # The implementation is the reusable operator-docs workflow, which is also
+    # dispatchable by hand for the initial bring-up and docs-only republishes.
     needs: publish
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
     permissions:
       contents: read # checkout the documentation sources
       pages: write # publish to GitHub Pages
       id-token: write # OIDC token the Pages deployment requires
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v7
-
-      # A release cannot publish documentation that does not name its own build.
-      # The version, studio commit, and release notes come from the same dispatch
-      # payload that produced the GitHub Release, validated by the `publish` job.
-      - name: Generate the release identity and notes
-        env:
-          TAG: ${{ needs.publish.outputs.tag }}
-          SHA: ${{ needs.publish.outputs.sha }}
-          NOTES: ${{ needs.publish.outputs.notes }}
-        run: |
-          {
-            echo "# Release ${TAG}"
-            echo
-            echo "This documentation was published for **${TAG}**, built from studio commit \`${SHA}\`."
-            echo
-            echo "## Release notes"
-            echo
-            printf '%s\n' "$NOTES"
-          } > docs/release.md
-          echo "Wrote docs/release.md for ${TAG} (${SHA})"
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: docs/package-lock.json
-
-      - name: Install docs dependencies
-        working-directory: docs
-        run: npm ci
-
-      - name: Build the operator documentation site
-        working-directory: docs
-        run: npm run docs:build
-
-      - uses: actions/upload-pages-artifact@v5
-        with:
-          path: docs/.vitepress/dist
-
-      - name: Deploy to GitHub Pages
-        id: deploy
-        uses: actions/deploy-pages@v5
+    uses: ./.github/workflows/docs.yml
+    with:
+      candidate_tag: ${{ needs.publish.outputs.tag }}
+      candidate_sha: ${{ needs.publish.outputs.sha }}
+      release_notes_body: ${{ needs.publish.outputs.notes }}
