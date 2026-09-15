@@ -58,12 +58,6 @@ class WikiWorkflowShape(unittest.TestCase):
             {"group": "operator-wiki", "cancel-in-progress": False},
         )
 
-    def test_defensive_gate_requires_sha_and_notes_with_a_tag(self) -> None:
-        # The authoritative gate is publish.yml's payload validation; this step
-        # is a defensive copy for the manual trigger.
-        self.assertIn("candidate_tag was supplied without candidate_sha", self.raw)
-        self.assertIn("candidate_tag was supplied without release_notes_body", self.raw)
-
     def test_mints_a_scoped_app_token_for_the_wiki_repo(self) -> None:
         self.assertIn("actions/create-github-app-token", self.raw)
         self.assertIn("VIBEDATA_GHA_APP_ID", self.raw)

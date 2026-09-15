@@ -9,8 +9,8 @@
 #     the initial bring-up and for a docs-only republish between releases. With no
 #     inputs it publishes without a release page.
 #
-# The authoritative gate is publish.yml's payload validation; the step below is a
-# defensive copy for the manual trigger.
+# The authoritative gate is publish.yml's payload validation; publish_wiki.py
+# re-checks the tag/sha/notes identity for the manual trigger too.
 #
 # Canonical contract: studio docs/design/operator-documentation/README.md.
 
@@ -63,24 +63,6 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
-
-      # A release publishes documentation that names its own build: the tag needs
-      # both the studio commit and the release notes. A manual run with no inputs
-      # has no build to name; publish_wiki.py then skips Release.md.
-      - name: Require the build identity when a tag is supplied
-        if: inputs.candidate_tag != ''
-        env:
-          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
-          CANDIDATE_NOTES: ${{ inputs.release_notes_body }}
-        run: |
-          if [ -z "$CANDIDATE_SHA" ]; then
-            echo "::error::candidate_tag was supplied without candidate_sha"
-            exit 1
-          fi
-          if [ -z "$CANDIDATE_NOTES" ]; then
-            echo "::error::candidate_tag was supplied without release_notes_body"
-            exit 1
-          fi
 
       # GITHUB_TOKEN cannot push to the wiki git repository; the app token scoped
       # to this repository can.

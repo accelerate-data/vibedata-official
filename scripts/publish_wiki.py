@@ -3,8 +3,10 @@
 The canonical source is this repository's ``docs/**`` (top-level markdown); the
 GitHub wiki is a separate git repository (``<repo>.wiki.git``) whose pages are its
 top-level ``*.md`` files. This script clones that repository, replaces every page
-with the canonical set, writes the generated sidebar, and — for a release —
-renders the released version, studio commit, and release notes into ``Release.md``.
+with the canonical set — each page stripped of its YAML front matter (the wiki
+does not render it) and with internal ``.md`` links rewritten to wiki page names —
+writes the generated sidebar, and, for a release, renders the released version,
+studio commit, and release notes into ``Release.md``.
 
 It is release-coupled: ``publish.yml``'s payload gate is the authoritative gate,
 and this script runs with the identity that gate validated. With no tag and sha it
@@ -24,7 +26,7 @@ Environment:
 from __future__ import annotations
 
 import os
-import shutil
+import re
 import subprocess
 import sys
 import tempfile
@@ -84,6 +86,54 @@ def wiki_pages(docs_dir: str | Path) -> dict[str, Path]:
     return pages
 
 
+def strip_front_matter(text: str) -> str:
+    """Drop a leading ``--- ... ---`` YAML block.
+
+    The GitHub wiki renderer does not consume YAML front matter, so the block
+    would otherwise render as a stray rule and heading. Text without a leading
+    delimiter, or with an unterminated one, is returned unchanged.
+    """
+    lines = text.splitlines(keepends=True)
+    if not lines or lines[0].strip() != "---":
+        return text
+    for index in range(1, len(lines)):
+        if lines[index].strip() == "---":
+            return "".join(lines[index + 1 :])
+    return text
+
+
+def rewrite_wiki_links(text: str) -> str:
+    """Point internal markdown links at the wiki page names.
+
+    A wiki page is served at ``/wiki/<page>`` (without the extension), so
+    ``](X.md)`` and ``](X.md#anchor)`` must lose the ``.md``; ``README.md`` and
+    ``README`` name the ``Home`` page. External URLs, pure ``#anchor`` links, and
+    non-``.md`` targets are left untouched.
+    """
+    return _LINK_RE.sub(_rewrite_link, text)
+
+
+def _rewrite_link(match: re.Match[str]) -> str:
+    target = match.group(1)
+    if (
+        target.startswith("#")
+        or target.startswith("//")
+        or target.startswith("mailto:")
+        or "://" in target
+    ):
+        return match.group(0)
+    path, sep, anchor = target.partition("#")
+    if path in ("README", "./README"):
+        return f"](Home{sep}{anchor})"
+    if path.endswith(".md"):
+        stem = path[:-3].removeprefix("./")
+        return f"]({'Home' if stem == 'README' else stem}{sep}{anchor})"
+    return match.group(0)
+
+
+_LINK_RE = re.compile(r"\]\(([^)\n]+)\)")
+
+
 def render_release_page(tag: str, sha: str, notes: str) -> str:
     """Render the generated ``Release.md`` naming the released build."""
     # The notes are raw model-generated text. GitHub sanitizes wiki markdown on
@@ -141,6 +191,18 @@ def main() -> int:
         print(f"::error::DOCS_DIR not found: {docs_dir}", file=sys.stderr)
         return 1
 
+    # A release publish must name its own build: a tag without the studio commit
+    # and the release notes is a malformed invocation. publish.yml's payload gate
+    # is authoritative; this guard is the executable-side check for the manual
+    # trigger too.
+    if tag and not (sha and notes.strip()):
+        print(
+            "::error::a release tag requires both SHA (studio commit) and "
+            "NOTES (release notes)",
+            file=sys.stderr,
+        )
+        return 1
+
     has_release = bool(tag and sha)
     pages = wiki_pages(docs_dir)
     # Removing the existing pages is destructive: refuse a source set that is
@@ -162,11 +224,14 @@ def main() -> int:
             stale.unlink()
 
         for page_name, source in pages.items():
-            shutil.copyfile(source, workdir / page_name)
+            rendered = rewrite_wiki_links(
+                strip_front_matter(source.read_text(encoding="utf-8"))
+            )
+            (workdir / page_name).write_text(rendered, "utf-8")
         (workdir / SIDEBAR_PAGE).write_text(render_sidebar(has_release), "utf-8")
         if has_release:
             (workdir / RELEASE_PAGE).write_text(
-                render_release_page(tag, sha, notes), "utf-8"
+                rewrite_wiki_links(render_release_page(tag, sha, notes)), "utf-8"
             )
 
         _run(["git", "-C", str(workdir), "config", "user.name", GIT_AUTHOR_NAME])
