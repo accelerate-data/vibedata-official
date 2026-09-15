@@ -5,9 +5,9 @@ accelerate-data/vd-studio's deploy.yml AFTER that workflow has already promoted
 the images (crane copy, signatures preserved) into the public studio-* packages.
 This workflow therefore must NOT re-promote the images; it downloads the
 studio-built release artifacts, creates the GitHub Release, and publishes the
-operator documentation as a VitePress site rendered from the same dispatch
-payload. See vd-studio docs/design/devops/03-release-promotion.md for the
-canonical contract.
+operator documentation to the vibedata-official GitHub wiki, rendered from the
+same dispatch payload. See vd-studio docs/design/devops/03-release-promotion.md
+for the canonical contract.
 """
 
 from __future__ import annotations
@@ -71,11 +71,11 @@ class PublishWorkflowShape(unittest.TestCase):
         self.assertIn("install.sh", self.raw)
 
     def test_no_longer_requires_a_wiki_tarball(self) -> None:
-        # Studio stopped producing wiki-<tag>.tar.gz and the operator wiki is
-        # retired to a pointer; the documentation publishes as a site (VD-5700).
-        # Assert the specific retired artifact name (its required-artifact list
-        # entry), not the bare word "wiki", so a future comment mentioning
-        # "wiki" does not break this test.
+        # Studio stopped producing wiki-<tag>.tar.gz; the operator docs are pushed
+        # to the wiki directly by the wiki workflow (VD-5737), not shipped as a
+        # release asset. Assert the specific retired artifact name (its
+        # required-artifact list entry), not the bare word "wiki", so a future
+        # comment mentioning "wiki" does not break this test.
         self.assertNotIn("wiki-${TAG}.tar.gz", self.raw)
 
     def test_creates_release_without_a_separate_image_manifest(self) -> None:
@@ -106,12 +106,12 @@ class PublishWorkflowShape(unittest.TestCase):
         self.assertIn("missing release_notes_body", self.raw)
         self.assertIn("missing source_workflow_run_id", self.raw)
 
-    def test_docs_job_calls_the_reusable_operator_docs_workflow(self) -> None:
-        # The Pages implementation lives in the reusable operator-docs workflow,
+    def test_docs_job_calls_the_reusable_operator_wiki_workflow(self) -> None:
+        # The wiki implementation lives in the reusable operator-wiki workflow,
         # which is also dispatchable by hand (initial bring-up, docs-only
         # republish between releases).
         docs = self.wf["jobs"]["docs"]
-        self.assertEqual(docs["uses"], "./.github/workflows/docs.yml")
+        self.assertEqual(docs["uses"], "./.github/workflows/wiki.yml")
         self.assertEqual(
             docs["with"]["candidate_tag"], "${{ needs.publish.outputs.tag }}"
         )
@@ -127,12 +127,15 @@ class PublishWorkflowShape(unittest.TestCase):
         # succeeded, and it consumes the identity the publish job validated.
         self.assertEqual(self.wf["jobs"]["docs"]["needs"], "publish")
 
-    def test_docs_job_grants_pages_permissions_to_the_called_workflow(self) -> None:
-        # A reusable workflow's token is capped by the caller's job permissions,
-        # so the caller must grant Pages + OIDC for the deploy to be allowed.
-        perms = self.wf["jobs"]["docs"]["permissions"]
-        self.assertEqual(perms.get("pages"), "write")
-        self.assertEqual(perms.get("id-token"), "write")
+    def test_docs_job_inherits_secrets_for_the_wiki_app_token(self) -> None:
+        # The called workflow mints an app token from repo secrets; a reusable
+        # workflow only receives them when the caller inherits.
+        self.assertEqual(self.wf["jobs"]["docs"]["secrets"], "inherit")
+
+    def test_docs_job_grants_only_contents_read(self) -> None:
+        # The wiki is a separate git repository pushed with a minted app token;
+        # the caller's GITHUB_TOKEN needs only to read the documentation sources.
+        self.assertEqual(self.wf["jobs"]["docs"]["permissions"], {"contents": "read"})
 
     def test_minimal_permissions(self) -> None:
         perms = self.wf["permissions"]

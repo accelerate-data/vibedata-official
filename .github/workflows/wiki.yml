@@ -1,0 +1,89 @@
+# Publish the operator documentation to the vibedata-official GitHub wiki (VD-5737).
+#
+# Two triggers, one implementation:
+#   - workflow_call: invoked by publish.yml on a `studio-release` dispatch, so a
+#     release publishes the documentation that names its own build. The released
+#     version, studio commit, and release notes come from the validated dispatch
+#     payload; publish_wiki.py renders them into the generated Release.md.
+#   - workflow_dispatch: a manual run that publishes the current docs. Used for
+#     the initial bring-up and for a docs-only republish between releases. With no
+#     inputs it publishes without a release page.
+#
+# The authoritative gate is publish.yml's payload validation; the step below is a
+# defensive copy for the manual trigger.
+#
+# Canonical contract: studio docs/design/operator-documentation/README.md.
+
+name: operator-wiki
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_tag:
+        description: >-
+          Released version to stamp (e.g. v1.4.2). Optional; omit to publish
+          without a release page.
+        required: false
+        type: string
+      candidate_sha:
+        description: 'Studio commit the release was built from. Required with candidate_tag.'
+        required: false
+        type: string
+      release_notes_body:
+        description: 'Release notes to render on the release page. Optional.'
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      candidate_tag:
+        required: false
+        type: string
+      candidate_sha:
+        required: false
+        type: string
+      release_notes_body:
+        required: false
+        type: string
+
+permissions:
+  contents: read # checkout the documentation sources
+
+jobs:
+  publish:
+    name: Publish operator documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      # A release publishes documentation that names its own build. A manual run
+      # with no inputs has no build to name; publish_wiki.py then skips Release.md.
+      - name: Require the build identity when a tag is supplied
+        if: inputs.candidate_tag != ''
+        env:
+          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+        run: |
+          if [ -z "$CANDIDATE_SHA" ]; then
+            echo "::error::candidate_tag was supplied without candidate_sha"
+            exit 1
+          fi
+
+      # GITHUB_TOKEN cannot push to the wiki git repository; the app token scoped
+      # to this repository can.
+      - name: Mint the wiki push token
+        id: wiki-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.VIBEDATA_GHA_APP_ID }}
+          private-key: ${{ secrets.VIBEDATA_GHA_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: vibedata-official
+
+      - name: Publish the wiki pages
+        env:
+          WIKI_REMOTE: https://x-access-token:${{ steps.wiki-token.outputs.token }}@github.com/${{ github.repository }}.wiki.git
+          DOCS_DIR: docs
+          TAG: ${{ inputs.candidate_tag }}
+          SHA: ${{ inputs.candidate_sha }}
+          NOTES: ${{ inputs.release_notes_body }}
+        run: python3 scripts/publish_wiki.py

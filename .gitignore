@@ -22,9 +22,3 @@ __pycache__/
 .coverage
 coverage.xml
 htmlcov/
-
-# VitePress docs site (docs/package-lock.json IS committed)
-docs/node_modules/
-docs/.vitepress/dist/
-docs/.vitepress/cache/
-docs/release.md
