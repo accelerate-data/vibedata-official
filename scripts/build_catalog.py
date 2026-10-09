@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Validate the vibedata-official storefront and generate its catalog.
 
 Run `python3 scripts/build_catalog.py` to regenerate catalog/ and the README
