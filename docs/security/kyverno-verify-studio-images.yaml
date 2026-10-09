@@ -40,11 +40,12 @@ spec:
   # (@.*$), matching the release pipeline's own verify. To also constrain to the
   # trusted ref, tighten to `@refs/(heads/main|tags/v.*)$` once you've confirmed
   # the SAN of a shipped image:
-  #   cosign verify --certificate-identity-regexp '.*release\.yml@.*' \
+  #   cosign verify --certificate-identity-regexp '.*create-candidate-image\.yml@.*' \
   #     --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   #     ghcr.io/accelerate-data/studio-backend:<tag>
   rules:
-    # Backend + frontend are signed by the release workflow.
+    # Backend + frontend are signed by create-candidate-image.yml; deploy.yml
+    # promotes the verified candidate to the public package without re-signing.
     - name: verify-backend-frontend
       match:
         any:
@@ -60,7 +61,7 @@ spec:
           attestors:
             - entries:
                 - keyless:
-                    subjectRegExp: "^https://github\\.com/accelerate-data/studio/\\.github/workflows/release\\.yml@.*$"
+                    subjectRegExp: "^https://github\\.com/accelerate-data/studio/\\.github/workflows/create-candidate-image\\.yml@.*$"
                     issuer: "https://token.actions.githubusercontent.com"
                     rekor:
                       url: https://rekor.sigstore.dev
