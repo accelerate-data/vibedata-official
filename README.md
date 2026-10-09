@@ -1,11 +1,13 @@
 <p align="left">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="http://assets.acceleratedata.ai/logo/product/ui/logo-light-h48.svg">
-    <img src="http://assets.acceleratedata.ai/logo/product/ui/logo-dark-h48.svg" alt="Accelerate Data" height="48">
-  </picture>
+  <a href="https://www.getvibedata.ai">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="http://assets.acceleratedata.ai/logo/product/ui/logo-light-h48.svg">
+      <img src="http://assets.acceleratedata.ai/logo/product/ui/logo-dark-h48.svg" alt="Accelerate Data" height="48">
+    </picture>
+  </a>
 </p>
 
-The official skill library and plugin marketplace for [VibeData](https://acceleratedata.ai) — the agentic coordination layer for data platforms.
+The official skill library and plugin marketplace for [vibedata](https://www.getvibedata.ai) — the agentic coordination layer for data platforms.
 
 > Organizational data engineering standards, encoded and enforced.
 
@@ -13,19 +15,19 @@ The official skill library and plugin marketplace for [VibeData](https://acceler
 
 Data teams lose weeks to coordination tax — intent lost between role switches, fix patterns never captured, institutional knowledge trapped in people's heads. Current tools address individual slices (ingestion, transformation, observability) without connecting them.
 
-This repository is the distribution layer for the standards that customize VibeData data engineering agents. Skills encode organizational rules for ingestion, extraction, source-system handling, platform conventions, and business logic so agents build, deploy, and operate pipelines with your team's accumulated knowledge — not generic defaults.
+This repository is the distribution layer for the standards that customize vibedata data engineering agents. Skills encode organizational rules for ingestion, extraction, source-system handling, platform conventions, and business logic so agents build, deploy, and operate pipelines with your team's accumulated knowledge — not generic defaults.
 
-The same bundles can also be installed directly in Claude Code as standalone skills for practitioners who want those standards available outside VibeData.
+The same bundles can also be installed directly in Claude Code as standalone skills for practitioners who want those standards available outside vibedata.
 
 ## Skills vs Plugins
 
 | | Skills | Plugins |
 |---|---|---|
-| **What** | Markdown knowledge packages that encode organizational standards, source customization, and business rules | Installable Claude Code packages that bundle skills for VibeData agents or standalone Claude Code use |
-| **How they work** | Loaded into VibeData data engineering agents to align behavior with your team's standards | Installed from the marketplace as reusable capabilities |
+| **What** | Markdown knowledge packages that encode organizational standards, source customization, and business rules | Installable Claude Code packages that bundle skills for vibedata agents or standalone Claude Code use |
+| **How they work** | Loaded into vibedata data engineering agents to align behavior with your team's standards | Installed from the marketplace as reusable capabilities |
 | **Example** | dbt naming conventions for Fabric, SCD2 snapshot patterns | Skill bundles like `vibedata-dbt-skills`, or platform plugins like `fabric-cli` |
 
-Skills are the behavior-shaping knowledge. Plugins are the distribution unit that makes those standards available to VibeData agents and, when useful, to Claude Code directly.
+Skills are the behavior-shaping knowledge. Plugins are the distribution unit that makes those standards available to vibedata agents and, when useful, to Claude Code directly.
 
 ## Quick Start
 
@@ -41,7 +43,7 @@ Install the dbt-on-Fabric starter bundle:
 /plugin install vibedata-dbt-skills@vibedata-plugins-official
 ```
 
-Then explore the rest of the catalog from the same marketplace. Skill bundles are intended for VibeData agent customization first, and can also be installed directly in Claude Code.
+Then explore the rest of the catalog from the same marketplace. Skill bundles are intended for vibedata agent customization first, and can also be installed directly in Claude Code.
 
 ### Codex
 
@@ -70,7 +72,7 @@ edit them by hand. CI fails when they are stale.
 <!-- END GENERATED: catalog-summary -->
 
 Third-party content is collated from upstream sources, provided as is, and used
-at your own risk. VibeData does not review each upstream change.
+at your own risk. vibedata does not review each upstream change.
 
 ## Available Plugins
 
@@ -83,8 +85,8 @@ at your own risk. VibeData does not review each upstream change.
 | `dbt-migration` | Migrating dbt projects — dbt Core to the Fusion engine, or across data platforms | Apache-2.0 | `/plugin install dbt-migration@vibedata-plugins-official` |
 | `fabric-cli` | Microsoft Fabric CLI operations — workspace management, notebook execution, pipeline orchestration, OneLake file I/O, lakehouse tables, and MCP server integration | Elastic-2.0 | `/plugin install fabric-cli@vibedata-plugins-official` |
 | `fabric-skills` | Microsoft Skills for Fabric — semantic model authoring, Spark and warehouse CLI operations, migration, and end-to-end medallion architecture | MIT | `/plugin install fabric-skills@vibedata-plugins-official` |
-| `vibedata-dbt-skills` | Customize VibeData dbt agents with Fabric modeling, snapshot, semantic layer, and Elementary quality standards | Elastic-2.0 | `/plugin install vibedata-dbt-skills@vibedata-plugins-official` |
-| `vibedata-dlt-skills` | Customize VibeData ingestion agents with dlt REST API standards for ADLS Gen2, OneLake, and Fabric lakehouses | Elastic-2.0 | `/plugin install vibedata-dlt-skills@vibedata-plugins-official` |
+| `vibedata-dbt-skills` | Customize vibedata dbt agents with Fabric modeling, snapshot, semantic layer, and Elementary quality standards | Elastic-2.0 | `/plugin install vibedata-dbt-skills@vibedata-plugins-official` |
+| `vibedata-dlt-skills` | Customize vibedata ingestion agents with dlt REST API standards for ADLS Gen2, OneLake, and Fabric lakehouses | Elastic-2.0 | `/plugin install vibedata-dlt-skills@vibedata-plugins-official` |
 <!-- END GENERATED: available-plugins -->
 
 ## Skill Library
@@ -113,9 +115,9 @@ The table above lists the Skill Library (`skills/`) and the skills bundled in th
 repository's own plugins. Skills inside collated third-party plugins are owned by
 their upstream repositories and are not listed here.
 
-## How Skills Work in VibeData
+## How Skills Work in vibedata
 
-Skills plug into three surfaces of the VibeData agentic workflow:
+Skills plug into three surfaces of the vibedata agentic workflow:
 
 - **Build** — When a practitioner describes business intent, agents draw on skills to validate domain fit and generate code that follows your team's conventions.
 - **Deploy** — When a PR is opened, deploy agents use skills to run context-informed quality gates — checking documentation, code quality, test coverage, and data quality.

@@ -88,7 +88,7 @@ personal account rather than on an organisation.
 
    | Field | What GitHub requires |
    | --- | --- |
-   | **GitHub App name** | Unique across all of GitHub, and at most 34 characters. The obvious names are often already taken, so qualify the name with your organisation — for example `VibeData Studio - Acme`. GitHub shows this name, lowercased and hyphenated, every time the App acts on a repository. |
+   | **GitHub App name** | Unique across all of GitHub, and at most 34 characters. The obvious names are often already taken, so qualify the name with your organisation — for example `vibedata Studio - Acme`. GitHub shows this name, lowercased and hyphenated, every time the App acts on a repository. |
    | **Homepage URL** | A complete, well-formed URL. If you have no page for this App, use your organisation's own GitHub URL: `https://github.com/<your-org>`. |
 
 4. Under **Identifying and authorizing users**, register this callback URL. Build it by

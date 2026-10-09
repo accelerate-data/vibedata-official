@@ -51,14 +51,14 @@
       },
       {
         "name": "vibedata-dbt-skills",
-        "description": "Customize VibeData dbt agents with Fabric modeling, snapshot, semantic layer, and Elementary quality standards",
+        "description": "Customize vibedata dbt agents with Fabric modeling, snapshot, semantic layer, and Elementary quality standards",
         "license": "Elastic-2.0",
         "source": "in-repo",
         "install": "/plugin install vibedata-dbt-skills@vibedata-plugins-official"
       },
       {
         "name": "vibedata-dlt-skills",
-        "description": "Customize VibeData ingestion agents with dlt REST API standards for ADLS Gen2, OneLake, and Fabric lakehouses",
+        "description": "Customize vibedata ingestion agents with dlt REST API standards for ADLS Gen2, OneLake, and Fabric lakehouses",
         "license": "Elastic-2.0",
         "source": "in-repo",
         "install": "/plugin install vibedata-dlt-skills@vibedata-plugins-official"

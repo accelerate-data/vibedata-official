@@ -1,4 +1,4 @@
-"""Validate the VibeData plugin marketplace registry."""
+"""Validate the vibedata plugin marketplace registry."""
 
 from __future__ import annotations
 

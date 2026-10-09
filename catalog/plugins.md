@@ -1,6 +1,6 @@
 # Plugins
 
-Third-party content is collated from upstream sources, provided as is, and used at your own risk. VibeData does not review each upstream change.
+Third-party content is collated from upstream sources, provided as is, and used at your own risk. vibedata does not review each upstream change.
 
 | Plugin | Description | Author | License | Source |
 | --- | --- | --- | --- | --- |
@@ -10,8 +10,8 @@ Third-party content is collated from upstream sources, provided as is, and used 
 | `dbt-migration` | Migrating dbt projects — dbt Core to the Fusion engine, or across data platforms | dbt Labs | Apache-2.0 | dbt-labs/dbt-agent-skills (skills/dbt-migration) |
 | `fabric-cli` | Microsoft Fabric CLI operations — workspace management, notebook execution, pipeline orchestration, OneLake file I/O, lakehouse tables, and MCP server integration |  | Elastic-2.0 | in-repo |
 | `fabric-skills` | Microsoft Skills for Fabric — semantic model authoring, Spark and warehouse CLI operations, migration, and end-to-end medallion architecture | Microsoft | MIT | microsoft/skills-for-fabric (plugins/fabric-skills) |
-| `vibedata-dbt-skills` | Customize VibeData dbt agents with Fabric modeling, snapshot, semantic layer, and Elementary quality standards |  | Elastic-2.0 | in-repo |
-| `vibedata-dlt-skills` | Customize VibeData ingestion agents with dlt REST API standards for ADLS Gen2, OneLake, and Fabric lakehouses |  | Elastic-2.0 | in-repo |
+| `vibedata-dbt-skills` | Customize vibedata dbt agents with Fabric modeling, snapshot, semantic layer, and Elementary quality standards |  | Elastic-2.0 | in-repo |
+| `vibedata-dlt-skills` | Customize vibedata ingestion agents with dlt REST API standards for ADLS Gen2, OneLake, and Fabric lakehouses |  | Elastic-2.0 | in-repo |
 
 ----
 

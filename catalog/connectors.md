@@ -1,6 +1,6 @@
 # Connector sources
 
-Third-party content is collated from upstream sources, provided as is, and used at your own risk. VibeData does not review each upstream change.
+Third-party content is collated from upstream sources, provided as is, and used at your own risk. vibedata does not review each upstream change.
 
 | Source | Description | Upstream | License |
 | --- | --- | --- | --- |

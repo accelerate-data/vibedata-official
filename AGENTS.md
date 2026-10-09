@@ -2,7 +2,7 @@
 
 ## Repository purpose
 
-Bundled plugin marketplace for [VibeData](https://acceleratedata.ai). Each subdirectory under `plugins/` is a self-contained Claude and Codex plugin package containing skills and optionally agents, commands, and hooks. The root `.claude-plugin/marketplace.json` is the Claude registry index. The root `.agents/plugins/marketplace.json` is the Codex registry index. Standalone skills that are not distributed through a plugin live under `skills/`.
+Bundled plugin marketplace for [vibedata](https://acceleratedata.ai). Each subdirectory under `plugins/` is a self-contained Claude and Codex plugin package containing skills and optionally agents, commands, and hooks. The root `.claude-plugin/marketplace.json` is the Claude registry index. The root `.agents/plugins/marketplace.json` is the Codex registry index. Standalone skills that are not distributed through a plugin live under `skills/`.
 
 The storefront pulls content in as submodules (`recipes/`, `mcp/`) and lists
 standalone skills under `skills/`. `manifest.json` names every content source,

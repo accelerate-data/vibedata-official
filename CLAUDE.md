@@ -2,7 +2,7 @@
 
 ## Plugins
 
-This repository publishes the `vibedata` plugin registry for VibeData.
+This repository publishes the `vibedata` plugin registry for vibedata.
 Plugin updates must follow the marketplace rules in AGENTS.md and pass:
 
 ```bash

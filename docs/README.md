@@ -13,9 +13,9 @@ sources:
   - cli/vibedata/src/vibedata/templates/env.j2
 ---
 
-# VibeData Studio
+# vibedata Studio
 
-VibeData Studio is a workspace where an AI agent helps a data team build, test, and run
+vibedata Studio is a workspace where an AI agent helps a data team build, test, and run
 data pipelines against a connected data platform, with changes tracked through a connected
 GitHub repository. This guide takes a reader with no access to any private Accelerate Data
 repository from an empty machine to a first domain: created, connected to a data platform,
