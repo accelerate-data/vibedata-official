@@ -1,4 +1,4 @@
-# Public release publish pipeline for VibeData Studio.
+# Public release publish pipeline for vibedata Studio.
 #
 # Triggered by a `studio-release` repository_dispatch from
 # accelerate-data/vd-studio's deploy.yml AFTER that workflow has already:

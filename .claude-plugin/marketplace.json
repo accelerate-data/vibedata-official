@@ -2,7 +2,7 @@
   "name": "vibedata-plugins-official",
   "owner": { "name": "accelerate-data" },
   "metadata": {
-    "description": "Skills and plugins for customizing VibeData data engineering agents across Microsoft Fabric, dbt, dlt, and Databricks",
+    "description": "Skills and plugins for customizing vibedata data engineering agents across Microsoft Fabric, dbt, dlt, and Databricks",
     "version": "1.1.0"
   },
   "plugins": [
@@ -74,13 +74,13 @@
     },
     {
       "name": "vibedata-dbt-skills",
-      "description": "Customize VibeData dbt agents with Fabric modeling, snapshot, semantic layer, and Elementary quality standards",
+      "description": "Customize vibedata dbt agents with Fabric modeling, snapshot, semantic layer, and Elementary quality standards",
       "license": "Elastic-2.0",
       "source": "./plugins/vibedata-dbt-skills"
     },
     {
       "name": "vibedata-dlt-skills",
-      "description": "Customize VibeData ingestion agents with dlt REST API standards for ADLS Gen2, OneLake, and Fabric lakehouses",
+      "description": "Customize vibedata ingestion agents with dlt REST API standards for ADLS Gen2, OneLake, and Fabric lakehouses",
       "license": "Elastic-2.0",
       "source": "./plugins/vibedata-dlt-skills"
     }

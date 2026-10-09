@@ -44,7 +44,7 @@ def valid_marketplace() -> dict:
 def valid_codex_marketplace() -> dict:
     return {
         "name": "vibedata-plugins-official",
-        "interface": {"displayName": "VibeData Official"},
+        "interface": {"displayName": "vibedata Official"},
         "plugins": [
             {
                 "name": "alpha-plugin",

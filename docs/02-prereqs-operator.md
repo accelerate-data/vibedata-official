@@ -92,7 +92,7 @@ the downloaded asset to plain `vibedata` for the same reason, so `vibedata versi
 resolves; without the rename, Windows will not find a `vibedata` command on `PATH`.
 
 **There is no Homebrew formula for the `vibedata` CLI.** The `accelerate-data/homebrew-tap`
-repository describes itself as a tap for the VibeData CLI, but the only formula it
+repository describes itself as a tap for the vibedata CLI, but the only formula it
 publishes is `ad-migration`. `brew install vibedata` fails — use the installer above
 instead.
 

@@ -1,7 +1,7 @@
 {
   "name": "vibedata-plugins-official",
   "interface": {
-    "displayName": "VibeData Official"
+    "displayName": "vibedata Official"
   },
   "plugins": [
     {
