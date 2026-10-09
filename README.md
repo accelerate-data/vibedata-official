@@ -53,59 +53,65 @@ codex plugin marketplace add accelerate-data/vibedata-plugins-official
 
 The Codex marketplace is declared in `.agents/plugins/marketplace.json`, and each bundled plugin exposes a `.codex-plugin/plugin.json` manifest.
 
-## Starter Set
+## Catalog
 
-The catalog covers four platforms, combining first-party VibeData standards with public plugins published by the platform vendors:
+Every catalog page and README table in this repository is generated from the
+sources declared in `manifest.json`; do not edit them by hand. CI fails when they
+are stale.
 
-| Platform | Plugins |
-|---|---|
-| Microsoft Fabric | `fabric-skills` (Microsoft), `fabric-cli` |
-| dbt | `dbt`, `dbt-migration`, `dbt-extras` (dbt Labs), `vibedata-dbt-skills` |
-| dlt | `vibedata-dlt-skills` |
-| Databricks | `databricks` (Databricks) |
+<!-- BEGIN GENERATED: catalog-summary -->
+| Catalog | Entries | Browse |
+| --- | --- | --- |
+| Plugins | 8 | [catalog/plugins.md](catalog/plugins.md) |
+| Skills | 13 | [catalog/skills.md](catalog/skills.md) |
+| Recipes | 22 | [catalog/recipes.md](catalog/recipes.md) |
+| Connector sources | 1 | [catalog/connectors.md](catalog/connectors.md) |
+| MCP servers | 174 | [catalog/mcp.md](catalog/mcp.md) |
+<!-- END GENERATED: catalog-summary -->
 
-Collated third-party plugins track their upstream repositories. Third-party content is provided as is, is used at your own risk, and is not reviewed by VibeData.
+Third-party content is collated from upstream sources, provided as is, and used
+at your own risk. VibeData does not review each upstream change.
 
 ## Available Plugins
 
-| Plugin | What it does | Best for | Install |
-|---|---|---|---|
-| `databricks` | Databricks CLI, Apps, Lakebase, Model Serving, Lakeflow Jobs, Spark Declarative Pipelines, and migration skills | Building and operating on Databricks | `/plugin install databricks@vibedata-plugins-official` |
-| `dbt` | Analytics engineering with dbt — models, tests, semantic layer, and job troubleshooting | dbt project delivery | `/plugin install dbt@vibedata-plugins-official` |
-| `dbt-extras` | Miscellaneous dbt skills | dbt project delivery | `/plugin install dbt-extras@vibedata-plugins-official` |
-| `dbt-migration` | Migrating dbt projects between engines and platforms | dbt Core to Fusion, or cross-platform moves | `/plugin install dbt-migration@vibedata-plugins-official` |
-| `fabric-cli` | Operational workflows for Fabric workspaces, notebooks, pipelines, and OneLake | Fabric platform operations and environment control | `/plugin install fabric-cli@vibedata-plugins-official` |
-| `fabric-skills` | Microsoft's Fabric skills for semantic models, Spark and warehouse CLI operations, migration, and medallion architecture | Broad Microsoft Fabric delivery | `/plugin install fabric-skills@vibedata-plugins-official` |
-| `vibedata-dbt-skills` | Customizes dbt agents with Fabric modeling, snapshot, semantic layer, and Elementary quality standards | dbt project delivery on Microsoft Fabric | `/plugin install vibedata-dbt-skills@vibedata-plugins-official` |
-| `vibedata-dlt-skills` | Customizes ingestion agents with dlt REST API standards for ADLS Gen2, OneLake, and Fabric lakehouses | API ingestion pipelines feeding dbt | `/plugin install vibedata-dlt-skills@vibedata-plugins-official` |
-
-## Skill Bundle Contents
-
-Skills are distributed through Claude plugins. Install the bundle that matches the VibeData agent behavior you want to customize, or install it directly in Claude Code for standalone use.
-
-### `vibedata-dbt-skills`
-
-| Skill | What it encodes |
-|---|---|
-| `dbt-fabric-patterns` | Practitioner-level dbt patterns for Microsoft Fabric |
-| `dbt-semantic-layer` | Semantic models and MetricFlow metrics in dbt on Microsoft Fabric |
-| `dbt-snapshot-scd2` | SCD Type 2 snapshot implementation in dbt on Microsoft Fabric |
-| `elementary-data-quality` | Elementary anomaly detection configuration for dbt on Microsoft Fabric |
-
-### `vibedata-dlt-skills`
-
-| Skill | What it encodes |
-|---|---|
-| `dlt-rest-api-connector` | dlt REST API pipelines to ADLS Gen2 and OneLake |
+<!-- BEGIN GENERATED: available-plugins -->
+| Plugin | What it does | License | Install |
+| --- | --- | --- | --- |
+| `databricks` | Databricks skills for the CLI, Apps, Lakebase, Model Serving, Lakeflow Jobs, Spark Declarative Pipelines, Declarative Automation Bundles, and classic-to-serverless migration | Databricks License | `/plugin install databricks@vibedata-plugins-official` |
+| `dbt` | Analytics engineering with dbt — building models, writing tests, querying the semantic layer, and troubleshooting jobs | Apache-2.0 | `/plugin install dbt@vibedata-plugins-official` |
+| `dbt-extras` | Miscellaneous dbt skills | Apache-2.0 | `/plugin install dbt-extras@vibedata-plugins-official` |
+| `dbt-migration` | Migrating dbt projects — dbt Core to the Fusion engine, or across data platforms | Apache-2.0 | `/plugin install dbt-migration@vibedata-plugins-official` |
+| `fabric-cli` | Microsoft Fabric CLI operations — workspace management, notebook execution, pipeline orchestration, OneLake file I/O, lakehouse tables, and MCP server integration | Elastic-2.0 | `/plugin install fabric-cli@vibedata-plugins-official` |
+| `fabric-skills` | Microsoft Skills for Fabric — semantic model authoring, Spark and warehouse CLI operations, migration, and end-to-end medallion architecture | MIT | `/plugin install fabric-skills@vibedata-plugins-official` |
+| `vibedata-dbt-skills` | Customize VibeData dbt agents with Fabric modeling, snapshot, semantic layer, and Elementary quality standards | Elastic-2.0 | `/plugin install vibedata-dbt-skills@vibedata-plugins-official` |
+| `vibedata-dlt-skills` | Customize VibeData ingestion agents with dlt REST API standards for ADLS Gen2, OneLake, and Fabric lakehouses | Elastic-2.0 | `/plugin install vibedata-dlt-skills@vibedata-plugins-official` |
+<!-- END GENERATED: available-plugins -->
 
 ## Skill Library
 
 Standalone skills that are not tied to a plugin bundle live in [`skills/`](./skills). Copy one into a Domain's `.agents/skills/` directory to make it an ordinary project skill.
 
-| Skill | What it encodes |
-|---|---|
-| `modeling-revenue-recognition` | Revenue recognition mapped to dbt medallion architecture on Microsoft Fabric |
-| `salesforce-extraction` | Salesforce data extraction via dlt into dbt on Microsoft Fabric |
+<!-- BEGIN GENERATED: skill-library -->
+| Skill | Bundle | What it encodes |
+| --- | --- | --- |
+| `modeling-revenue-recognition` | Skill Library | Use when modeling ASC 606 revenue recognition in dbt on Microsoft Fabric, including performance obligations, transaction price allocation, deferred revenue, contract modifications, or silver/gold revenue reporting layers. |
+| `salesforce-extraction` | Skill Library | Extract Salesforce data via dlt into dbt on Microsoft Fabric. Use when building Salesforce pipelines, handling CPQ overrides, soft deletes, or managed package fields. Also use when choosing CDC timestamps or debugging missing Salesforce records. |
+| `fabric-cli-basics` | fabric-cli | Core Fabric CLI (fab) operations — workspace navigation, item management, authentication, resource types, path format, output formatting. Use when listing workspaces/items, creating/deleting resources, checking existence, describing items, or configuring the CLI. |
+| `fabric-cli-lakehouse` | fabric-cli | Fabric CLI lakehouse operations — create lakehouses, inspect table schemas, load data into tables, optimize and vacuum tables, and run table maintenance jobs. Use when working with .Lakehouse items and Delta tables via the fab CLI. |
+| `fabric-cli-notebook` | fabric-cli | Fabric CLI notebook operations — list, create, export, import, edit, run, schedule, and monitor notebooks in Microsoft Fabric. Use when working with .Notebook items via the fab CLI. |
+| `fabric-cli-onelake` | fabric-cli | Fabric CLI OneLake file operations — upload, download, copy, move, list, create, and delete files and folders in OneLake storage. Use when working with files inside Lakehouse Files/ or Tables/ paths. |
+| `fabric-cli-pipeline` | fabric-cli | Fabric CLI data pipeline operations — list, create, run with parameters, monitor, schedule, cancel, export, and import DataPipeline items. Use when working with .DataPipeline items via the fab CLI. |
+| `fabric-mcp` | fabric-cli | Microsoft Fabric MCP Server setup and usage — provides AI agents with access to Fabric public APIs, item definitions, OneLake data operations, and best-practice guidance. Use when configuring the Fabric MCP Server for Claude Code or other AI clients. |
+| `dbt-fabric-patterns` | vibedata-dbt-skills | Practitioner-level dbt patterns for Microsoft Fabric. Covers materialization decisions, incremental model gotchas, snapshot strategies, selector/tag patterns, ref() chain rules, and Fabric-specific T-SQL quirks. Use when writing, reviewing, or debugging dbt models on Fabric. Also use when setting up dbt_project.yml configuration or CI/CD pipelines for dbt-fabric projects. |
+| `dbt-semantic-layer` | vibedata-dbt-skills | Define semantic models and MetricFlow metrics in dbt on Microsoft Fabric. Use when creating semantic model YAML, defining entities, dimensions, and measures, or configuring metric types. Also use when choosing between denormalized marts and semantic layer queries. |
+| `dbt-snapshot-scd2` | vibedata-dbt-skills | Implement SCD Type 2 snapshots in dbt on Microsoft Fabric. Use when building snapshot models, choosing between timestamp and check strategies, or handling Fabric-specific datetime2 quirks. Also use when tracking slowly changing dimensions or debugging snapshot drift. |
+| `elementary-data-quality` | vibedata-dbt-skills | Configure Elementary anomaly detection for dbt on Microsoft Fabric. Use when placing data quality tests by medallion layer, setting up volume or column anomalies, or configuring timestamp_column. Also use when debugging silent test failures or choosing severity levels. |
+| `dlt-rest-api-connector` | vibedata-dlt-skills | Build dlt REST API pipelines to ADLS Gen2 and OneLake. Use when configuring RESTAPIConfig, handling pagination, or setting schema contracts for REST sources. Also use when landing REST API data into Fabric lakehouses or debugging schema evolution. |
+<!-- END GENERATED: skill-library -->
+
+The table above lists the Skill Library (`skills/`) and the skills bundled in this
+repository's own plugins. Skills inside collated third-party plugins are owned by
+their upstream repositories and are not listed here.
 
 ## How Skills Work in VibeData
 

@@ -1,0 +1,1360 @@
+{
+  "schemaVersion": 1,
+  "entries": {
+    "plugins": [
+      {
+        "name": "databricks",
+        "description": "Databricks skills for the CLI, Apps, Lakebase, Model Serving, Lakeflow Jobs, Spark Declarative Pipelines, Declarative Automation Bundles, and classic-to-serverless migration",
+        "license": "Databricks License",
+        "source": "databricks/databricks-agent-skills (plugins/databricks/claude)",
+        "install": "/plugin install databricks@vibedata-plugins-official",
+        "author": "Databricks"
+      },
+      {
+        "name": "dbt",
+        "description": "Analytics engineering with dbt \u2014 building models, writing tests, querying the semantic layer, and troubleshooting jobs",
+        "license": "Apache-2.0",
+        "source": "dbt-labs/dbt-agent-skills (skills/dbt)",
+        "install": "/plugin install dbt@vibedata-plugins-official",
+        "author": "dbt Labs"
+      },
+      {
+        "name": "dbt-extras",
+        "description": "Miscellaneous dbt skills",
+        "license": "Apache-2.0",
+        "source": "dbt-labs/dbt-agent-skills (skills/dbt-extras)",
+        "install": "/plugin install dbt-extras@vibedata-plugins-official",
+        "author": "dbt Labs"
+      },
+      {
+        "name": "dbt-migration",
+        "description": "Migrating dbt projects \u2014 dbt Core to the Fusion engine, or across data platforms",
+        "license": "Apache-2.0",
+        "source": "dbt-labs/dbt-agent-skills (skills/dbt-migration)",
+        "install": "/plugin install dbt-migration@vibedata-plugins-official",
+        "author": "dbt Labs"
+      },
+      {
+        "name": "fabric-cli",
+        "description": "Microsoft Fabric CLI operations \u2014 workspace management, notebook execution, pipeline orchestration, OneLake file I/O, lakehouse tables, and MCP server integration",
+        "license": "Elastic-2.0",
+        "source": "in-repo",
+        "install": "/plugin install fabric-cli@vibedata-plugins-official"
+      },
+      {
+        "name": "fabric-skills",
+        "description": "Microsoft Skills for Fabric \u2014 semantic model authoring, Spark and warehouse CLI operations, migration, and end-to-end medallion architecture",
+        "license": "MIT",
+        "source": "microsoft/skills-for-fabric (plugins/fabric-skills)",
+        "install": "/plugin install fabric-skills@vibedata-plugins-official",
+        "author": "Microsoft"
+      },
+      {
+        "name": "vibedata-dbt-skills",
+        "description": "Customize VibeData dbt agents with Fabric modeling, snapshot, semantic layer, and Elementary quality standards",
+        "license": "Elastic-2.0",
+        "source": "in-repo",
+        "install": "/plugin install vibedata-dbt-skills@vibedata-plugins-official"
+      },
+      {
+        "name": "vibedata-dlt-skills",
+        "description": "Customize VibeData ingestion agents with dlt REST API standards for ADLS Gen2, OneLake, and Fabric lakehouses",
+        "license": "Elastic-2.0",
+        "source": "in-repo",
+        "install": "/plugin install vibedata-dlt-skills@vibedata-plugins-official"
+      }
+    ],
+    "skills": [
+      {
+        "name": "modeling-revenue-recognition",
+        "description": "Use when modeling ASC 606 revenue recognition in dbt on Microsoft Fabric, including performance obligations, transaction price allocation, deferred revenue, contract modifications, or silver/gold revenue reporting layers.",
+        "plugin": null,
+        "path": "skills/modeling-revenue-recognition"
+      },
+      {
+        "name": "salesforce-extraction",
+        "description": "Extract Salesforce data via dlt into dbt on Microsoft Fabric. Use when building Salesforce pipelines, handling CPQ overrides, soft deletes, or managed package fields. Also use when choosing CDC timestamps or debugging missing Salesforce records.",
+        "plugin": null,
+        "path": "skills/salesforce-extraction"
+      },
+      {
+        "name": "fabric-cli-basics",
+        "description": "Core Fabric CLI (fab) operations \u2014 workspace navigation, item management, authentication, resource types, path format, output formatting. Use when listing workspaces/items, creating/deleting resources, checking existence, describing items, or configuring the CLI.",
+        "plugin": "fabric-cli",
+        "path": "plugins/fabric-cli/skills/fabric-cli-basics"
+      },
+      {
+        "name": "fabric-cli-lakehouse",
+        "description": "Fabric CLI lakehouse operations \u2014 create lakehouses, inspect table schemas, load data into tables, optimize and vacuum tables, and run table maintenance jobs. Use when working with .Lakehouse items and Delta tables via the fab CLI.",
+        "plugin": "fabric-cli",
+        "path": "plugins/fabric-cli/skills/fabric-cli-lakehouse"
+      },
+      {
+        "name": "fabric-cli-notebook",
+        "description": "Fabric CLI notebook operations \u2014 list, create, export, import, edit, run, schedule, and monitor notebooks in Microsoft Fabric. Use when working with .Notebook items via the fab CLI.",
+        "plugin": "fabric-cli",
+        "path": "plugins/fabric-cli/skills/fabric-cli-notebook"
+      },
+      {
+        "name": "fabric-cli-onelake",
+        "description": "Fabric CLI OneLake file operations \u2014 upload, download, copy, move, list, create, and delete files and folders in OneLake storage. Use when working with files inside Lakehouse Files/ or Tables/ paths.",
+        "plugin": "fabric-cli",
+        "path": "plugins/fabric-cli/skills/fabric-cli-onelake"
+      },
+      {
+        "name": "fabric-cli-pipeline",
+        "description": "Fabric CLI data pipeline operations \u2014 list, create, run with parameters, monitor, schedule, cancel, export, and import DataPipeline items. Use when working with .DataPipeline items via the fab CLI.",
+        "plugin": "fabric-cli",
+        "path": "plugins/fabric-cli/skills/fabric-cli-pipeline"
+      },
+      {
+        "name": "fabric-mcp",
+        "description": "Microsoft Fabric MCP Server setup and usage \u2014 provides AI agents with access to Fabric public APIs, item definitions, OneLake data operations, and best-practice guidance. Use when configuring the Fabric MCP Server for Claude Code or other AI clients.",
+        "plugin": "fabric-cli",
+        "path": "plugins/fabric-cli/skills/fabric-mcp"
+      },
+      {
+        "name": "dbt-fabric-patterns",
+        "description": "Practitioner-level dbt patterns for Microsoft Fabric. Covers materialization decisions, incremental model gotchas, snapshot strategies, selector/tag patterns, ref() chain rules, and Fabric-specific T-SQL quirks. Use when writing, reviewing, or debugging dbt models on Fabric. Also use when setting up dbt_project.yml configuration or CI/CD pipelines for dbt-fabric projects.",
+        "plugin": "vibedata-dbt-skills",
+        "path": "plugins/vibedata-dbt-skills/skills/dbt-fabric-patterns"
+      },
+      {
+        "name": "dbt-semantic-layer",
+        "description": "Define semantic models and MetricFlow metrics in dbt on Microsoft Fabric. Use when creating semantic model YAML, defining entities, dimensions, and measures, or configuring metric types. Also use when choosing between denormalized marts and semantic layer queries.",
+        "plugin": "vibedata-dbt-skills",
+        "path": "plugins/vibedata-dbt-skills/skills/dbt-semantic-layer"
+      },
+      {
+        "name": "dbt-snapshot-scd2",
+        "description": "Implement SCD Type 2 snapshots in dbt on Microsoft Fabric. Use when building snapshot models, choosing between timestamp and check strategies, or handling Fabric-specific datetime2 quirks. Also use when tracking slowly changing dimensions or debugging snapshot drift.",
+        "plugin": "vibedata-dbt-skills",
+        "path": "plugins/vibedata-dbt-skills/skills/dbt-snapshot-scd2"
+      },
+      {
+        "name": "elementary-data-quality",
+        "description": "Configure Elementary anomaly detection for dbt on Microsoft Fabric. Use when placing data quality tests by medallion layer, setting up volume or column anomalies, or configuring timestamp_column. Also use when debugging silent test failures or choosing severity levels.",
+        "plugin": "vibedata-dbt-skills",
+        "path": "plugins/vibedata-dbt-skills/skills/elementary-data-quality"
+      },
+      {
+        "name": "dlt-rest-api-connector",
+        "description": "Build dlt REST API pipelines to ADLS Gen2 and OneLake. Use when configuring RESTAPIConfig, handling pagination, or setting schema contracts for REST sources. Also use when landing REST API data into Fabric lakehouses or debugging schema evolution.",
+        "plugin": "vibedata-dlt-skills",
+        "path": "plugins/vibedata-dlt-skills/skills/dlt-rest-api-connector"
+      }
+    ],
+    "recipes": [
+      {
+        "id": "api-to-bronze-incremental-contract",
+        "title": "Land a SaaS or REST API into bronze with an incremental cursor and a schema contract",
+        "pitch": "Land an API into bronze incrementally, with a schema contract that decides what happens when a field changes.",
+        "area": "ingestion",
+        "readiness": "supported"
+      },
+      {
+        "id": "bounded-partition-backfill",
+        "title": "Backfill a bounded date range after a logic change without a full refresh",
+        "pitch": "Restate one date range after a logic change, and prove nothing else moved because of it.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "business-event-fact",
+        "title": "Build a business-event fact with auditable duplicate handling",
+        "pitch": "Count business events with a defensible identity rule and an audit trail for every source row.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "dbt-full-refresh-to-incremental",
+        "title": "Convert a full-refresh dbt model to incremental and show the runtime delta",
+        "pitch": "Make a slow full-refresh dbt model incremental, prove its output still matches, and measure the runtime change.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "dbt-refactor-output-identical",
+        "title": "Refactor dbt models without changing consumer output",
+        "pitch": "Clean up tangled dbt models and prove that nothing your consumers read has changed.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "dbt-snapshot-history",
+        "title": "Add dimension history with verified historical fact classification",
+        "pitch": "Preserve recorded dimension changes and prove that historical events select the right version.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "effective-dated-business-rules",
+        "title": "Build historical event amounts from effective-dated business rules",
+        "pitch": "Calculate historical amounts from the rules that apply to each event, with visible exceptions and independent amount checks.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "event-resource-attribution",
+        "title": "Build auditable event-to-resource attribution",
+        "pitch": "Explain who or what is responsible for each event, with evidence and totals that survive attribution joins.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "fabric-data-pipeline-as-code",
+        "title": "Author a Fabric Data Pipeline that sequences ingestion, dbt, and downstream refresh as committed code",
+        "pitch": "Turn a clicked-together Fabric pipeline into committed code that runs ingestion, dbt and the downstream refresh in order.",
+        "area": "orchestration",
+        "readiness": "supported"
+      },
+      {
+        "id": "identity-golden-record-crosswalk",
+        "title": "Deduplicate customers into a golden record with a source crosswalk",
+        "pitch": "One customer, one stable id, every source record traced to it and every unresolved one explained.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "identity-standardize-names-addresses",
+        "title": "Standardize names and addresses and mint deterministic match keys",
+        "pitch": "Give every customer record a clean name, a clean address and a match key you can explain.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "legacy-sql-to-dbt",
+        "title": "Convert a legacy SQL script or view into a dbt model and prove parity",
+        "pitch": "Retire a hand-run SQL script by rebuilding it in dbt and proving the new models return exactly what the old one did.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "logistics-fleet-utilization",
+        "title": "Build fleet utilisation against explicit asset availability",
+        "pitch": "Measure fleet use against defensible available asset time while keeping missing observations and maintenance evidence visible.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "master-b2b-account-hierarchy",
+        "title": "Resolve B2B account hierarchies and roll measures to the ultimate parent",
+        "pitch": "See every corporate family's total, with every account placed or explicitly unresolved and every broken parent link explained.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "metric-population-and-rollups",
+        "title": "Build a metric with explicit eligibility and reconcilable rollups",
+        "pitch": "Make the metric's population and components explicit so its values and supported totals can be checked.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "motherduck-flight-scheduling",
+        "title": "Schedule a dlt load and a dbt build on MotherDuck as a committed MotherDuck Flight",
+        "pitch": "Replace the laptop cron with a committed MotherDuck Flight that loads and builds on a schedule.",
+        "area": "orchestration",
+        "readiness": "supported"
+      },
+      {
+        "id": "operational-state-duration",
+        "title": "Build state durations by entity, location and reporting period",
+        "pitch": "Explain how long each entity spent in a state and where, without inventing locations or filling unknown time with activity.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "prove-dbt-change-safe",
+        "title": "Assess an existing dbt change for safe merge without modifying it",
+        "pitch": "Review the business answers behind a dbt change with independent evidence and leave its implementation unchanged.",
+        "area": "data-quality",
+        "readiness": "supported"
+      },
+      {
+        "id": "revops-pipeline-snapshots",
+        "title": "Build a periodic opportunity pipeline snapshot with stage conversion and slippage",
+        "pitch": "Reproduce the pipeline as it stood at each captured snapshot period and measure how deals move, convert and slip.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "revops-quota-commission",
+        "title": "Build commission-eligible bookings and quota attainment from explicit plan rules",
+        "pitch": "Turn written compensation plan rules into tested, traceable commission-eligible bookings and quota attainment.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "service-ticket-sla",
+        "title": "Track ticket SLA attainment and backlog aging outside the vendor dashboard",
+        "pitch": "See how every SLA number is computed and how old the open backlog was on any past day.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "shift-unit-economics",
+        "title": "Build shift revenue, cost and margin with reconciled rollups",
+        "pitch": "Explain shift economics with traceable revenue, complete cost status and allocations that conserve source amounts.",
+        "area": "transformation",
+        "readiness": "supported"
+      }
+    ],
+    "connectors": [
+      {
+        "name": "verified-sources",
+        "description": "Production-grade dlt sources for databases, APIs, and files.",
+        "url": "https://github.com/dlt-hub/verified-sources",
+        "ref": "3957506893a7da821dbcc6acd51c7ca4475d1f53",
+        "license": "Apache-2.0",
+        "attribution": "dltHub"
+      }
+    ],
+    "mcp": [
+      {
+        "name": "AWS Knowledge",
+        "description": "Check AWS service regional availability and search AWS documentation",
+        "runtime": "remote",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "AWS Marketplace",
+        "description": "Discover and compare software and services in AWS Marketplace",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "AdisInsight",
+        "description": "Search pharmaceutical drug pipelines and clinical trials",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Adobe Customer Journey Analytics",
+        "description": "Run journey analytics reports and manage CJA analysis components",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Adobe Experience Manager",
+        "description": "Manage Adobe Experience Manager content and assets from MCP clients",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Adobe Journey Optimizer",
+        "description": "Inspect and troubleshoot journeys, campaigns, offers, and channel configurations",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Adobe Marketing Agent",
+        "description": "Explore Adobe marketing audiences, journeys, campaigns, and customer insights conversationally",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Adobe Workfront",
+        "description": "Find, create, update, and manage Workfront projects, tasks, planning records, and approvals",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Affinity",
+        "description": "Search and update Affinity relationships, pipelines, meetings, and notes",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Ahrefs",
+        "description": "Research keywords, backlinks, rankings, competitors, and AI visibility",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Airtable",
+        "description": "Search, analyze, create, and update structured Airtable data",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "AllTrails",
+        "description": "Find trails and inspect routes, conditions, and weather",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Alpha Vantage",
+        "description": "Query market prices, fundamentals, options, indicators, and economic data",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Apollo.io",
+        "description": "Find, enrich, and manage sales prospects and sequences",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Asana",
+        "description": "Manage Asana tasks, projects, and portfolios through Asana's official MCP server",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Ashby",
+        "description": "Search recruiting data, prepare interviews, and update candidate pipelines",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Atlassian",
+        "description": "Manage Jira issues, Confluence pages, and Compass services with AI assistance",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Attio",
+        "description": "Search and manage CRM records, pipelines, notes, tasks, meetings, emails, and reports",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Base44",
+        "description": "Create, inspect, edit, and operate Base44 backend projects and app sandboxes",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "BigQuery Toolbox",
+        "description": "Explore BigQuery data and run SQL through Google's managed MCP server",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Bigdata.com",
+        "description": "Research cited financial documents, markets, companies, and portfolios",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Box",
+        "description": "Search, analyze, create, and update content stored in Box",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Brevo",
+        "description": "Analyze Brevo campaigns, contacts, and audience segments",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "BrightHire",
+        "description": "Search and analyze interview context, notes, scorecards, and hiring data",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Calendly",
+        "description": "Manage Calendly event types, availability, links, and bookings",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Canva",
+        "description": "Search, create, edit, and export Canva designs",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Carta CRM",
+        "description": "Search and manage private-market relationships, deals, notes, tasks, reports, and campaigns",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Circle",
+        "description": "Manage and analyze your Circle community through its official MCP server",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Clay",
+        "description": "Find prospects, enrich contacts, and research target companies",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "ClickUp",
+        "description": "Manage ClickUp tasks, documents, chat, lists, and time tracking",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Cloudflare",
+        "description": "Search and manage the full Cloudflare API through Cloudflare's Code Mode MCP server",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Composio Connect",
+        "description": "Connect your assistant to more than 1,000 apps through one MCP server",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Consensus",
+        "description": "Search and synthesize evidence from scientific research",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Context7",
+        "description": "Get up-to-date, version-specific code documentation and examples for any library",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Cortellis Regulatory Intelligence",
+        "description": "Research global life-sciences regulatory requirements",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "CourtListener",
+        "description": "Search U.S. case law, court records, judges, oral arguments, citations, and docket alerts",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Crypto.com Market Data",
+        "description": "Retrieve real-time cryptocurrency order books, trades, and candles",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Daloopa",
+        "description": "Retrieve sourced company fundamentals, KPIs, filings, and stock-price data",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Databricks Genie Spaces",
+        "description": "Ask natural language questions about your data with AI-powered analytics",
+        "runtime": "remote",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "Databricks Unity Catalog Functions",
+        "description": "Execute and manage Databricks Unity Catalog serverless functions",
+        "runtime": "remote",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "Databricks Vector Search",
+        "description": "Semantic search and similarity queries with Databricks Vector Search indexes",
+        "runtime": "remote",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "Datadog",
+        "description": "Query Datadog observability data and manage platform features with Datadog's official MCP server",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "DeepWiki",
+        "description": "Access AI-generated documentation for any public GitHub repository",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Descript",
+        "description": "Import, edit, organize, and publish video and audio projects with Descript",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Dice",
+        "description": "Search active technology jobs with detailed filters",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "DigitalOcean",
+        "description": "Manage an official DigitalOcean service with a personal access token",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Docusign",
+        "description": "Search agreements and manage Docusign envelopes and workflows",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Dovetail",
+        "description": "Search customer research and retrieve evidence from Dovetail",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Dropbox",
+        "description": "Search, organize, create, and share Dropbox files and folders",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Dynatrace",
+        "description": "Access Dynatrace observability data and intelligence through the official hosted MCP server",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Egnyte",
+        "description": "Search, retrieve, and analyze permissioned Egnyte content",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Elasticsearch",
+        "description": "Search and analyze Elasticsearch data with Elastic's Agent Builder tools",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Elicit",
+        "description": "Search papers and build structured literature-review reports",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Era Context",
+        "description": "Analyze spending and manage connected personal-finance context",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Exa Search",
+        "description": "Exa web search, advanced retrieval, and API-key research",
+        "runtime": "remote",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "Excalidraw",
+        "description": "Create and edit interactive hand-drawn diagrams with Excalidraw",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Fabric Core",
+        "description": "Manage Microsoft Fabric workspaces, items, permissions, and capacities with natural language",
+        "runtime": "remote",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "Fabric Pro-Dev",
+        "description": "Build on Microsoft Fabric with API specs, item schemas, OneLake data operations, and Data Factory pipelines",
+        "runtime": "containerized",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "FactSet AI-Ready Data",
+        "description": "Analyze FactSet market, company, and investment research data",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Fathom",
+        "description": "Search meetings and retrieve summaries, transcripts, and action items",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Fellow.ai",
+        "description": "Search meetings and retrieve transcripts, summaries, and action items",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Files.com",
+        "description": "Manage files, users, groups, permissions, and secure file sharing through Files.com's hosted MCP server",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Firecrawl",
+        "description": "Search, scrape, crawl, interact with, and monitor the web using Firecrawl's official hosted MCP",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Fireflies",
+        "description": "Retrieve and analyze Fireflies meeting transcripts and summaries",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Gamma",
+        "description": "Create presentations, documents, webpages, and social posts with AI",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "GitHub",
+        "description": "Manage GitHub repositories, issues, PRs, workflows, and CI/CD operations",
+        "runtime": "remote",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "GitHub Enterprise Cloud",
+        "description": "Connect to a GitHub Enterprise Cloud data-residency tenant with GitHub-hosted MCP and OAuth",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "GitMCP",
+        "description": "Access any GitHub project's documentation and code in real-time with AI assistance",
+        "runtime": "remote",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "GoDaddy",
+        "description": "Search domain ideas and check current registration availability with GoDaddy",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Goodnotes",
+        "description": "Generate editable notes, whiteboards, illustrations, and structured diagrams",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Google Cloud Run",
+        "description": "Inspect and deploy Cloud Run services through Google's managed MCP server",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Google Compute Engine",
+        "description": "Create, inspect, and operate Google Compute Engine resources",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Google Maps Grounding Lite",
+        "description": "The server provides tools for developers to build LLM applications on top of Google Maps Platform.",
+        "runtime": "remote",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "Grafana Cloud",
+        "description": "Query Grafana Cloud metrics, logs, dashboards, alerts, incidents, and on-call schedules with OAuth",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Granola",
+        "description": "Search meeting notes, transcripts, decisions, and action items",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Guru",
+        "description": "Search and maintain verified company knowledge in Guru",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Gusto",
+        "description": "Query payroll and people data, then build custom reports and charts",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Harvey",
+        "description": "Answer legal questions, analyze Vault documents, and research enabled knowledge sources",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "HubSpot",
+        "description": "Connect to HubSpot CRM data with secure, per-user OAuth access",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Hugging Face",
+        "description": "Search Hugging Face models, datasets, papers, docs, and Spaces",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "HyperFrames by HeyGen",
+        "description": "Build animated slides, explainer videos, and motion graphics with HTML",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Interactive Brokers (IBKR)",
+        "description": "Analyze IBKR portfolio data, market data, and trade instructions",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Intercom",
+        "description": "Search Intercom conversations, contacts, tickets, and customer data",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Jam",
+        "description": "Bring Jam bug recordings, logs, and network context into coding tools",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Jotform",
+        "description": "Create and edit forms and analyze Jotform submissions",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Kensho by S&P Global",
+        "description": "Retrieve structured S&P Global company and financial data",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Kiwi.com",
+        "description": "Search flights with flexible routes, dates, passengers, and cabins",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Klaviyo",
+        "description": "Analyze campaigns and flows, manage profiles and audiences, and create marketing content",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Legal Data Hunter",
+        "description": "Search official legal documents across jurisdictions and resolve citations",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Linear",
+        "description": "Manage Linear issues, projects, comments, and team workflows with AI agents",
+        "runtime": "remote",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "Lovable",
+        "description": "Create, inspect, iterate on, and deploy Lovable applications",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Lucid",
+        "description": "Search, summarize, share, and create Lucid diagrams and documents",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "LunarCrush",
+        "description": "Analyze social sentiment, market intelligence, and real-time trends",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Lusha",
+        "description": "Find, enrich, and prospect B2B contacts and companies with verified sales data",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "MailerLite",
+        "description": "Manage MailerLite subscribers, campaigns, automations, and forms",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Mailgun",
+        "description": "Send email and inspect Mailgun delivery operations through the official MCP server",
+        "runtime": "npx",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "Make",
+        "description": "Run and manage Make scenarios, connections, teams, and data stores",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Mercury",
+        "description": "Search, analyze, and understand Mercury account and transaction data",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Mermaid Chart",
+        "description": "Validate, render, summarize, and manage Mermaid diagrams and projects",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Microsoft Learn",
+        "description": "Search Microsoft Learn documentation and find official code samples",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Miro",
+        "description": "Search, summarize, and create content on Miro boards",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Mixpanel",
+        "description": "Analyze events, funnels, retention, experiments, replays, dashboards, and data quality",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Mobbin",
+        "description": "Search real product screens, user flows, and website sections for UI and UX reference",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Monday.com",
+        "description": "Manage monday.com boards, items, workflows, and team collaboration",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "MongoDB Atlas",
+        "description": "Manage MongoDB Atlas infrastructure and databases through MongoDB's hosted MCP server",
+        "runtime": "npx",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Monte Carlo",
+        "description": "Investigate data incidents, lineage, monitors, and observability assets",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Morningstar",
+        "description": "Access Morningstar financial data, analyst research, and investment screening",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Motion Creative Analytics",
+        "description": "Analyze ad creative performance, competitor campaigns, and brand patterns",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Neon Database",
+        "description": "Manage Neon Postgres databases with natural language, branching, and migrations",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Netlify",
+        "description": "Create, deploy, manage, and secure websites on Netlify",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Nimble",
+        "description": "Search, extract, map, and crawl live web data",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Notion",
+        "description": "Manage Notion pages, databases, blocks, comments, and workspace content",
+        "runtime": "remote",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "Omni Analytics",
+        "description": "Query governed business data through Omni's semantic model",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Open Targets",
+        "description": "Research drug targets, diseases, drugs, variants, studies, and target-disease associations",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Otter.ai",
+        "description": "Search meeting transcripts and retrieve conversations, summaries, insights, and profile context",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Outreach",
+        "description": "Research revenue records, meetings, emails, sequences, prospects, accounts, and opportunities",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "PagerDuty",
+        "description": "Manage PagerDuty incidents, on-call schedules, services, and incident response workflows",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "PandaDoc",
+        "description": "Create, send, track, and manage PandaDoc documents",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "PayPal",
+        "description": "Create invoices, process payments, manage subscriptions, and handle disputes with PayPal",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Peec AI",
+        "description": "Analyze brand visibility, sentiment, and share of voice across AI search",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Pipedrive",
+        "description": "Search and update deals, contacts, leads, activities, and notes",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Plaud",
+        "description": "Search Plaud recordings and retrieve transcripts, summaries, notes, and action items",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "PlayMCP",
+        "description": "Use selected Kakao and third-party tools through one shared toolbox",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "PostHog",
+        "description": "Query product analytics and manage PostHog insights and experiments",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Postman",
+        "description": "Connect to Postman collections, workspaces, environments, mocks, and API specs",
+        "runtime": "remote",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "Pylon",
+        "description": "Search, manage, and resolve customer support issues",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Quartr",
+        "description": "Research public companies with first-party investor-relations data",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Railway",
+        "description": "Deploy, manage, and debug Railway projects and services",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Ramp",
+        "description": "Search and analyze Ramp transactions, bills, cards, and vendors",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Ramp Data",
+        "description": "Analyze vendor trends and business AI adoption from Ramp Data",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Read AI",
+        "description": "Retrieve meeting transcripts and summaries, dispatch agents, and share reports",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Ref",
+        "description": "Token-efficient search over documentation to prevent AI hallucinations",
+        "runtime": "remote",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "Render",
+        "description": "Manage Render services, databases, deployments, logs, and performance metrics",
+        "runtime": "remote",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "Replit",
+        "description": "Create, inspect, update, and publish Replit apps through Replit Agent",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Resend",
+        "description": "Send email and manage Resend audiences, broadcasts, domains, and webhooks",
+        "runtime": "remote",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "Salesforce",
+        "description": "Access Salesforce records through Salesforce's hosted MCP servers",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Sanity",
+        "description": "Create, query, publish, and manage structured content in Sanity",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Scholar Gateway",
+        "description": "Search peer-reviewed Wiley research with verifiable citations and DOI links",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Scite",
+        "description": "Search scientific literature and verify claims with Smart Citation evidence",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Semrush",
+        "description": "Research SEO, keywords, competitors, traffic, backlinks, paid search, and site health",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Sentry",
+        "description": "Search, investigate, and manage Sentry errors, issues, and projects",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Similarweb",
+        "description": "Analyze website traffic, channels, audiences, search, competitors, and mobile apps",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Slack Workspace",
+        "description": "Connect to Slack and work with messages, files, channels, and more",
+        "runtime": "remote",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "SlidesGPT",
+        "description": "Generate presentation decks, apply themes, create images, and export PowerPoint files",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Snowflake",
+        "description": "Connect to a Snowflake-managed MCP server with OAuth and native RBAC",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Square",
+        "description": "Manage Square payments, customers, orders, catalog, and business operations",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Strava",
+        "description": "Analyze your activities, fitness trends, training load, goals, and gear",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Stripe",
+        "description": "Process payments, manage subscriptions, invoices, customers, and disputes with Stripe",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Supabase",
+        "description": "Connect to Supabase with selectable read-only access and OAuth or a personal access token",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Superhuman Docs",
+        "description": "Create, search, and update Superhuman docs, pages, and tables",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Superhuman Mail",
+        "description": "Search email, draft and send replies, and manage calendars across Gmail and Outlook",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Supermetrics Marketing Analytics",
+        "description": "Analyze marketing data and manage campaigns across many platforms",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Surfer",
+        "description": "Create, optimize, and score SEO content with live Surfer data",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "SurveyMonkey",
+        "description": "Build and edit surveys, publish collection links, and analyze responses",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Synapse.org",
+        "description": "Search scientific datasets and inspect Synapse metadata and provenance",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Tableau Cloud",
+        "description": "Query Tableau Cloud data, explore content, and manage Pulse metrics with OAuth",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Tavily Search",
+        "description": "Real-time web research, data extraction, and domain crawling with AI ranking",
+        "runtime": "remote",
+        "serverUserType": "multiUser"
+      },
+      {
+        "name": "TickTick",
+        "description": "Search and manage TickTick tasks, projects, habits, and focus sessions",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Todoist",
+        "description": "Manage Todoist tasks, projects, and team collaboration through natural language",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Trello",
+        "description": "Search and manage Trello workspaces, boards, lists, cards, checklists, Inbox, and Planner",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Twilio Docs",
+        "description": "Search Twilio API documentation and retrieve implementation guidance",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Udemy Business",
+        "description": "Discover enterprise learning content and create structured learning experiences",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Webflow",
+        "description": "Manage Webflow sites, CMS content, pages, assets, and styles",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Windsor.ai",
+        "description": "Analyze marketing, sales, analytics, and e-commerce data",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Wispr Flow",
+        "description": "Search meetings, transcripts, notes, calendars, and tasks",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Wix",
+        "description": "Access Wix APIs to manage sites, bookings, pricing plans, and CMS",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Wrike",
+        "description": "Search and manage Wrike tasks, projects, folders, and comments",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Zapier",
+        "description": "Access 30,000+ actions across 8,000+ apps in Zapier automation platform",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "ZipRecruiter",
+        "description": "Search live US and Canadian jobs by role, location, salary, work style, and experience",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Zoom",
+        "description": "Search meetings and retrieve Zoom recordings, transcripts, and notes",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "ZoomInfo",
+        "description": "Search and enrich companies, contacts, buying signals, and go-to-market research",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "incident.io",
+        "description": "Manage incidents, pages, follow-ups, on-call schedules, and operational analysis",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "tldraw",
+        "description": "Draw and iteratively edit diagrams, wireframes, mind maps, and illustrations",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "trivago",
+        "description": "Search accommodations and compare live hotel prices across booking providers",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      }
+    ]
+  }
+}

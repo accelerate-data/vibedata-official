@@ -1,2 +1,36 @@
-# All changes require review from at least one maintainer
-* @admiraldata @hbanerjee74 @ukakkad
+# Ownership split for vibedata-official (proposal §4, VD-6698).
+#
+# Several producers write to this repository: the release pipeline, the
+# operator-documentation owners, the content owners, and the generators. Each
+# area is listed below. They map to one Accelerate team today; split them out
+# when per-area teams exist.
+
+# Default — anything not named below.
+*                                @accelerate-data/vibedata-engineering
+
+# Release pipeline — release assets, the generated Release.md, and releases/.
+/Release.md                      @accelerate-data/vibedata-engineering
+/releases/                       @accelerate-data/vibedata-engineering
+
+# Operator documentation owners — docs/.
+/docs/                           @accelerate-data/vibedata-engineering
+
+# Content owners — plugins, skills, recipes, mcp, connectors.
+/plugins/                        @accelerate-data/vibedata-engineering
+/skills/                         @accelerate-data/vibedata-engineering
+/recipes/                        @accelerate-data/vibedata-engineering
+/mcp/                            @accelerate-data/vibedata-engineering
+/connectors/                     @accelerate-data/vibedata-engineering
+
+# Generators — catalog/, the marketplace JSON, the manifest and schemas, and
+# the README tables. Nobody edits these by hand.
+/catalog/                        @accelerate-data/vibedata-engineering
+/manifest.json                   @accelerate-data/vibedata-engineering
+/schema/                         @accelerate-data/vibedata-engineering
+/licenses/                       @accelerate-data/vibedata-engineering
+/scripts/                        @accelerate-data/vibedata-engineering
+/tests/                          @accelerate-data/vibedata-engineering
+/README.md                       @accelerate-data/vibedata-engineering
+/.claude-plugin/                 @accelerate-data/vibedata-engineering
+/.agents/                        @accelerate-data/vibedata-engineering
+/.github/                        @accelerate-data/vibedata-engineering

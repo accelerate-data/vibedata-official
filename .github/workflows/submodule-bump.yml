@@ -1,0 +1,76 @@
+name: submodule-bump
+
+# Bump every submodule to its tracked branch, regenerate the storefront catalog
+# from the new content, and open a PR that auto-merges on green CI. This keeps
+# the generated catalog and the submodule pins in step: a plain submodule-pointer
+# bump would fail the freshness check in ci.yml.
+#
+# Uses the GitHub App token rather than GITHUB_TOKEN so the PR it opens actually
+# triggers the pull_request CI checks that auto-merge waits on.
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: submodule-bump
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    name: Bump submodules and regenerate the catalog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mint GitHub App token
+        id: app
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.VIBEDATA_GHA_APP_ID }}
+          private-key: ${{ secrets.VIBEDATA_GHA_APP_PRIVATE_KEY }}
+          owner: accelerate-data
+          repositories: vibedata-official
+
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          token: ${{ steps.app.outputs.token }}
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Bump submodules to their tracked branches
+        run: git submodule update --remote --recursive
+
+      - name: Install dev tools
+        run: python3 -m pip install --upgrade -r requirements-dev.txt
+
+      - name: Regenerate the catalog
+        run: python3 scripts/build_catalog.py
+
+      - name: Open and auto-merge the bump PR
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+        run: |
+          git config user.name "vibedata-official bump bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Submodules and catalog are already current; nothing to do."
+            exit 0
+          fi
+
+          branch="chore/submodule-bump-$(date -u +%Y%m%d)"
+          git checkout -b "$branch"
+          git commit -m "chore: bump submodules and regenerate the catalog"
+          git push -u origin "$branch"
+
+          gh pr create \
+            --base main \
+            --head "$branch" \
+            --title "chore: daily submodule bump" \
+            --body "Automated daily submodule bump (VD-6698). Regenerates the storefront catalog so the freshness check stays green."
+          gh pr merge --auto --squash "$branch"
