@@ -1,11 +1,13 @@
 <p align="left">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="http://assets.acceleratedata.ai/logo/product/ui/logo-light-h48.svg">
-    <img src="http://assets.acceleratedata.ai/logo/product/ui/logo-dark-h48.svg" alt="Accelerate Data" height="48">
-  </picture>
+  <a href="https://www.getvibedata.ai">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="http://assets.acceleratedata.ai/logo/product/ui/logo-light-h48.svg">
+      <img src="http://assets.acceleratedata.ai/logo/product/ui/logo-dark-h48.svg" alt="Accelerate Data" height="48">
+    </picture>
+  </a>
 </p>
 
-The official skill library and plugin marketplace for [VibeData](https://acceleratedata.ai) — the agentic coordination layer for data platforms.
+The official skill library and plugin marketplace for [VibeData](https://www.getvibedata.ai) — the agentic coordination layer for data platforms.
 
 > Organizational data engineering standards, encoded and enforced.
 
