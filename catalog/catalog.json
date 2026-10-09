@@ -312,6 +312,30 @@
     ],
     "mcp": [
       {
+        "name": "AWS API",
+        "description": "Execute AWS CLI commands across all AWS services with intelligent suggestions",
+        "runtime": "containerized",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "AWS Documentation",
+        "description": "Access, search, and get recommendations from AWS documentation",
+        "runtime": "containerized",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "AWS EKS",
+        "description": "Manage Amazon EKS clusters, Kubernetes resources, and containerized applications",
+        "runtime": "containerized",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "AWS Kendra",
+        "description": "Query Amazon Kendra indices for enhanced RAG context in AI applications",
+        "runtime": "containerized",
+        "serverUserType": "singleUser"
+      },
+      {
         "name": "AWS Knowledge",
         "description": "Check AWS service regional availability and search AWS documentation",
         "runtime": "remote",
@@ -321,6 +345,12 @@
         "name": "AWS Marketplace",
         "description": "Discover and compare software and services in AWS Marketplace",
         "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "AWS Redshift",
+        "description": "Discover, explore, and query Amazon Redshift clusters and serverless workgroups",
+        "runtime": "containerized",
         "serverUserType": "singleUser"
       },
       {
@@ -390,6 +420,12 @@
         "serverUserType": "singleUser"
       },
       {
+        "name": "AntV Charts",
+        "description": "Generate 25+ professional chart types for data visualization and analysis",
+        "runtime": "containerized",
+        "serverUserType": "singleUser"
+      },
+      {
         "name": "Apollo.io",
         "description": "Find, enrich, and manage sales prospects and sequences",
         "runtime": "remote",
@@ -420,6 +456,12 @@
         "serverUserType": "singleUser"
       },
       {
+        "name": "Azure",
+        "description": "Manage Azure services including AI, databases, compute, storage, and monitoring",
+        "runtime": "containerized",
+        "serverUserType": "singleUser"
+      },
+      {
         "name": "Base44",
         "description": "Create, inspect, edit, and operate Base44 backend projects and app sandboxes",
         "runtime": "remote",
@@ -444,6 +486,12 @@
         "serverUserType": "singleUser"
       },
       {
+        "name": "Brave Search",
+        "description": "Search the web, news, images, videos, and local businesses with Brave Search API",
+        "runtime": "containerized",
+        "serverUserType": "singleUser"
+      },
+      {
         "name": "Brevo",
         "description": "Analyze Brevo campaigns, contacts, and audience segments",
         "runtime": "remote",
@@ -452,6 +500,18 @@
       {
         "name": "BrightHire",
         "description": "Search and analyze interview context, notes, scorecards, and hiring data",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Browserbase",
+        "description": "Cloud browser automation with web scraping, screenshots, and AI interactions",
+        "runtime": "containerized",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Calendar",
+        "description": "Manage Microsoft 365 calendars, events, meetings, and attendees",
         "runtime": "remote",
         "serverUserType": "singleUser"
       },
@@ -471,6 +531,12 @@
         "name": "Carta CRM",
         "description": "Search and manage private-market relationships, deals, notes, tasks, reports, and campaigns",
         "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Chroma Cloud",
+        "description": "Manage collections, documents, and vector search in Chroma embedding database",
+        "runtime": "containerized",
         "serverUserType": "singleUser"
       },
       {
@@ -506,6 +572,12 @@
       {
         "name": "Consensus",
         "description": "Search and synthesize evidence from scientific research",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Contact",
+        "description": "Manage Microsoft 365 contacts with CRUD operations and advanced search",
         "runtime": "remote",
         "serverUserType": "singleUser"
       },
@@ -606,6 +678,12 @@
         "serverUserType": "singleUser"
       },
       {
+        "name": "DuckDuckGo Search",
+        "description": "Search the web with DuckDuckGo and retrieve webpage content with parsing",
+        "runtime": "containerized",
+        "serverUserType": "singleUser"
+      },
+      {
         "name": "Dynatrace",
         "description": "Access Dynatrace observability data and intelligence through the official hosted MCP server",
         "runtime": "remote",
@@ -644,6 +722,12 @@
       {
         "name": "Excalidraw",
         "description": "Create and edit interactive hand-drawn diagrams with Excalidraw",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Excel",
+        "description": "Manage Excel workbooks, worksheets, tables, and data with Microsoft Graph API",
         "runtime": "remote",
         "serverUserType": "singleUser"
       },
@@ -708,9 +792,21 @@
         "serverUserType": "multiUser"
       },
       {
+        "name": "GitHub Enterprise",
+        "description": "Connect AI tools to GitHub Enterprise Server",
+        "runtime": "containerized",
+        "serverUserType": "singleUser"
+      },
+      {
         "name": "GitHub Enterprise Cloud",
         "description": "Connect to a GitHub Enterprise Cloud data-residency tenant with GitHub-hosted MCP and OAuth",
         "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "GitLab",
+        "description": "Manage GitLab projects, repositories, issues, merge requests, and CI/CD pipelines",
+        "runtime": "containerized",
         "serverUserType": "singleUser"
       },
       {
@@ -718,6 +814,12 @@
         "description": "Access any GitHub project's documentation and code in real-time with AI assistance",
         "runtime": "remote",
         "serverUserType": "multiUser"
+      },
+      {
+        "name": "Gmail",
+        "description": "Send, read, draft, and organize Gmail emails with label management and search",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
       },
       {
         "name": "GoDaddy",
@@ -728,6 +830,12 @@
       {
         "name": "Goodnotes",
         "description": "Generate editable notes, whiteboards, illustrations, and structured diagrams",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Google Calendar",
+        "description": "Manage Google Calendar events, recurring events, and attendees with OAuth2",
         "runtime": "remote",
         "serverUserType": "singleUser"
       },
@@ -744,10 +852,40 @@
         "serverUserType": "singleUser"
       },
       {
+        "name": "Google Docs",
+        "description": "Create and manage documents in Google Docs",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Google Drive",
+        "description": "Manage Google Drive files, folders, permissions, and sharing with OAuth2",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
         "name": "Google Maps Grounding Lite",
         "description": "The server provides tools for developers to build LLM applications on top of Google Maps Platform.",
         "runtime": "remote",
         "serverUserType": "multiUser"
+      },
+      {
+        "name": "Google Search Console",
+        "description": "Use Google Search Console API to get sitemaps, analytics, and more",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Google Sheets",
+        "description": "Create and manage Google Sheets spreadsheets, worksheets, cells, and formulas",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Grafana",
+        "description": "Query metrics, logs, traces, manage dashboards, alerts, and on-call schedules",
+        "runtime": "containerized",
+        "serverUserType": "singleUser"
       },
       {
         "name": "Grafana Cloud",
@@ -894,6 +1032,12 @@
         "serverUserType": "singleUser"
       },
       {
+        "name": "MarkItDown",
+        "description": "Convert documents, images, audio, and web content to LLM-optimized Markdown",
+        "runtime": "containerized",
+        "serverUserType": "singleUser"
+      },
+      {
         "name": "Mercury",
         "description": "Search, analyze, and understand Mercury account and transaction data",
         "runtime": "remote",
@@ -942,6 +1086,18 @@
         "serverUserType": "singleUser"
       },
       {
+        "name": "MongoDB Atlas Management",
+        "description": "Create and manage MongoDB Atlas projects, clusters, and database users",
+        "runtime": "containerized",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "MongoDB Database",
+        "description": "Manage MongoDB databases, collections, documents, and aggregation pipelines",
+        "runtime": "containerized",
+        "serverUserType": "singleUser"
+      },
+      {
         "name": "Monte Carlo",
         "description": "Investigate data incidents, lineage, monitors, and observability assets",
         "runtime": "remote",
@@ -957,6 +1113,12 @@
         "name": "Motion Creative Analytics",
         "description": "Analyze ad creative performance, competitor campaigns, and brand patterns",
         "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "MySQL",
+        "description": "Execute SQL queries and explore MySQL databases with structured access control",
+        "runtime": "containerized",
         "serverUserType": "singleUser"
       },
       {
@@ -990,6 +1152,12 @@
         "serverUserType": "singleUser"
       },
       {
+        "name": "OneDrive",
+        "description": "Manage OneDrive files, folders, sharing, and cross-drive operations",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
         "name": "Open Targets",
         "description": "Research drug targets, diseases, drugs, variants, studies, and target-disease associations",
         "runtime": "remote",
@@ -998,6 +1166,12 @@
       {
         "name": "Otter.ai",
         "description": "Search meeting transcripts and retrieve conversations, summaries, insights, and profile context",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Outlook",
+        "description": "Manage Outlook emails, folders, drafts, and attachments via Microsoft Graph API",
         "runtime": "remote",
         "serverUserType": "singleUser"
       },
@@ -1050,9 +1224,21 @@
         "serverUserType": "singleUser"
       },
       {
+        "name": "Playwright",
+        "description": "Browser automation with accessibility-based interactions using Playwright",
+        "runtime": "containerized",
+        "serverUserType": "singleUser"
+      },
+      {
         "name": "PostHog",
         "description": "Query product analytics and manage PostHog insights and experiments",
         "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "PostgreSQL",
+        "description": "Analyze performance, optimize queries, and tune PostgreSQL databases with health checks",
+        "runtime": "containerized",
         "serverUserType": "singleUser"
       },
       {
@@ -1095,6 +1281,12 @@
         "name": "Read AI",
         "description": "Retrieve meeting transcripts and summaries, dispatch agents, and share reports",
         "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Redis",
+        "description": "Manage Redis data types, vector search, streams, and pub/sub messaging",
+        "runtime": "containerized",
         "serverUserType": "singleUser"
       },
       {
@@ -1161,6 +1353,12 @@
         "name": "Similarweb",
         "description": "Analyze website traffic, channels, audiences, search, competitors, and mobile apps",
         "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Slack",
+        "description": "Send messages, manage channels, search history, and handle threads in Slack workspaces",
+        "runtime": "containerized",
         "serverUserType": "singleUser"
       },
       {
@@ -1242,6 +1440,12 @@
         "serverUserType": "singleUser"
       },
       {
+        "name": "Tableau",
+        "description": "Query Tableau data sources, access Pulse metrics, and explore workbooks",
+        "runtime": "containerized",
+        "serverUserType": "singleUser"
+      },
+      {
         "name": "Tableau Cloud",
         "description": "Query Tableau Cloud data, explore content, and manage Pulse metrics with OAuth",
         "runtime": "remote",
@@ -1252,6 +1456,12 @@
         "description": "Real-time web research, data extraction, and domain crawling with AI ranking",
         "runtime": "remote",
         "serverUserType": "multiUser"
+      },
+      {
+        "name": "Terraform",
+        "description": "Manage Terraform Cloud workspaces, runs, variables, and explore the registry",
+        "runtime": "containerized",
+        "serverUserType": "singleUser"
       },
       {
         "name": "TickTick",
@@ -1305,6 +1515,18 @@
         "name": "Wix",
         "description": "Access Wix APIs to manage sites, bookings, pricing plans, and CMS",
         "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "Word",
+        "description": "Create and manage Microsoft Word documents with markdown content conversion",
+        "runtime": "remote",
+        "serverUserType": "singleUser"
+      },
+      {
+        "name": "WordPress",
+        "description": "Manage WordPress posts, categories, tags, and media on self-hosted sites",
+        "runtime": "containerized",
         "serverUserType": "singleUser"
       },
       {

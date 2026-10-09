@@ -82,8 +82,7 @@
         "name": { "type": "string" },
         "description": { "type": "string" },
         "runtime": { "type": "string" },
-        "serverUserType": { "type": "string" },
-        "url": { "type": "string" }
+        "serverUserType": { "type": "string" }
       }
     }
   }

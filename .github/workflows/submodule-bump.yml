@@ -63,14 +63,14 @@ jobs:
             exit 0
           fi
 
-          branch="chore/submodule-bump-$(date -u +%Y%m%d)"
+          branch="chore/submodule-bump-${{ github.run_id }}"
           git checkout -b "$branch"
           git commit -m "chore: bump submodules and regenerate the catalog"
           git push -u origin "$branch"
 
-          gh pr create \
+          pr=$(gh pr create \
             --base main \
             --head "$branch" \
             --title "chore: daily submodule bump" \
-            --body "Automated daily submodule bump (VD-6698). Regenerates the storefront catalog so the freshness check stays green."
-          gh pr merge --auto --squash "$branch"
+            --body "Automated daily submodule bump (VD-6698). Regenerates the storefront catalog so the freshness check stays green.")
+          gh pr merge --auto --squash "$pr"
