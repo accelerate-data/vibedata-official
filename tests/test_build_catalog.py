@@ -3,9 +3,11 @@ from __future__ import annotations
 import importlib.util
 import json
 import shutil
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = REPO_ROOT / "scripts" / "build_catalog.py"
@@ -260,6 +262,122 @@ class BuildCatalogTests(unittest.TestCase):
 
     def test_table_cell_escapes_pipes_and_newlines(self) -> None:
         self.assertEqual(build_catalog.table_cell("a | b\nc"), "a \\| b c")
+
+    def test_build_is_deterministic(self) -> None:
+        root = FixtureRoot(self).root
+        self.assertEqual(
+            build_catalog.build_outputs(root), build_catalog.build_outputs(root)
+        )
+
+    def test_reads_every_mcp_catalog_directory(self) -> None:
+        root = FixtureRoot(self).root
+        for sub in ("remotes", "obot-remotes", "obot-images"):
+            directory = root / "mcp" / sub
+            directory.mkdir(parents=True)
+            (directory / "extra.yaml").write_text(
+                f"name: {sub} server\nshortDescription: from {sub}\nruntime: remote\nserverUserType: multiUser\n",
+                encoding="utf-8",
+            )
+        names = {entry["name"] for entry in build_catalog.read_mcp(root)}
+        self.assertEqual(
+            names,
+            {
+                "Fabric Core",
+                "remotes server",
+                "obot-remotes server",
+                "obot-images server",
+            },
+        )
+
+    def test_external_source_labels_and_author(self) -> None:
+        root = FixtureRoot(self).root
+        path = root / ".claude-plugin" / "marketplace.json"
+        write_json(
+            path,
+            {
+                "name": "vibedata-plugins-official",
+                "plugins": [
+                    {
+                        "name": "sub",
+                        "description": "Sub",
+                        "license": "MIT",
+                        "source": {
+                            "source": "git-subdir",
+                            "url": "https://github.com/acme/plugins",
+                            "path": "plugins/sub",
+                        },
+                        "author": {"name": "Acme"},
+                    },
+                    {
+                        "name": "whole",
+                        "description": "Whole",
+                        "license": "MIT",
+                        "source": {
+                            "source": "url",
+                            "url": "https://github.com/acme/whole.git",
+                        },
+                    },
+                ],
+            },
+        )
+        plugins = build_catalog.read_plugins(
+            root, {"MIT", "Elastic-2.0", "Apache-2.0"}, []
+        )
+        self.assertEqual(
+            [entry["source"] for entry in plugins],
+            ["acme/plugins (plugins/sub)", "acme/whole"],
+        )
+        self.assertEqual(plugins[0]["author"], "Acme")
+        self.assertNotIn("author", plugins[1])
+
+    def test_plugin_missing_license_fails(self) -> None:
+        root = FixtureRoot(self).root
+        path = root / ".claude-plugin" / "marketplace.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        del data["plugins"][0]["license"]
+        write_json(path, data)
+        _, errors = build_catalog.build_catalog(root)
+        self.assertTrue(any("license is required" in error for error in errors), errors)
+
+    def test_skill_without_frontmatter_falls_back_to_directory_name(self) -> None:
+        root = FixtureRoot(self).root
+        path = root / "skills" / "plain" / "SKILL.md"
+        path.parent.mkdir(parents=True)
+        path.write_text("# no frontmatter\n", encoding="utf-8")
+        self.assertEqual(build_catalog.read_skill(root, path, None)["name"], "plain")
+
+    def test_invalid_mcp_yaml_fails(self) -> None:
+        root = FixtureRoot(self).root
+        (root / "mcp" / "bad.yaml").write_text(
+            "name: [unterminated\n", encoding="utf-8"
+        )
+        with self.assertRaises(SystemExit):
+            build_catalog.build_catalog(root)
+
+    def test_build_outputs_aborts_on_validation_error(self) -> None:
+        root = FixtureRoot(self).root
+        path = root / ".claude-plugin" / "marketplace.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["plugins"][0]["license"] = "GPL-3.0"
+        write_json(path, data)
+        with self.assertRaises(SystemExit):
+            build_catalog.build_outputs(root)
+
+    def run_main(self, root: Path, argv: list[str]) -> None:
+        with (
+            mock.patch.object(build_catalog, "ROOT", root),
+            mock.patch.object(sys, "argv", ["build_catalog.py", *argv]),
+        ):
+            build_catalog.main()
+
+    def test_main_writes_then_check_passes_then_stale_check_exits(self) -> None:
+        root = FixtureRoot(self).root
+        self.run_main(root, [])
+        self.run_main(root, ["--check"])
+        (root / "catalog" / "plugins.md").write_text("hand edited\n", encoding="utf-8")
+        with self.assertRaises(SystemExit) as caught:
+            self.run_main(root, ["--check"])
+        self.assertNotEqual(caught.exception.code, 0)
 
 
 if __name__ == "__main__":
