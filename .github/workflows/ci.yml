@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
 
       - name: Fetch main branch
         run: git fetch origin main --depth=1
@@ -38,6 +40,9 @@ jobs:
       - name: Install dev tools
         run: python3 -m pip install --upgrade -r requirements-dev.txt
 
+      - name: Check the catalog is generated and current
+        run: python3 scripts/build_catalog.py --check
+
       - name: Lint Python
         run: python3 -m ruff check scripts tests
 
@@ -45,7 +50,7 @@ jobs:
         run: python3 -m ruff format --check scripts tests
 
       - name: Compile Python
-        run: python3 -m py_compile scripts/validate-marketplace.py scripts/check-plugin-version-bump.py
+        run: python3 -m py_compile scripts/validate-marketplace.py scripts/check-plugin-version-bump.py scripts/build_catalog.py
 
       - name: Run tests with coverage
         run: |

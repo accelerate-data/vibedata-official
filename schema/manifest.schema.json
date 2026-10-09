@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/accelerate-data/vibedata-official/schema/manifest.schema.json",
+  "title": "vibedata-official manifest",
+  "description": "manifest.json: one entry per content source Studio reads, who fetches it, and what an admin can override.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "content"],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "content": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plugins",
+        "skills",
+        "recipes",
+        "connectors",
+        "releases",
+        "mcp"
+      ],
+      "properties": {
+        "plugins": { "$ref": "#/$defs/source" },
+        "skills": { "$ref": "#/$defs/source" },
+        "recipes": { "$ref": "#/$defs/source" },
+        "connectors": { "$ref": "#/$defs/source" },
+        "releases": { "$ref": "#/$defs/source" },
+        "mcp": { "$ref": "#/$defs/source" }
+      }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "fetchedBy", "adminOverride"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fetchedBy": {
+          "enum": ["studio", "obot"]
+        },
+        "adminOverride": {
+          "description": "none = fixed; pointer = the whole official-source pointer only; additive = admins may add their own alongside the protected default.",
+          "enum": ["none", "pointer", "additive"]
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

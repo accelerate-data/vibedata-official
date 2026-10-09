@@ -1,0 +1,8 @@
+[submodule "mcp"]
+	path = mcp
+	url = https://github.com/accelerate-data/mcp-catalog
+	branch = main
+[submodule "recipes"]
+	path = recipes
+	url = https://github.com/accelerate-data/vibedata-cookbooks
+	branch = main

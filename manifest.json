@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "content": {
+    "plugins": {
+      "path": ".claude-plugin/marketplace.json",
+      "fetchedBy": "studio",
+      "adminOverride": "additive"
+    },
+    "skills": {
+      "path": "skills/",
+      "fetchedBy": "studio",
+      "adminOverride": "none",
+      "license": "Elastic-2.0"
+    },
+    "recipes": {
+      "path": "recipes/catalog.json",
+      "fetchedBy": "studio",
+      "adminOverride": "pointer",
+      "license": "Elastic-2.0"
+    },
+    "connectors": {
+      "path": "connectors/sources.json",
+      "fetchedBy": "studio",
+      "adminOverride": "additive",
+      "license": "Apache-2.0"
+    },
+    "releases": {
+      "path": "releases/",
+      "fetchedBy": "studio",
+      "adminOverride": "none",
+      "license": "Elastic-2.0"
+    },
+    "mcp": {
+      "path": "mcp/",
+      "fetchedBy": "obot",
+      "adminOverride": "none"
+    }
+  }
+}

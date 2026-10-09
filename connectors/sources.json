@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "name": "verified-sources",
+      "description": "Production-grade dlt sources for databases, APIs, and files.",
+      "url": "https://github.com/dlt-hub/verified-sources",
+      "ref": "3957506893a7da821dbcc6acd51c7ca4475d1f53",
+      "license": "Apache-2.0",
+      "attribution": "dltHub"
+    }
+  ]
+}
