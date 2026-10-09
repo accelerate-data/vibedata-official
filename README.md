@@ -23,7 +23,7 @@ The same bundles can also be installed directly in Claude Code as standalone ski
 |---|---|---|
 | **What** | Markdown knowledge packages that encode organizational standards, source customization, and business rules | Installable Claude Code packages that bundle skills for VibeData agents or standalone Claude Code use |
 | **How they work** | Loaded into VibeData data engineering agents to align behavior with your team's standards | Installed from the marketplace as reusable capabilities |
-| **Example** | dbt naming conventions for Fabric, SCD2 snapshot patterns | Skill bundles like `vibedata-dbt-skills`, or workflow plugins like `ad-migration` |
+| **Example** | dbt naming conventions for Fabric, SCD2 snapshot patterns | Skill bundles like `vibedata-dbt-skills`, or platform plugins like `fabric-cli` |
 
 Skills are the behavior-shaping knowledge. Plugins are the distribution unit that makes those standards available to VibeData agents and, when useful, to Claude Code directly.
 
@@ -35,10 +35,10 @@ Add the marketplace:
 /plugin marketplace add accelerate-data/vibedata-plugins-official
 ```
 
-Install the flagship plugin:
+Install the dbt-on-Fabric starter bundle:
 
 ```bash
-/plugin install ad-migration@vibedata-plugins-official
+/plugin install vibedata-dbt-skills@vibedata-plugins-official
 ```
 
 Then explore the rest of the catalog from the same marketplace. Skill bundles are intended for VibeData agent customization first, and can also be installed directly in Claude Code.
@@ -53,36 +53,31 @@ codex plugin marketplace add accelerate-data/vibedata-plugins-official
 
 The Codex marketplace is declared in `.agents/plugins/marketplace.json`, and each bundled plugin exposes a `.codex-plugin/plugin.json` manifest.
 
-## Featured Plugin: ad-migration
+## Starter Set
 
-`ad-migration` helps teams modernize legacy data warehouses into governed Fabric Lakehouse platforms.
+The catalog covers four platforms, combining first-party VibeData standards with public plugins published by the platform vendors:
 
-The result is a cleaner, agent-ready foundation for VibeData workflows and more predictable AI outcomes.
+| Platform | Plugins |
+|---|---|
+| Microsoft Fabric | `fabric-skills` (Microsoft), `fabric-cli` |
+| dbt | `dbt`, `dbt-migration`, `dbt-extras` (dbt Labs), `vibedata-dbt-skills` |
+| dlt | `vibedata-dlt-skills` |
+| Databricks | `databricks` (Databricks) |
 
-It is designed for teams that need to:
-
-- assess and scope legacy SQL Server warehouse assets
-- profile source structures and migration candidates
-- generate tests and dbt models as part of a repeatable workflow
-- move from one-off migration efforts to governed, reviewable delivery
-
-Install:
-
-```bash
-/plugin install ad-migration@vibedata-plugins-official
-```
+Collated third-party plugins track their upstream repositories. Third-party content is provided as is, is used at your own risk, and is not reviewed by VibeData.
 
 ## Available Plugins
 
 | Plugin | What it does | Best for | Install |
 |---|---|---|---|
-| `ad-migration` | Governed migration workflows for stored procedures, warehouse logic, and dbt model generation | Legacy warehouse to Fabric Lakehouse modernization | `/plugin install ad-migration@vibedata-plugins-official` |
+| `databricks` | Databricks CLI, Apps, Lakebase, Model Serving, Lakeflow Jobs, Spark Declarative Pipelines, and migration skills | Building and operating on Databricks | `/plugin install databricks@vibedata-plugins-official` |
+| `dbt` | Analytics engineering with dbt — models, tests, semantic layer, and job troubleshooting | dbt project delivery | `/plugin install dbt@vibedata-plugins-official` |
+| `dbt-extras` | Miscellaneous dbt skills | dbt project delivery | `/plugin install dbt-extras@vibedata-plugins-official` |
+| `dbt-migration` | Migrating dbt projects between engines and platforms | dbt Core to Fusion, or cross-platform moves | `/plugin install dbt-migration@vibedata-plugins-official` |
 | `fabric-cli` | Operational workflows for Fabric workspaces, notebooks, pipelines, and OneLake | Fabric platform operations and environment control | `/plugin install fabric-cli@vibedata-plugins-official` |
-| `fabric-semantic-model` | TMDL semantic model design, validation, and DAX measure authoring | Fabric and Power BI semantic model delivery | `/plugin install fabric-semantic-model@vibedata-plugins-official` |
+| `fabric-skills` | Microsoft's Fabric skills for semantic models, Spark and warehouse CLI operations, migration, and medallion architecture | Broad Microsoft Fabric delivery | `/plugin install fabric-skills@vibedata-plugins-official` |
 | `vibedata-dbt-skills` | Customizes dbt agents with Fabric modeling, snapshot, semantic layer, and Elementary quality standards | dbt project delivery on Microsoft Fabric | `/plugin install vibedata-dbt-skills@vibedata-plugins-official` |
 | `vibedata-dlt-skills` | Customizes ingestion agents with dlt REST API standards for ADLS Gen2, OneLake, and Fabric lakehouses | API ingestion pipelines feeding dbt | `/plugin install vibedata-dlt-skills@vibedata-plugins-official` |
-| `vibedata-domain-skills` | Customizes modeling agents with business rules, including revenue recognition | Domain-aware marts and accounting logic | `/plugin install vibedata-domain-skills@vibedata-plugins-official` |
-| `vibedata-ingestion-skills` | Customizes extraction agents with source-system standards, including Salesforce extraction | CRM/source-system extraction patterns | `/plugin install vibedata-ingestion-skills@vibedata-plugins-official` |
 
 ## Skill Bundle Contents
 
@@ -103,16 +98,13 @@ Skills are distributed through Claude plugins. Install the bundle that matches t
 |---|---|
 | `dlt-rest-api-connector` | dlt REST API pipelines to ADLS Gen2 and OneLake |
 
-### `vibedata-domain-skills`
+## Skill Library
+
+Standalone skills that are not tied to a plugin bundle live in [`skills/`](./skills). Copy one into a Domain's `.agents/skills/` directory to make it an ordinary project skill.
 
 | Skill | What it encodes |
 |---|---|
 | `modeling-revenue-recognition` | Revenue recognition mapped to dbt medallion architecture on Microsoft Fabric |
-
-### `vibedata-ingestion-skills`
-
-| Skill | What it encodes |
-|---|---|
 | `salesforce-extraction` | Salesforce data extraction via dlt into dbt on Microsoft Fabric |
 
 ## How Skills Work in VibeData

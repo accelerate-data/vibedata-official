@@ -348,6 +348,9 @@ def validate_catalog_parity(
     codex_names = plugin_names(codex_data)
     errors: list[str] = []
 
+    # Strict parity: the two catalogues carry the same plugin set. A plugin that
+    # only ships a Claude manifest is still listed for Codex, which reads the
+    # `.claude-plugin` compatibility manifest.
     missing_in_codex = sorted(claude_names - codex_names)
     if missing_in_codex:
         errors.append(
