@@ -2,7 +2,7 @@
 
 ## Repository purpose
 
-Bundled plugin marketplace for [VibeData](https://acceleratedata.ai). Each subdirectory under `plugins/` is a self-contained Claude and Codex plugin package containing skills and optionally agents, commands, and hooks. The root `.claude-plugin/marketplace.json` is the Claude registry index. The root `.agents/plugins/marketplace.json` is the Codex registry index.
+Bundled plugin marketplace for [VibeData](https://acceleratedata.ai). Each subdirectory under `plugins/` is a self-contained Claude and Codex plugin package containing skills and optionally agents, commands, and hooks. The root `.claude-plugin/marketplace.json` is the Claude registry index. The root `.agents/plugins/marketplace.json` is the Codex registry index. Standalone skills that are not distributed through a plugin live under `skills/`.
 
 No build scripts or test runners. All changes are Markdown or JSON edits.
 
@@ -29,7 +29,14 @@ No build scripts or test runners. All changes are Markdown or JSON edits.
 - Every Codex entry must include `policy.installation`, `policy.authentication`, and `category`
 - Codex local source paths must stay under `./plugins/`
 - Every Codex marketplace entry must point to a plugin with `.codex-plugin/plugin.json`
+- The Claude and Codex catalogues carry the **same** plugin set (strict parity, enforced by `validate-marketplace.py`). A collated third-party plugin that ships only `.claude-plugin` is still listed here — Codex installs it through its `.claude-plugin` compatibility manifest. Point at the plugin's native Codex directory when the upstream ships one (e.g. Databricks `plugins/databricks/codex`).
 - `.claude-plugin/marketplace.json.metadata.version` is the single marketplace catalog version. Bump it when adding plugin entries to either the Claude or Codex marketplace manifest.
+
+## Skill library
+
+- Standalone skills live at `skills/<name>/` with a `SKILL.md` and optional `references/`
+- Skills are not marketplace entries — only plugins get marketplace entries
+- A skill removed from a retired plugin is relocated here instead of staying a plugin
 
 ## Anti-patterns
 

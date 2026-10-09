@@ -5,10 +5,50 @@
   },
   "plugins": [
     {
-      "name": "ad-migration",
+      "name": "databricks",
       "source": {
-        "source": "url",
-        "url": "https://github.com/accelerate-data/migration-utility.git"
+        "source": "git-subdir",
+        "url": "https://github.com/databricks/databricks-agent-skills",
+        "path": "plugins/databricks/codex"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Data Engineering"
+    },
+    {
+      "name": "dbt",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/dbt-labs/dbt-agent-skills",
+        "path": "skills/dbt"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Data Engineering"
+    },
+    {
+      "name": "dbt-extras",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/dbt-labs/dbt-agent-skills",
+        "path": "skills/dbt-extras"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Data Engineering"
+    },
+    {
+      "name": "dbt-migration",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/dbt-labs/dbt-agent-skills",
+        "path": "skills/dbt-migration"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -29,10 +69,11 @@
       "category": "Data Engineering"
     },
     {
-      "name": "fabric-semantic-model",
+      "name": "fabric-skills",
       "source": {
-        "source": "url",
-        "url": "https://github.com/accelerate-data/fabric-semantic-model.git"
+        "source": "git-subdir",
+        "url": "https://github.com/microsoft/skills-for-fabric",
+        "path": "plugins/fabric-skills"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -57,30 +98,6 @@
       "source": {
         "source": "local",
         "path": "./plugins/vibedata-dlt-skills"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Data Engineering"
-    },
-    {
-      "name": "vibedata-domain-skills",
-      "source": {
-        "source": "local",
-        "path": "./plugins/vibedata-domain-skills"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Data Engineering"
-    },
-    {
-      "name": "vibedata-ingestion-skills",
-      "source": {
-        "source": "local",
-        "path": "./plugins/vibedata-ingestion-skills"
       },
       "policy": {
         "installation": "AVAILABLE",
