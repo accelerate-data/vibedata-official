@@ -1,6 +1,9 @@
 <p align="left">
   <a href="https://www.getvibedata.ai">
-    <img src="https://www.getvibedata.ai/images/email/vibedata-endorsed-horizontal-light.png" alt="vibedata" height="48">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://www.getvibedata.ai/brand/vibedata-lockup-horizontal-dark.png">
+      <img src="https://www.getvibedata.ai/brand/vibedata-lockup-horizontal-light.png" alt="vibedata" height="48">
+    </picture>
   </a>
 </p>
 
