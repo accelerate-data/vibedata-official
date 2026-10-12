@@ -3,7 +3,7 @@
 # Triggered by a `studio-release` repository_dispatch from
 # accelerate-data/vd-studio's deploy.yml AFTER that workflow has already:
 #   - verified the candidate's cosign signature + SBOM + SLSA attestations,
-#   - promoted BOTH images via `crane copy` (sigstore referrers preserved, no
+#   - promoted BOTH images via `oras cp -r` (image + sigstore referrers, no
 #     re-sign) into the public ghcr.io/accelerate-data/studio-{backend,frontend}
 #     packages under the same vX.Y.Z tag.
 #
@@ -95,12 +95,14 @@ jobs:
         uses: imjasonh/setup-crane@v0.7
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3
+        # Same cosign as vd-studio's signer and deploy.yml verifier. Studio
+        # signs with cosign v3, which stores signatures as OCI referrers; a
+        # cosign v2 verify looks only for the legacy .sig tag and reports
+        # "no signatures found". --offline (below) avoids the online Rekor
+        # lookup that once hung a vd-studio self-verify 40+ min (cc217782).
+        uses: sigstore/cosign-installer@v4.1.2
         with:
-          # Pin cosign; v2.5.2 supports --offline. The nightly self-verify hung
-          # 40+ min on an online Rekor lookup during a sigstore slow window
-          # (vd-studio cc217782) — verifying --offline here avoids that.
-          cosign-release: v2.5.2
+          cosign-release: v3.0.6
 
       - name: Log in to GHCR
         uses: docker/login-action@v4
