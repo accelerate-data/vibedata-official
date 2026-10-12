@@ -89,7 +89,10 @@ class PublishWorkflowShape(unittest.TestCase):
         # Rekor lookup that hung the nightly self-verify (vd-studio cc217782).
         self.assertIn("cosign verify", self.raw)
         self.assertIn("--offline", self.raw)
-        self.assertIn("cosign-release: v2.5.2", self.raw)
+        # Studio signs with cosign v3 (OCI referrer format); a v2 verifier
+        # reports "no signatures found" on it.
+        self.assertIn("sigstore/cosign-installer@v4.1.2", self.raw)
+        self.assertIn("cosign-release: v3.0.6", self.raw)
 
     def test_uses_app_token_not_personal_pat(self) -> None:
         # Cross-repo read of vd-studio's run artifacts uses a minted GitHub App
