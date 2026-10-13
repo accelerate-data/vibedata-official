@@ -43,6 +43,29 @@ jobs:
       - name: Check the catalog is generated and current
         run: python3 scripts/build_catalog.py --check
 
+      - name: Mint read-only token for the private design-system repository
+        id: theme-contract-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.VIBEDATA_GHA_APP_ID }}
+          private-key: ${{ secrets.VIBEDATA_GHA_APP_PRIVATE_KEY }}
+          owner: accelerate-data
+          repositories: vd-design-system
+          permission-contents: read
+
+      - name: Checkout the theme contract validator
+        uses: actions/checkout@v7
+        with:
+          repository: accelerate-data/vd-design-system
+          # Publish-time test reference, not Studio's runtime design-system pin.
+          ref: 00ec222afedb5706ccd08d1362b21bfd1d124a82
+          path: .theme-contract
+          token: ${{ steps.theme-contract-token.outputs.token }}
+          persist-credentials: false
+
+      - name: Validate every theme against the design-system contract
+        run: python3 .theme-contract/scripts/check_theme.py themes/*.json
+
       - name: Lint Python
         run: python3 -m ruff check scripts tests
 

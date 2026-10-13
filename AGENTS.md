@@ -44,7 +44,7 @@ edited by hand; CI fails when they are stale.
 
 ## Manifest and generated catalog
 
-- `manifest.json` lists every content source, who fetches it, and what an admin can override. `schema/manifest.schema.json` is its contract, `schema/catalog.schema.json` covers the generated catalog, and `schema/connector-sources.schema.json` covers `connectors/sources.json`.
+- `manifest.json` lists every content source, who fetches it, and what an admin can override. `schema/manifest.schema.json` is its contract, `schema/catalog.schema.json` covers the generated catalog, `schema/connector-sources.schema.json` covers `connectors/sources.json`, and `schema/themes.schema.json` covers `themes/*.json`.
 - `scripts/build_catalog.py` validates the manifest, the catalog and the license allowlist, then writes `catalog/` and the README generated blocks. Run it to regenerate, or pass `--check` to verify without writing.
 - Never edit `catalog/`, `catalog/catalog.json`, or anything between the `<!-- BEGIN GENERATED: ... -->` markers in `README.md` by hand.
 - `licenses/allowlist.json` is the allowed license set. Every Claude marketplace entry and every `connectors/sources.json` entry must declare a license on it; any license declared in `manifest.json` is checked too.

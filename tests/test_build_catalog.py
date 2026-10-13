@@ -52,6 +52,7 @@ class FixtureRoot:
             "manifest.schema.json",
             "catalog.schema.json",
             "connector-sources.schema.json",
+            "themes.schema.json",
         ):
             shutil.copy(REPO_ROOT / "schema" / schema, self.root / "schema" / schema)
         write_json(
@@ -127,6 +128,23 @@ class FixtureRoot:
             "release notes\n", encoding="utf-8"
         )
         write_json(
+            self.root / "themes" / "demo-light.json",
+            {
+                "id": "demo-light",
+                "name": "Demo Light",
+                "scheme": "light",
+                "source": "https://example.com/demo-theme",
+                "author": "Demo Author",
+                "license": "MIT",
+                "attribution": "Demo theme by Demo Author",
+                "changes": [],
+                "roles": {
+                    "--vd-surface": "#FFFFFF",
+                    "--vd-text": "#241F1F",
+                },
+            },
+        )
+        write_json(
             self.root / "manifest.json",
             {
                 "schemaVersion": 1,
@@ -160,6 +178,11 @@ class FixtureRoot:
                         "adminOverride": "none",
                         "license": "Elastic-2.0",
                     },
+                    "themes": {
+                        "path": "themes/",
+                        "fetchedBy": "studio",
+                        "adminOverride": "none",
+                    },
                     "mcp": {
                         "path": "mcp/",
                         "fetchedBy": "obot",
@@ -180,7 +203,53 @@ class BuildCatalogTests(unittest.TestCase):
         self.assertEqual(len(catalog["entries"]["skills"]), 2)
         self.assertEqual(len(catalog["entries"]["recipes"]), 1)
         self.assertEqual(len(catalog["entries"]["connectors"]), 1)
+        self.assertEqual(len(catalog["entries"]["themes"]), 1)
         self.assertEqual(len(catalog["entries"]["mcp"]), 1)
+
+    def test_theme_license_off_allowlist_fails(self) -> None:
+        root = FixtureRoot(self).root
+        path = root / "themes" / "demo-light.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["license"] = "Proprietary"
+        write_json(path, data)
+        _, errors = build_catalog.build_catalog(root)
+        self.assertTrue(
+            any("not on the allowlist" in error for error in errors), errors
+        )
+
+    def test_theme_id_must_match_file_name(self) -> None:
+        root = FixtureRoot(self).root
+        path = root / "themes" / "demo-light.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["id"] = "mismatched-id"
+        write_json(path, data)
+        _, errors = build_catalog.build_catalog(root)
+        self.assertTrue(
+            any("does not match the file name" in error for error in errors), errors
+        )
+
+    def test_theme_with_unknown_top_level_field_fails(self) -> None:
+        root = FixtureRoot(self).root
+        path = root / "themes" / "demo-light.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["schemeName"] = "light"
+        write_json(path, data)
+        _, errors = build_catalog.build_catalog(root)
+        self.assertTrue(any("schemeName" in error for error in errors), errors)
+
+    def test_theme_roles_must_be_colour_values(self) -> None:
+        root = FixtureRoot(self).root
+        path = root / "themes" / "demo-light.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["roles"]["--vd-surface"] = "papayawhip"
+        write_json(path, data)
+        _, errors = build_catalog.build_catalog(root)
+        self.assertTrue(
+            any(
+                "--vd-surface" in error or "does not match" in error for error in errors
+            ),
+            errors,
+        )
 
     def test_plugin_license_off_allowlist_fails(self) -> None:
         root = FixtureRoot(self).root
