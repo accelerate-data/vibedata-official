@@ -30,6 +30,11 @@
       "adminOverride": "none",
       "license": "Elastic-2.0"
     },
+    "themes": {
+      "path": "themes/",
+      "fetchedBy": "studio",
+      "adminOverride": "none"
+    },
     "mcp": {
       "path": "mcp/",
       "fetchedBy": "obot",

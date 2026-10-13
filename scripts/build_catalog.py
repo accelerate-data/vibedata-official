@@ -23,6 +23,7 @@ MARKETPLACE = Path(".claude-plugin/marketplace.json")
 MANIFEST = Path("manifest.json")
 CONNECTOR_SOURCES = Path("connectors/sources.json")
 ALLOWLIST = Path("licenses/allowlist.json")
+THEMES_DIR = Path("themes")
 CATALOG_DIR = Path("catalog")
 CATALOG_JSON = CATALOG_DIR / "catalog.json"
 README = Path("README.md")
@@ -31,6 +32,7 @@ SCHEMAS = {
     "manifest": Path("schema/manifest.schema.json"),
     "catalog": Path("schema/catalog.schema.json"),
     "connectors": Path("schema/connector-sources.schema.json"),
+    "themes": Path("schema/themes.schema.json"),
 }
 DISCLAIMER = (
     "Third-party content is collated from upstream sources, provided as is, and "
@@ -229,6 +231,40 @@ def read_connectors(
     return sorted(entries, key=lambda item: item["name"])
 
 
+def read_themes(
+    root: Path, schema: dict[str, Any], allowlist: set[str], errors: list[str]
+) -> list[dict[str, Any]]:
+    entries = []
+    for path in sorted(root.glob(f"{THEMES_DIR}/*.json")):
+        label = path.as_posix()
+        data = load_json(path)
+        errors.extend(validate(schema, data, label))
+        check_license(
+            data.get("license"),
+            f"{label}: {data.get('id')}",
+            allowlist,
+            errors,
+        )
+        if data.get("id") and data["id"] != path.stem:
+            errors.append(
+                f"{label}: id {data['id']!r} does not match the file name {path.stem!r}"
+            )
+        changes = data.get("changes")
+        entries.append(
+            {
+                "id": data.get("id", ""),
+                "name": data.get("name", ""),
+                "scheme": data.get("scheme", ""),
+                "author": one_line(data.get("author")),
+                "license": data.get("license", ""),
+                "source": data.get("source", ""),
+                "attribution": one_line(data.get("attribution")),
+                "corrections": len(changes) if isinstance(changes, list) else 0,
+            }
+        )
+    return sorted(entries, key=lambda item: (item["scheme"], item["name"]))
+
+
 def build_catalog(root: Path) -> tuple[dict[str, Any], list[str]]:
     schemas = load_schemas(root)
     allowlist = load_allowlist(root)
@@ -256,6 +292,7 @@ def build_catalog(root: Path) -> tuple[dict[str, Any], list[str]]:
             "connectors": read_connectors(
                 root, schemas["connectors"], allowlist, errors
             ),
+            "themes": read_themes(root, schemas["themes"], allowlist, errors),
             "mcp": read_mcp(root),
         },
     }
@@ -325,6 +362,21 @@ def render_pages(catalog: dict[str, Any]) -> dict[Path, str]:
                 for c in e["connectors"]
             ],
         ),
+        "themes": page(
+            "Themes",
+            ["Theme", "Scheme", "Author", "License", "Source", "Corrections"],
+            [
+                [
+                    table_cell(t["name"]),
+                    table_cell(t["scheme"]),
+                    table_cell(t["author"]),
+                    table_cell(t["license"]),
+                    f"[{table_cell(t['source'])}]({t['source']})",
+                    str(t["corrections"]),
+                ]
+                for t in e["themes"]
+            ],
+        ),
         "mcp": page(
             "MCP servers",
             ["Server", "Description", "Runtime", "Access"],
@@ -353,6 +405,7 @@ def render_readme_blocks(catalog: dict[str, Any]) -> dict[str, str]:
             len(e["connectors"]),
             "[catalog/connectors.md](catalog/connectors.md)",
         ],
+        ["Themes", len(e["themes"]), "[catalog/themes.md](catalog/themes.md)"],
         ["MCP servers", len(e["mcp"]), "[catalog/mcp.md](catalog/mcp.md)"],
     ]
     summary = page_free_table(["Catalog", "Entries", "Browse"], summary_rows)

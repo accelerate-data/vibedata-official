@@ -310,6 +310,98 @@
         "attribution": "dltHub"
       }
     ],
+    "themes": [
+      {
+        "id": "catppuccin-mocha",
+        "name": "Catppuccin Mocha",
+        "scheme": "dark",
+        "author": "Catppuccin",
+        "license": "MIT",
+        "source": "https://github.com/catppuccin/catppuccin",
+        "attribution": "Catppuccin Mocha",
+        "corrections": 1
+      },
+      {
+        "id": "dracula",
+        "name": "Dracula",
+        "scheme": "dark",
+        "author": "Zeno Rocha",
+        "license": "MIT",
+        "source": "https://github.com/dracula/dracula-theme",
+        "attribution": "Dracula by Zeno Rocha",
+        "corrections": 1
+      },
+      {
+        "id": "github-dark",
+        "name": "GitHub Dark",
+        "scheme": "dark",
+        "author": "GitHub",
+        "license": "MIT",
+        "source": "https://github.com/primer/github-vscode-theme",
+        "attribution": "GitHub Dark, from GitHub's Primer palette",
+        "corrections": 2
+      },
+      {
+        "id": "nord",
+        "name": "Nord",
+        "scheme": "dark",
+        "author": "Arctic Ice Studio",
+        "license": "MIT",
+        "source": "https://github.com/nordtheme/nord",
+        "attribution": "Nord by Arctic Ice Studio",
+        "corrections": 2
+      },
+      {
+        "id": "one-dark",
+        "name": "One Dark",
+        "scheme": "dark",
+        "author": "Atom",
+        "license": "MIT",
+        "source": "https://github.com/atom/one-dark-syntax",
+        "attribution": "One Dark, from the Atom One Dark syntax theme",
+        "corrections": 2
+      },
+      {
+        "id": "solarized-dark",
+        "name": "Solarized Dark",
+        "scheme": "dark",
+        "author": "Ethan Schoonover",
+        "license": "MIT",
+        "source": "https://github.com/altercation/solarized",
+        "attribution": "Solarized by Ethan Schoonover",
+        "corrections": 3
+      },
+      {
+        "id": "catppuccin-latte",
+        "name": "Catppuccin Latte",
+        "scheme": "light",
+        "author": "Catppuccin",
+        "license": "MIT",
+        "source": "https://github.com/catppuccin/catppuccin",
+        "attribution": "Catppuccin Latte",
+        "corrections": 4
+      },
+      {
+        "id": "github-light",
+        "name": "GitHub Light",
+        "scheme": "light",
+        "author": "GitHub",
+        "license": "MIT",
+        "source": "https://github.com/primer/github-vscode-theme",
+        "attribution": "GitHub Light, from GitHub's Primer palette",
+        "corrections": 1
+      },
+      {
+        "id": "solarized-light",
+        "name": "Solarized Light",
+        "scheme": "light",
+        "author": "Ethan Schoonover",
+        "license": "MIT",
+        "source": "https://github.com/altercation/solarized",
+        "attribution": "Solarized by Ethan Schoonover",
+        "corrections": 5
+      }
+    ],
     "mcp": [
       {
         "name": "AWS API",
