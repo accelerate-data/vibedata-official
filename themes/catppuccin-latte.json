@@ -10,7 +10,8 @@
     "text-secondary: #6C6F85 -> #6A6D82 to reach 4.5:1 on #EFF1F5",
     "control-border: #BCC0CC -> #828AA0 to reach 3.0:1 on #EFF1F5",
     "status: #40A02B -> #3E9C2A to reach 3.0:1 on #EFF1F5",
-    "status: #DF8E1D -> #BF7A19 to reach 3.0:1 on #EFF1F5"
+    "status: #DF8E1D -> #BF7A19 to reach 3.0:1 on #EFF1F5",
+    "code surface: #E6E9EF -> #2A2B3A: .vd-code paints a fixed light ink (#D1EFF7) on --vd-code-surface, so a light code surface is unreadable"
   ],
   "roles": {
     "--vd-surface": "#EFF1F5",
@@ -32,7 +33,7 @@
     "--vd-panel-line": "transparent",
     "--vd-badge-fill": "#EFF1F5",
     "--vd-badge-line": "#BCC0CC",
-    "--vd-code-surface": "#E6E9EF",
+    "--vd-code-surface": "#2A2B3A",
     "--vd-scrim": "rgba(76, 79, 105, 0.55)",
     "--vd-status-success": "#3E9C2A",
     "--vd-status-warning": "#BF7A19",

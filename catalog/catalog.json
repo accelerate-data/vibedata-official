@@ -379,7 +379,7 @@
         "license": "MIT",
         "source": "https://github.com/catppuccin/catppuccin",
         "attribution": "Catppuccin Latte",
-        "corrections": 4
+        "corrections": 5
       },
       {
         "id": "github-light",
@@ -389,7 +389,7 @@
         "license": "MIT",
         "source": "https://github.com/primer/github-vscode-theme",
         "attribution": "GitHub Light, from GitHub's Primer palette",
-        "corrections": 1
+        "corrections": 2
       },
       {
         "id": "solarized-light",
@@ -399,7 +399,7 @@
         "license": "MIT",
         "source": "https://github.com/altercation/solarized",
         "attribution": "Solarized by Ethan Schoonover",
-        "corrections": 5
+        "corrections": 6
       }
     ],
     "mcp": [
