@@ -7,25 +7,37 @@ Third-party content is collated from upstream sources, provided as is, and used 
 | `api-to-bronze-incremental-contract` | Land a SaaS or REST API into bronze with an incremental cursor and a schema contract | ingestion | supported |
 | `bounded-partition-backfill` | Backfill a bounded date range after a logic change without a full refresh | transformation | supported |
 | `business-event-fact` | Build a business-event fact with auditable duplicate handling | transformation | supported |
+| `database-tables-to-bronze` | Load a database table set into bronze with a bounded incremental strategy and landed-data proof | ingestion | supported |
 | `dbt-full-refresh-to-incremental` | Convert a full-refresh dbt model to incremental and show the runtime delta | transformation | supported |
 | `dbt-refactor-output-identical` | Refactor dbt models without changing consumer output | transformation | supported |
 | `dbt-snapshot-history` | Add dimension history with verified historical fact classification | transformation | supported |
 | `effective-dated-business-rules` | Build historical event amounts from effective-dated business rules | transformation | supported |
 | `event-resource-attribution` | Build auditable event-to-resource attribution | transformation | supported |
 | `fabric-data-pipeline-as-code` | Author a Fabric Data Pipeline that sequences ingestion, dbt, and downstream refresh as committed code | orchestration | supported |
+| `fabric-direct-lake-semantic-model` | Author a Direct Lake semantic model as code over governed gold tables | semantic-layer | supported |
+| `file-drop-to-bronze` | Load a recurring file drop into bronze with file-completeness and schema controls | ingestion | supported |
+| `governed-spreadsheet-table` | Promote a spreadsheet or CSV to a governed, tested table | ingestion | supported |
 | `identity-golden-record-crosswalk` | Deduplicate customers into a golden record with a source crosswalk | transformation | supported |
 | `identity-standardize-names-addresses` | Standardize names and addresses and mint deterministic match keys | transformation | supported |
+| `incremental-dbt-model-with-contract` | Author an incremental dbt model with its contract and prove idempotency | transformation | supported |
 | `legacy-sql-to-dbt` | Convert a legacy SQL script or view into a dbt model and prove parity | transformation | supported |
 | `logistics-fleet-utilization` | Build fleet utilisation against explicit asset availability | transformation | supported |
+| `managed-connector-to-dlt` | Replace a Fivetran or Airbyte connector with a dlt pipeline and reconcile the result | ingestion | supported |
 | `master-b2b-account-hierarchy` | Resolve B2B account hierarchies and roll measures to the ultimate parent | transformation | supported |
+| `materialized-view-to-dbt` | Convert a materialized view into a dbt model and preserve its required refresh semantics | transformation | supported |
 | `metric-population-and-rollups` | Build a metric with explicit eligibility and reconcilable rollups | transformation | supported |
 | `motherduck-flight-scheduling` | Schedule a dlt load and a dbt build on MotherDuck as a committed MotherDuck Flight | orchestration | supported |
+| `notebook-transformation-to-dbt` | Convert a notebook transformation into a dbt model and prove parity | transformation | supported |
 | `operational-state-duration` | Build state durations by entity, location and reporting period | transformation | supported |
 | `prove-dbt-change-safe` | Assess an existing dbt change for safe merge without modifying it | data-quality | supported |
 | `revops-pipeline-snapshots` | Build a periodic opportunity pipeline snapshot with stage conversion and slippage | transformation | supported |
 | `revops-quota-commission` | Build commission-eligible bookings and quota attainment from explicit plan rules | transformation | supported |
+| `scalar-sql-function-to-dbt-macro` | Convert a scalar SQL function into a dbt macro and prove equivalence | transformation | supported |
 | `service-ticket-sla` | Track ticket SLA attainment and backlog aging outside the vendor dashboard | transformation | supported |
 | `shift-unit-economics` | Build shift revenue, cost and margin with reconciled rollups | transformation | supported |
+| `source-freshness-sla` | Declare source freshness SLAs and make stale data fail before downstream work | data-quality | supported |
+| `spark-ingestion-notebook-to-dlt` | Convert a Spark ingestion notebook into a dlt pipeline and reconcile what it lands | ingestion | supported |
+| `stored-procedure-to-dbt` | Convert a stored procedure into a dbt model and prove parity | transformation | supported |
 
 ----
 

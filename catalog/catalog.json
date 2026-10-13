@@ -148,7 +148,7 @@
       {
         "id": "api-to-bronze-incremental-contract",
         "title": "Land a SaaS or REST API into bronze with an incremental cursor and a schema contract",
-        "pitch": "Land an API into bronze incrementally, with a schema contract that decides what happens when a field changes.",
+        "pitch": "Land an API into bronze incrementally, with a schema contract for changed fields and an account of every record it can see.",
         "area": "ingestion",
         "readiness": "supported"
       },
@@ -164,6 +164,13 @@
         "title": "Build a business-event fact with auditable duplicate handling",
         "pitch": "Count business events with a defensible identity rule and an audit trail for every source row.",
         "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "database-tables-to-bronze",
+        "title": "Load a database table set into bronze with a bounded incremental strategy and landed-data proof",
+        "pitch": "Land a database's tables into bronze, each the way it changes, and reconcile each approved run against the source with a cause for every difference found.",
+        "area": "ingestion",
         "readiness": "supported"
       },
       {
@@ -209,6 +216,27 @@
         "readiness": "supported"
       },
       {
+        "id": "fabric-direct-lake-semantic-model",
+        "title": "Author a Direct Lake semantic model as code over governed gold tables",
+        "pitch": "Author one Direct Lake model as code over governed gold, each approved KPI defined once with independently computed expected values.",
+        "area": "semantic-layer",
+        "readiness": "supported"
+      },
+      {
+        "id": "file-drop-to-bronze",
+        "title": "Load a recurring file drop into bronze with file-completeness and schema controls",
+        "pitch": "Land a recurring file drop into bronze so a rerun duplicates nothing, with completeness checks, a schema contract and a status for each expected delivery.",
+        "area": "ingestion",
+        "readiness": "supported"
+      },
+      {
+        "id": "governed-spreadsheet-table",
+        "title": "Promote a spreadsheet or CSV to a governed, tested table",
+        "pitch": "Turn the spreadsheet everyone depends on into a governed table that fails loudly when its structure breaks.",
+        "area": "ingestion",
+        "readiness": "supported"
+      },
+      {
         "id": "identity-golden-record-crosswalk",
         "title": "Deduplicate customers into a golden record with a source crosswalk",
         "pitch": "One customer, one stable id, every source record traced to it and every unresolved one explained.",
@@ -219,6 +247,13 @@
         "id": "identity-standardize-names-addresses",
         "title": "Standardize names and addresses and mint deterministic match keys",
         "pitch": "Give every customer record a clean name, a clean address and a match key you can explain.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "incremental-dbt-model-with-contract",
+        "title": "Author an incremental dbt model with its contract and prove idempotency",
+        "pitch": "Build an incremental dbt model with an enforced contract and show that a rerun or a re-delivery of records already applied leaves it unchanged.",
         "area": "transformation",
         "readiness": "supported"
       },
@@ -237,9 +272,23 @@
         "readiness": "supported"
       },
       {
+        "id": "managed-connector-to-dlt",
+        "title": "Replace a Fivetran or Airbyte connector with a dlt pipeline and reconcile the result",
+        "pitch": "Swap a Fivetran or Airbyte connector for a dlt pipeline you own, and prove table by table that it lands what the connector did before you cut over.",
+        "area": "ingestion",
+        "readiness": "supported"
+      },
+      {
         "id": "master-b2b-account-hierarchy",
         "title": "Resolve B2B account hierarchies and roll measures to the ultimate parent",
         "pitch": "See every corporate family's total, with every account placed or explicitly unresolved and every broken parent link explained.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "materialized-view-to-dbt",
+        "title": "Convert a materialized view into a dbt model and preserve its required refresh semantics",
+        "pitch": "Retire a materialized view by rebuilding it in dbt and proving each compared refresh matches the view's.",
         "area": "transformation",
         "readiness": "supported"
       },
@@ -255,6 +304,13 @@
         "title": "Schedule a dlt load and a dbt build on MotherDuck as a committed MotherDuck Flight",
         "pitch": "Replace the laptop cron with a committed MotherDuck Flight that loads and builds on a schedule.",
         "area": "orchestration",
+        "readiness": "supported"
+      },
+      {
+        "id": "notebook-transformation-to-dbt",
+        "title": "Convert a notebook transformation into a dbt model and prove parity",
+        "pitch": "Retire a hand-run notebook by rebuilding its dataframe logic in dbt and proving the new models publish what the notebook did.",
+        "area": "transformation",
         "readiness": "supported"
       },
       {
@@ -286,6 +342,13 @@
         "readiness": "supported"
       },
       {
+        "id": "scalar-sql-function-to-dbt-macro",
+        "title": "Convert a scalar SQL function into a dbt macro and prove equivalence",
+        "pitch": "Move a hidden warehouse function into dbt as a macro and prove the SQL it generates gives what the function did.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
         "id": "service-ticket-sla",
         "title": "Track ticket SLA attainment and backlog aging outside the vendor dashboard",
         "pitch": "See how every SLA number is computed and how old the open backlog was on any past day.",
@@ -296,6 +359,27 @@
         "id": "shift-unit-economics",
         "title": "Build shift revenue, cost and margin with reconciled rollups",
         "pitch": "Explain shift economics with traceable revenue, complete cost status and allocations that conserve source amounts.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "source-freshness-sla",
+        "title": "Declare source freshness SLAs and make stale data fail before downstream work",
+        "pitch": "Give every source a freshness limit and stop stale data before downstream models rebuild on it.",
+        "area": "data-quality",
+        "readiness": "supported"
+      },
+      {
+        "id": "spark-ingestion-notebook-to-dlt",
+        "title": "Convert a Spark ingestion notebook into a dlt pipeline and reconcile what it lands",
+        "pitch": "Turn a Spark ingestion notebook into a dlt pipeline you own, and prove table by table what it lands and why any row differs.",
+        "area": "ingestion",
+        "readiness": "supported"
+      },
+      {
+        "id": "stored-procedure-to-dbt",
+        "title": "Convert a stored procedure into a dbt model and prove parity",
+        "pitch": "Retire a stored procedure by rebuilding it in dbt and proving the table matches after every compared run, not only at the end.",
         "area": "transformation",
         "readiness": "supported"
       }
