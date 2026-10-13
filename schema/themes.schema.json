@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/accelerate-data/vibedata_official/schema/themes.schema.json",
+  "title": "vibedata-official theme",
+  "description": "One theme file under themes/. It carries the design system's colour roles and the scheme they belong to. The exact role set and the readability bar (text 4.5:1, control border / focus / line 3:1) are owned by the design system's theme contract and enforced by its scripts/check_theme.py, which runs over these files in CI: this schema checks the file's shape, not the contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "scheme",
+    "source",
+    "author",
+    "license",
+    "attribution",
+    "changes",
+    "roles"
+  ],
+  "properties": {
+    "id": {
+      "description": "Stable identifier, matching the file name without .json. Studio stores a user's pick under this id.",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "name": {
+      "description": "The theme's own name, as the picker shows it.",
+      "type": "string",
+      "minLength": 1
+    },
+    "scheme": {
+      "description": "The one scheme this theme is. A picker for a scheme lists only its own.",
+      "enum": ["light", "dark"]
+    },
+    "source": {
+      "description": "The upstream the values were converted from.",
+      "type": "string",
+      "format": "uri"
+    },
+    "author": {
+      "type": "string",
+      "minLength": 1
+    },
+    "license": {
+      "description": "Must be on licenses/allowlist.json.",
+      "type": "string",
+      "minLength": 1
+    },
+    "attribution": {
+      "type": "string",
+      "minLength": 1
+    },
+    "changes": {
+      "description": "Every correction made to the original values to pass the contract, one human-readable line each. Empty when the original passed unchanged.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "roles": {
+      "description": "The design system's colour roles, keyed by token name, with literal colour values. A theme must supply every role the contract requires; the contract itself lives in the design system, not here.",
+      "type": "object",
+      "propertyNames": { "pattern": "^--vd-[a-z0-9-]+$" },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^(#[0-9A-Fa-f]{3,8}|rgba?\\([^)]*\\)|transparent)$"
+      },
+      "minProperties": 1
+    }
+  }
+}
