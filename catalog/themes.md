@@ -4,15 +4,15 @@ Third-party content is collated from upstream sources, provided as is, and used 
 
 | Theme | Scheme | Author | License | Source | Corrections |
 | --- | --- | --- | --- | --- | --- |
-| Catppuccin Mocha | dark | Catppuccin | MIT | [https://github.com/catppuccin/catppuccin](https://github.com/catppuccin/catppuccin) | 1 |
-| Dracula | dark | Zeno Rocha | MIT | [https://github.com/dracula/dracula-theme](https://github.com/dracula/dracula-theme) | 3 |
-| GitHub Dark | dark | GitHub | MIT | [https://github.com/primer/github-vscode-theme](https://github.com/primer/github-vscode-theme) | 2 |
-| Nord | dark | Arctic Ice Studio | MIT | [https://github.com/nordtheme/nord](https://github.com/nordtheme/nord) | 5 |
-| One Dark | dark | Atom | MIT | [https://github.com/atom/one-dark-syntax](https://github.com/atom/one-dark-syntax) | 4 |
-| Solarized Dark | dark | Ethan Schoonover | MIT | [https://github.com/altercation/solarized](https://github.com/altercation/solarized) | 7 |
-| Catppuccin Latte | light | Catppuccin | MIT | [https://github.com/catppuccin/catppuccin](https://github.com/catppuccin/catppuccin) | 9 |
-| GitHub Light | light | GitHub | MIT | [https://github.com/primer/github-vscode-theme](https://github.com/primer/github-vscode-theme) | 5 |
-| Solarized Light | light | Ethan Schoonover | MIT | [https://github.com/altercation/solarized](https://github.com/altercation/solarized) | 10 |
+| Catppuccin Mocha | dark | Catppuccin | MIT | [https://github.com/catppuccin/catppuccin](https://github.com/catppuccin/catppuccin) | 2 |
+| Dracula | dark | Zeno Rocha | MIT | [https://github.com/dracula/dracula-theme](https://github.com/dracula/dracula-theme) | 5 |
+| GitHub Dark | dark | GitHub | MIT | [https://github.com/primer/github-vscode-theme](https://github.com/primer/github-vscode-theme) | 3 |
+| Nord | dark | Arctic Ice Studio | MIT | [https://github.com/nordtheme/nord](https://github.com/nordtheme/nord) | 7 |
+| One Dark | dark | Atom | MIT | [https://github.com/atom/one-dark-syntax](https://github.com/atom/one-dark-syntax) | 6 |
+| Solarized Dark | dark | Ethan Schoonover | MIT | [https://github.com/altercation/solarized](https://github.com/altercation/solarized) | 10 |
+| Catppuccin Latte | light | Catppuccin | MIT | [https://github.com/catppuccin/catppuccin](https://github.com/catppuccin/catppuccin) | 12 |
+| GitHub Light | light | GitHub | MIT | [https://github.com/primer/github-vscode-theme](https://github.com/primer/github-vscode-theme) | 6 |
+| Solarized Light | light | Ethan Schoonover | MIT | [https://github.com/altercation/solarized](https://github.com/altercation/solarized) | 14 |
 
 ----
 
