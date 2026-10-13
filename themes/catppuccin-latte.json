@@ -11,7 +11,11 @@
     "control-border: #BCC0CC -> #828AA0 to reach 3.0:1 on #EFF1F5",
     "status: #40A02B -> #3E9C2A to reach 3.0:1 on #EFF1F5",
     "status: #DF8E1D -> #BF7A19 to reach 3.0:1 on #EFF1F5",
-    "code surface: #E6E9EF -> #2A2B3A: .vd-code paints a fixed light ink (#D1EFF7) on --vd-code-surface, so a light code surface is unreadable"
+    "code surface: #E6E9EF -> #2A2B3A: .vd-code paints a fixed light ink (#D1EFF7) on --vd-code-surface, so a light code surface is unreadable",
+    "--vd-status-success: #3E9C2A -> #2B6C1D to reach 4.75:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 2.59:1)",
+    "--vd-status-warning: #BF7A19 -> #845511 to reach 4.72:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 2.58:1)",
+    "--vd-status-error: #D20F39 -> #BF0E34 to reach 4.66:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 4.01:1)",
+    "--vd-code-surface: #2A2B3A -> #1D1E28 to keep the code block's fixed metadata ink at 4.57:1 (was 3.85:1)"
   ],
   "roles": {
     "--vd-surface": "#EFF1F5",
@@ -33,11 +37,11 @@
     "--vd-panel-line": "transparent",
     "--vd-badge-fill": "#EFF1F5",
     "--vd-badge-line": "#BCC0CC",
-    "--vd-code-surface": "#2A2B3A",
+    "--vd-code-surface": "#1D1E28",
     "--vd-scrim": "rgba(76, 79, 105, 0.55)",
-    "--vd-status-success": "#3E9C2A",
-    "--vd-status-warning": "#BF7A19",
-    "--vd-status-error": "#D20F39",
+    "--vd-status-success": "#2B6C1D",
+    "--vd-status-warning": "#845511",
+    "--vd-status-error": "#BF0E34",
     "--vd-status-success-tint": "#DAE7DD",
     "--vd-status-warning-tint": "#E9E3DB",
     "--vd-status-error-tint": "#ECD6DE",

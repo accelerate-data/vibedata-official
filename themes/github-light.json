@@ -8,7 +8,10 @@
   "attribution": "GitHub Light, from GitHub's Primer palette",
   "changes": [
     "control-border: #D0D7DE -> #8597A9 to reach 3.0:1 on #FFFFFF",
-    "code surface: #F6F8FA -> #111316: .vd-code paints a fixed light ink (#D1EFF7) on --vd-code-surface, so a light code surface is unreadable"
+    "code surface: #F6F8FA -> #111316: .vd-code paints a fixed light ink (#D1EFF7) on --vd-code-surface, so a light code surface is unreadable",
+    "--vd-status-success: #1A7F37 -> #187733 to reach 4.62:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 4.17:1)",
+    "--vd-status-warning: #9A6700 -> #8B5D00 to reach 4.70:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 3.99:1)",
+    "--vd-status-error: #CF222E -> #CB212D to reach 4.54:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 4.39:1)"
   ],
   "roles": {
     "--vd-surface": "#FFFFFF",
@@ -32,9 +35,9 @@
     "--vd-badge-line": "#D0D7DE",
     "--vd-code-surface": "#111316",
     "--vd-scrim": "rgba(31, 35, 40, 0.55)",
-    "--vd-status-success": "#1A7F37",
-    "--vd-status-warning": "#9A6700",
-    "--vd-status-error": "#CF222E",
+    "--vd-status-success": "#187733",
+    "--vd-status-warning": "#8B5D00",
+    "--vd-status-error": "#CB212D",
     "--vd-status-success-tint": "#E4F0E7",
     "--vd-status-warning-tint": "#F3EDE0",
     "--vd-status-error-tint": "#F9E4E6",

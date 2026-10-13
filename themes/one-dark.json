@@ -8,7 +8,9 @@
   "attribution": "One Dark, from the Atom One Dark syntax theme",
   "changes": [
     "text-secondary on raised: #8B93A1 -> #939BA8 to reach 4.5:1 on #2F333D",
-    "control-border: #3E4451 -> #6A758B to reach 3.0:1 on #282C34"
+    "control-border: #3E4451 -> #6A758B to reach 3.0:1 on #282C34",
+    "--vd-status-error: #E06C75 -> #EB9FA4 to reach 4.64:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 3.04:1)",
+    "--vd-code-surface: #21252B -> #1B1F24 to keep the code block's fixed metadata ink at 4.57:1 (was 4.25:1)"
   ],
   "roles": {
     "--vd-surface": "#282C34",
@@ -30,11 +32,11 @@
     "--vd-panel-line": "#6A758B",
     "--vd-badge-fill": "#334659",
     "--vd-badge-line": "#6A758B",
-    "--vd-code-surface": "#21252B",
+    "--vd-code-surface": "#1B1F24",
     "--vd-scrim": "rgba(0, 0, 0, 0.6)",
     "--vd-status-success": "#98C379",
     "--vd-status-warning": "#E5C07B",
-    "--vd-status-error": "#E06C75",
+    "--vd-status-error": "#EB9FA4",
     "--vd-status-success-tint": "transparent",
     "--vd-status-warning-tint": "transparent",
     "--vd-status-error-tint": "transparent",

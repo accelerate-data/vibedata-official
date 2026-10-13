@@ -7,7 +7,9 @@
   "license": "MIT",
   "attribution": "Dracula by Zeno Rocha",
   "changes": [
-    "control-border: #44475A -> #6E7391 to reach 3.0:1 on #282A36"
+    "control-border: #44475A -> #6E7391 to reach 3.0:1 on #282A36",
+    "--vd-status-error: #FF5555 -> #FF9292 to reach 4.59:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 3.14:1)",
+    "--vd-code-surface: #21222C -> #1D1D26 to keep the code block's fixed metadata ink at 4.61:1 (was 4.36:1)"
   ],
   "roles": {
     "--vd-surface": "#282A36",
@@ -29,11 +31,11 @@
     "--vd-panel-line": "#6E7391",
     "--vd-badge-fill": "#463F5D",
     "--vd-badge-line": "#6E7391",
-    "--vd-code-surface": "#21222C",
+    "--vd-code-surface": "#1D1D26",
     "--vd-scrim": "rgba(0, 0, 0, 0.6)",
     "--vd-status-success": "#50FA7B",
     "--vd-status-warning": "#FFB86C",
-    "--vd-status-error": "#FF5555",
+    "--vd-status-error": "#FF9292",
     "--vd-status-success-tint": "transparent",
     "--vd-status-warning-tint": "transparent",
     "--vd-status-error-tint": "transparent",

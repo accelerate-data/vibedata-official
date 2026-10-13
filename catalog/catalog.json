@@ -329,7 +329,7 @@
         "license": "MIT",
         "source": "https://github.com/dracula/dracula-theme",
         "attribution": "Dracula by Zeno Rocha",
-        "corrections": 1
+        "corrections": 3
       },
       {
         "id": "github-dark",
@@ -349,7 +349,7 @@
         "license": "MIT",
         "source": "https://github.com/nordtheme/nord",
         "attribution": "Nord by Arctic Ice Studio",
-        "corrections": 2
+        "corrections": 5
       },
       {
         "id": "one-dark",
@@ -359,7 +359,7 @@
         "license": "MIT",
         "source": "https://github.com/atom/one-dark-syntax",
         "attribution": "One Dark, from the Atom One Dark syntax theme",
-        "corrections": 2
+        "corrections": 4
       },
       {
         "id": "solarized-dark",
@@ -369,7 +369,7 @@
         "license": "MIT",
         "source": "https://github.com/altercation/solarized",
         "attribution": "Solarized by Ethan Schoonover",
-        "corrections": 3
+        "corrections": 7
       },
       {
         "id": "catppuccin-latte",
@@ -379,7 +379,7 @@
         "license": "MIT",
         "source": "https://github.com/catppuccin/catppuccin",
         "attribution": "Catppuccin Latte",
-        "corrections": 5
+        "corrections": 9
       },
       {
         "id": "github-light",
@@ -389,7 +389,7 @@
         "license": "MIT",
         "source": "https://github.com/primer/github-vscode-theme",
         "attribution": "GitHub Light, from GitHub's Primer palette",
-        "corrections": 2
+        "corrections": 5
       },
       {
         "id": "solarized-light",
@@ -399,7 +399,7 @@
         "license": "MIT",
         "source": "https://github.com/altercation/solarized",
         "attribution": "Solarized by Ethan Schoonover",
-        "corrections": 6
+        "corrections": 10
       }
     ],
     "mcp": [

@@ -9,7 +9,11 @@
   "changes": [
     "text-secondary on raised: #839496 -> #8B9B9D to reach 4.5:1 on #073642",
     "control-border: #0F4C5A -> #187C93 to reach 3.0:1 on #002B36",
-    "action so on-action stays readable: #268BD2 -> #3295DA to reach 4.5:1 on #002B36"
+    "action so on-action stays readable: #268BD2 -> #3295DA to reach 4.5:1 on #002B36",
+    "--vd-status-success: #859900 -> #9BB300 to reach 4.69:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 3.48:1)",
+    "--vd-status-warning: #B58900 -> #D4A000 to reach 4.69:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 3.47:1)",
+    "--vd-status-error: #DC322F -> #EB8C8B to reach 4.60:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 2.41:1)",
+    "--vd-code-surface: #073642 -> #042129 to keep the code block's fixed metadata ink at 4.62:1 (was 3.59:1)"
   ],
   "roles": {
     "--vd-surface": "#002B36",
@@ -31,11 +35,11 @@
     "--vd-panel-line": "#187C93",
     "--vd-badge-fill": "#0A4057",
     "--vd-badge-line": "#187C93",
-    "--vd-code-surface": "#073642",
+    "--vd-code-surface": "#042129",
     "--vd-scrim": "rgba(0, 0, 0, 0.6)",
-    "--vd-status-success": "#859900",
-    "--vd-status-warning": "#B58900",
-    "--vd-status-error": "#DC322F",
+    "--vd-status-success": "#9BB300",
+    "--vd-status-warning": "#D4A000",
+    "--vd-status-error": "#EB8C8B",
     "--vd-status-success-tint": "transparent",
     "--vd-status-warning-tint": "transparent",
     "--vd-status-error-tint": "transparent",
