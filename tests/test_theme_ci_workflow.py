@@ -20,7 +20,7 @@ class ThemeCIWorkflowTests(unittest.TestCase):
         )
         self.assertEqual(checkout["uses"], "actions/checkout@v7")
         self.assertEqual(
-            checkout["with"]["ref"], "7b10f64df104ba7b13dcf8bf724c8d62cf1f57a9"
+            checkout["with"]["ref"], "00ec222afedb5706ccd08d1362b21bfd1d124a82"
         )
         token = next(step for step in steps if step.get("id") == "theme-contract-token")
         self.assertEqual(token["uses"], "actions/create-github-app-token@v3")
