@@ -7,7 +7,8 @@
   "license": "MIT",
   "attribution": "Catppuccin Mocha",
   "changes": [
-    "control-border: #45475A -> #666985 to reach 3.0:1 on #1E1E2E"
+    "control-border: #45475A -> #666985 to reach 3.0:1 on #1E1E2E",
+    "--vd-control-border: #666985 -> #777B97 to reach 3.0:1 on --vd-surface, --vd-field, --vd-surface-raised, --vd-surface-subtle (worst was 2.35:1, now 3.03:1)"
   ],
   "roles": {
     "--vd-surface": "#1E1E2E",
@@ -16,7 +17,7 @@
     "--vd-surface-brand": "#333C57",
     "--vd-text": "#CDD6F4",
     "--vd-text-secondary": "#A6ADC8",
-    "--vd-control-border": "#666985",
+    "--vd-control-border": "#777B97",
     "--vd-action": "#89B4FA",
     "--vd-on-action": "#1E1E2E",
     "--vd-focus": "#89B4FA",

@@ -319,7 +319,7 @@
         "license": "MIT",
         "source": "https://github.com/catppuccin/catppuccin",
         "attribution": "Catppuccin Mocha",
-        "corrections": 1
+        "corrections": 2
       },
       {
         "id": "dracula",
@@ -329,7 +329,7 @@
         "license": "MIT",
         "source": "https://github.com/dracula/dracula-theme",
         "attribution": "Dracula by Zeno Rocha",
-        "corrections": 3
+        "corrections": 5
       },
       {
         "id": "github-dark",
@@ -339,7 +339,7 @@
         "license": "MIT",
         "source": "https://github.com/primer/github-vscode-theme",
         "attribution": "GitHub Dark, from GitHub's Primer palette",
-        "corrections": 2
+        "corrections": 3
       },
       {
         "id": "nord",
@@ -349,7 +349,7 @@
         "license": "MIT",
         "source": "https://github.com/nordtheme/nord",
         "attribution": "Nord by Arctic Ice Studio",
-        "corrections": 5
+        "corrections": 7
       },
       {
         "id": "one-dark",
@@ -359,7 +359,7 @@
         "license": "MIT",
         "source": "https://github.com/atom/one-dark-syntax",
         "attribution": "One Dark, from the Atom One Dark syntax theme",
-        "corrections": 4
+        "corrections": 6
       },
       {
         "id": "solarized-dark",
@@ -369,7 +369,7 @@
         "license": "MIT",
         "source": "https://github.com/altercation/solarized",
         "attribution": "Solarized by Ethan Schoonover",
-        "corrections": 7
+        "corrections": 10
       },
       {
         "id": "catppuccin-latte",
@@ -379,7 +379,7 @@
         "license": "MIT",
         "source": "https://github.com/catppuccin/catppuccin",
         "attribution": "Catppuccin Latte",
-        "corrections": 9
+        "corrections": 12
       },
       {
         "id": "github-light",
@@ -389,7 +389,7 @@
         "license": "MIT",
         "source": "https://github.com/primer/github-vscode-theme",
         "attribution": "GitHub Light, from GitHub's Primer palette",
-        "corrections": 5
+        "corrections": 6
       },
       {
         "id": "solarized-light",
@@ -399,7 +399,7 @@
         "license": "MIT",
         "source": "https://github.com/altercation/solarized",
         "attribution": "Solarized by Ethan Schoonover",
-        "corrections": 10
+        "corrections": 14
       }
     ],
     "mcp": [

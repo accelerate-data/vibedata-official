@@ -15,7 +15,10 @@
     "--vd-status-success: #3E9C2A -> #2B6C1D to reach 4.75:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 2.59:1)",
     "--vd-status-warning: #BF7A19 -> #845511 to reach 4.72:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 2.58:1)",
     "--vd-status-error: #D20F39 -> #BF0E34 to reach 4.66:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 4.01:1)",
-    "--vd-code-surface: #2A2B3A -> #1D1E28 to keep the code block's fixed metadata ink at 4.57:1 (was 3.85:1)"
+    "--vd-code-surface: #2A2B3A -> #1D1E28 to keep the code block's fixed metadata ink at 4.57:1 (was 3.85:1)",
+    "--vd-text-secondary: #6A6D82 -> #5E6174 to reach 4.5:1 on --vd-tint, --vd-surface-subtle, --vd-surface-brand (worst was 3.76:1, now 4.51:1)",
+    "--vd-muted: #6A6D82 -> #65687C to reach 4.5:1 on --vd-surface-subtle (worst was 4.19:1, now 4.51:1)",
+    "--vd-control-border: #828AA0 -> #7D859C to reach 3.0:1 on --vd-surface, --vd-field, --vd-surface-raised, --vd-surface-subtle (worst was 2.83:1, now 3.03:1)"
   ],
   "roles": {
     "--vd-surface": "#EFF1F5",
@@ -23,8 +26,8 @@
     "--vd-surface-raised": "#FFFFFF",
     "--vd-surface-brand": "#D2DEF5",
     "--vd-text": "#4C4F69",
-    "--vd-text-secondary": "#6A6D82",
-    "--vd-control-border": "#828AA0",
+    "--vd-text-secondary": "#5E6174",
+    "--vd-control-border": "#7D859C",
     "--vd-action": "#1E66F5",
     "--vd-on-action": "#FFFFFF",
     "--vd-focus": "#1E66F5",
@@ -32,7 +35,7 @@
     "--vd-field": "#FFFFFF",
     "--vd-tint": "#D2DEF5",
     "--vd-soft": "#E6E9EF",
-    "--vd-muted": "#6A6D82",
+    "--vd-muted": "#65687C",
     "--vd-divider": "#BCC0CC",
     "--vd-panel-line": "transparent",
     "--vd-badge-fill": "#EFF1F5",
