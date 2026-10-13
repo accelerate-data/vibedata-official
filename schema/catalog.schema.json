@@ -14,12 +14,13 @@
     "entries": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["plugins", "skills", "recipes", "connectors", "mcp"],
+      "required": ["plugins", "skills", "recipes", "connectors", "themes", "mcp"],
       "properties": {
         "plugins": { "type": "array", "items": { "$ref": "#/$defs/plugin" } },
         "skills": { "type": "array", "items": { "$ref": "#/$defs/skill" } },
         "recipes": { "type": "array", "items": { "$ref": "#/$defs/recipe" } },
         "connectors": { "type": "array", "items": { "$ref": "#/$defs/connector" } },
+        "themes": { "type": "array", "items": { "$ref": "#/$defs/theme" } },
         "mcp": { "type": "array", "items": { "$ref": "#/$defs/mcp" } }
       }
     }
@@ -72,6 +73,21 @@
         "ref": { "type": "string" },
         "license": { "type": "string" },
         "attribution": { "type": "string" }
+      }
+    },
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "scheme", "author", "license", "source"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "scheme": { "enum": ["light", "dark"] },
+        "author": { "type": "string" },
+        "license": { "type": "string" },
+        "source": { "type": "string" },
+        "attribution": { "type": "string" },
+        "corrections": { "type": "integer" }
       }
     },
     "mcp": {
