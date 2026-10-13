@@ -19,8 +19,8 @@
     "--vd-code-surface: #303C40 -> #191F21 to keep the code block's fixed metadata ink at 4.60:1 (was 3.14:1)",
     "--vd-text: #586E75 -> #53686F to reach 4.5:1 on --vd-tint, --vd-surface-subtle, --vd-surface-brand (worst was 4.16:1, now 4.54:1)",
     "--vd-text-secondary: #5E737A -> #55686F to reach 4.5:1 on --vd-tint, --vd-surface-subtle, --vd-surface-brand (worst was 3.86:1, now 4.52:1)",
-    "--vd-muted: #5E737A -> #586C73 to reach 4.5:1 on --vd-surface-subtle (worst was 4.07:1, now 4.50:1)",
-    "--vd-control-border: #9D8C5C -> #908054 to reach 3.0:1 on --vd-surface-subtle, --vd-tint, --vd-surface-brand (worst was 2.56:1, now 3.01:1)"
+    "--vd-muted: #5E737A -> #586B72 to reach 4.5:1 on --vd-surface-subtle (worst was 4.07:1, now 4.56:1)",
+    "--vd-control-border: #9D8C5C -> #938456 to reach 3.0:1 on --vd-surface, --vd-field, --vd-surface-raised, --vd-surface-subtle (worst was 2.70:1, now 3.02:1)"
   ],
   "roles": {
     "--vd-surface": "#FDF6E3",
@@ -29,7 +29,7 @@
     "--vd-surface-brand": "#DEE4DC",
     "--vd-text": "#53686F",
     "--vd-text-secondary": "#55686F",
-    "--vd-control-border": "#908054",
+    "--vd-control-border": "#938456",
     "--vd-action": "#2074AF",
     "--vd-on-action": "#FDF6E3",
     "--vd-focus": "#2074AF",
@@ -37,7 +37,7 @@
     "--vd-field": "#FDF6E3",
     "--vd-tint": "#DEE4DC",
     "--vd-soft": "#EEE8D5",
-    "--vd-muted": "#586C73",
+    "--vd-muted": "#586B72",
     "--vd-divider": "#D9D2BE",
     "--vd-panel-line": "transparent",
     "--vd-badge-fill": "#FDF6E3",

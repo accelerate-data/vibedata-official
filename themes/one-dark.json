@@ -12,7 +12,7 @@
     "--vd-status-error: #E06C75 -> #EB9FA4 to reach 4.64:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 3.04:1)",
     "--vd-code-surface: #21252B -> #1B1F24 to keep the code block's fixed metadata ink at 4.57:1 (was 4.25:1)",
     "--vd-text-secondary: #939BA8 -> #ABB1BB to reach 4.5:1 on --vd-tint, --vd-surface-brand (worst was 3.47:1, now 4.51:1)",
-    "--vd-control-border: #6A758B -> #8690A3 to reach 3.0:1 on --vd-field, --vd-surface-raised, --vd-surface-subtle, --vd-tint, --vd-surface-brand (worst was 2.10:1, now 3.02:1)"
+    "--vd-control-border: #6A758B -> #717C93 to reach 3.0:1 on --vd-surface, --vd-field, --vd-surface-raised, --vd-surface-subtle (worst was 2.73:1, now 3.01:1)"
   ],
   "roles": {
     "--vd-surface": "#282C34",
@@ -21,7 +21,7 @@
     "--vd-surface-brand": "#334659",
     "--vd-text": "#ABB2BF",
     "--vd-text-secondary": "#ABB1BB",
-    "--vd-control-border": "#8690A3",
+    "--vd-control-border": "#717C93",
     "--vd-action": "#61AFEF",
     "--vd-on-action": "#282C34",
     "--vd-focus": "#61AFEF",

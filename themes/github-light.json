@@ -12,7 +12,7 @@
     "--vd-status-success: #1A7F37 -> #187733 to reach 4.62:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 4.17:1)",
     "--vd-status-warning: #9A6700 -> #8B5D00 to reach 4.70:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 3.99:1)",
     "--vd-status-error: #CF222E -> #CB212D to reach 4.54:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 4.39:1)",
-    "--vd-control-border: #8597A9 -> #73889D to reach 3.0:1 on --vd-surface-subtle, --vd-tint, --vd-surface-brand (worst was 2.46:1, now 3.00:1)"
+    "--vd-control-border: #8597A9 -> #7F92A4 to reach 3.0:1 on --vd-surface, --vd-field, --vd-surface-raised, --vd-surface-subtle (worst was 2.82:1, now 3.01:1)"
   ],
   "roles": {
     "--vd-surface": "#FFFFFF",
@@ -21,7 +21,7 @@
     "--vd-surface-brand": "#DDEAFA",
     "--vd-text": "#1F2328",
     "--vd-text-secondary": "#59636E",
-    "--vd-control-border": "#73889D",
+    "--vd-control-border": "#7F92A4",
     "--vd-action": "#0969DA",
     "--vd-on-action": "#FFFFFF",
     "--vd-focus": "#0969DA",

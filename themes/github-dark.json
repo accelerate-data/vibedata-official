@@ -9,7 +9,7 @@
   "changes": [
     "control-border: #30363D -> #56616E to reach 3.0:1 on #0D1117",
     "action so on-action stays readable: #2F81F7 -> #126FF6 to reach 4.5:1 on #FFFFFF",
-    "--vd-control-border: #56616E -> #626F7E to reach 3.0:1 on --vd-field, --vd-surface-raised, --vd-surface-subtle, --vd-tint, --vd-surface-brand (worst was 2.46:1, now 3.02:1)"
+    "--vd-control-border: #56616E -> #5C6875 to reach 3.0:1 on --vd-surface, --vd-field, --vd-surface-raised, --vd-surface-subtle (worst was 2.74:1, now 3.04:1)"
   ],
   "roles": {
     "--vd-surface": "#0D1117",
@@ -18,7 +18,7 @@
     "--vd-surface-brand": "#0E2444",
     "--vd-text": "#E6EDF3",
     "--vd-text-secondary": "#8B949E",
-    "--vd-control-border": "#626F7E",
+    "--vd-control-border": "#5C6875",
     "--vd-action": "#126FF6",
     "--vd-on-action": "#FFFFFF",
     "--vd-focus": "#126FF6",
