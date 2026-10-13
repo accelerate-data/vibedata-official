@@ -7,7 +7,8 @@
   "license": "MIT",
   "attribution": "GitHub Light, from GitHub's Primer palette",
   "changes": [
-    "control-border: #D0D7DE -> #8597A9 to reach 3.0:1 on #FFFFFF"
+    "control-border: #D0D7DE -> #8597A9 to reach 3.0:1 on #FFFFFF",
+    "code surface: #F6F8FA -> #111316: .vd-code paints a fixed light ink (#D1EFF7) on --vd-code-surface, so a light code surface is unreadable"
   ],
   "roles": {
     "--vd-surface": "#FFFFFF",
@@ -29,7 +30,7 @@
     "--vd-panel-line": "transparent",
     "--vd-badge-fill": "#FFFFFF",
     "--vd-badge-line": "#D0D7DE",
-    "--vd-code-surface": "#F6F8FA",
+    "--vd-code-surface": "#111316",
     "--vd-scrim": "rgba(31, 35, 40, 0.55)",
     "--vd-status-success": "#1A7F37",
     "--vd-status-warning": "#9A6700",

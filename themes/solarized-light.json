@@ -11,7 +11,8 @@
     "control-border: #D9D2BE -> #9D8C5C to reach 3.0:1 on #FDF6E3",
     "action so on-action stays readable: #268BD2 -> #2074AF to reach 4.5:1 on #FDF6E3",
     "status: #859900 -> #819400 to reach 3.0:1 on #FDF6E3",
-    "status: #B58900 -> #B08500 to reach 3.0:1 on #FDF6E3"
+    "status: #B58900 -> #B08500 to reach 3.0:1 on #FDF6E3",
+    "code surface: #EEE8D5 -> #303C40: .vd-code paints a fixed light ink (#D1EFF7) on --vd-code-surface, so a light code surface is unreadable"
   ],
   "roles": {
     "--vd-surface": "#FDF6E3",
@@ -33,7 +34,7 @@
     "--vd-panel-line": "transparent",
     "--vd-badge-fill": "#FDF6E3",
     "--vd-badge-line": "#D9D2BE",
-    "--vd-code-surface": "#EEE8D5",
+    "--vd-code-surface": "#303C40",
     "--vd-scrim": "rgba(88, 110, 117, 0.55)",
     "--vd-status-success": "#819400",
     "--vd-status-warning": "#B08500",
