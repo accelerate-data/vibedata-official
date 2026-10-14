@@ -132,6 +132,17 @@ Every pipeline built and every incident resolved makes the skill library more va
 |---|---|
 | `fabric-ontology` | Business ontology and semantic layer design workflows for governed analytics platforms |
 
+## Releasing a theme catalogue
+
+The `themes/` content type is consumed by Studio, which fetches it at startup at a pinned ref rather than at a floating branch, so that a Studio release shows a reproducible theme set. That makes the ref a release artefact:
+
+1. **Every release gets a new tag**, named `themes-vN` (`themes-v1`, `themes-v2`, …), cut at the merged catalogue revision.
+2. **Never move an existing tag.** Installs cache the ref they fetched, so re-pointing a published tag changes their content silently. A correction is a new tag.
+3. **The design-system contract runs in CI on the pull request.** `.github/workflows/ci.yml` checks out the design system at a pinned commit and runs its `scripts/check_theme.py` over every `themes/*.json`, so a theme that fails the contract cannot merge. That pinned commit is the *validator* revision, not Studio's runtime design-system pin.
+4. **Adding or correcting a theme therefore takes three steps**: merge it here (with the catalogue regenerated and the contract green), cut the next `themes-vN` tag, and have the operator point `VIBEDATA_THEMES_REF` at it — or ship a Studio release that bumps the default.
+
+Studio's own adoption procedure, including why an existing install must have its cached clone invalidated before a new ref takes effect, lives in `docs/design/design-system-pipeline/README.md` § _Theme catalogue maintenance_ in the Studio repository.
+
 ## Contributing
 
 Contributions are welcome, but this repository is curated. If you want to contribute a skill or plugin, or improve an existing one:
