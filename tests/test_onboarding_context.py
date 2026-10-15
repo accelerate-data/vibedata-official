@@ -251,6 +251,34 @@ class OnboardingContextTests(unittest.TestCase):
         self.assertIn("missing.py", findings)
         self.assertIn("tests/missing.py", findings)
 
+    def test_structural_test_paths_are_validated_without_execution(self):
+        mapped_repo(self.root)
+        write(self.root, "tests/check_maps.py", "raise RuntimeError('must not run')\n")
+        module = {"sources": ["repo-map.json"]}
+        for paths, expected in (
+            (["tests/check_maps.py"], None),
+            (["tests/missing.py"], "registered path is missing"),
+            (["../outside.py"], "path escapes"),
+            ("tests/check_maps.py", "expected a list"),
+        ):
+            with self.subTest(paths=paths):
+                module["structural"] = paths
+                write_json(
+                    self.root,
+                    "test-map.json",
+                    {"taxonomy": {}, "modules": {"maps": module}},
+                )
+                before = hashes(self.root)
+                findings = self.validate()
+                if expected is None:
+                    self.assertEqual(findings, [])
+                else:
+                    self.assertIn(
+                        "test-map.modules.maps.structural", "\n".join(findings)
+                    )
+                    self.assertIn(expected, "\n".join(findings))
+                self.assertEqual(before, hashes(self.root))
+
     def test_context_rejects_escape_and_cycles(self):
         for unsafe in (
             "../outside.md",

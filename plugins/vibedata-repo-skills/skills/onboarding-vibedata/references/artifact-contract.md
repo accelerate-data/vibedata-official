@@ -16,7 +16,7 @@ Keep scope, meaning and force. Repair moved relative links/imports and verify th
 
 ## Maps
 
-Use [repo-map.json](../templates/repo-map.json), [schema](../templates/repo-map.schema.json), and [test-map.json](../templates/test-map.json) as shapes. Reconcile existing maps in place, retaining unknown keys and customer formats. A legacy shape that differs from the shared contract needs an explicit compatibility decision or a retained suitable checker, not silent normalization.
+Use [repo-map.json](../templates/repo-map.json), [schema](../templates/repo-map.schema.json), and [test-map.json](../templates/test-map.json) for new maps. For existing maps, retain the customer schema and suitable checker as their contract, including unknown keys and formats. Resolve equivalent instruction and report locations through that contract; record a report location in the onboarding output if the schema has no such role. Missing portable-only keys such as `instructions` or `onboarding_report` do not alone block context readiness. Adopting the shared schema requires an explicit compatibility decision.
 
 | Owner | Content |
 | --- | --- |
@@ -26,14 +26,14 @@ Use [repo-map.json](../templates/repo-map.json), [schema](../templates/repo-map.
 | `commands` | Existing understood commands; environment-dependent commands remain unverified in the report. |
 | `artifact_paths` | Semantic roles mapped to customer-selected repo-relative paths or future filename patterns. |
 | `key_references` | Actual bootstrap, canonical instructions, rules directory, schema and test map. |
-| `notes_for_agents` | Startup order and task-specific pointers to rules, examples/templates and checks. |
+| `notes_for_agents` | Startup/task pointers to rules, examples and checks; observed maintenance and evaluation paths excluded from normal build-task routing. |
 | Optional `layers` | Existing layer taxonomy only. |
 
-Required artifact roles are `context`, `adr`, `design_record_model`, `design_record_pipeline`, `review`, `proposal`, and `onboarding_report`. Defaults appear in the map template. Select one location per role; do not also create a default or alternate glossary with the same purpose. Preserve existing locations, case, numbering and formats. Literal registered paths must exist. Future patterns use `{identifier}` placeholders and can name directories not yet created. Instantiate paths only for artifacts actually registered; do not manufacture design records to satisfy a pattern.
+For maps using the shared schema, required artifact roles are `context`, `adr`, `design_record_model`, `design_record_pipeline`, `review`, `proposal`, and `onboarding_report`. Defaults appear in the map template. Select one location per role; do not also create a default or alternate glossary with the same purpose. Preserve existing locations, case, numbering and formats. Literal registered paths must exist. Future patterns use `{identifier}` placeholders and can name directories not yet created. Instantiate paths only for artifacts actually registered; do not manufacture design records to satisfy a pattern.
 
-`key_references.agents` is the runtime bootstrap; `key_references.instructions` is canonical AGENTS; `rules`, `schema`, and `test_map` point at the actual artifacts. The startup sequence is: canonical instructions → repo map → applicable task rules/examples → relevant checks in the test map. Custom vocabulary/ADR paths also need the conditional [compatibility workaround](compatibility.md).
+In the shared schema, `key_references.agents` is the runtime bootstrap; `key_references.instructions` is canonical AGENTS; `rules`, `schema`, and `test_map` point at the actual artifacts. The startup sequence is: canonical instructions → repo map → applicable task rules/examples → relevant checks in the test map. Custom vocabulary/ADR paths also need the conditional [compatibility workaround](compatibility.md).
 
-`test-map.json` has `taxonomy` and `modules`. Each module has existing `sources` paths and optional `unit`, `data`, `selectors`, and `commands`. Use `gaps` for missing coverage. A Python module needs no dbt selector. Selector resolution needs native dbt checks when available; path validation does not execute selectors or commands. Empty inventories are valid.
+`test-map.json` has `taxonomy` and `modules`. Each module has existing `sources` paths and optional `unit`, `data`, `structural`, `selectors`, and `commands`. Use `gaps` for missing coverage. A Python module needs no dbt selector. Selector resolution needs native dbt checks when available; path validation does not execute selectors or commands. Empty inventories are valid.
 
 ## Artifact selection
 
@@ -41,7 +41,7 @@ Use the [agents template](../templates/agents.md) as routing, then select only a
 
 Reuse vocabulary and ADR history. When knowledge is absent, use the [glossary](../templates/glossary.md) and [ADR index](../templates/adr-index.md); do not invent a term, numbered decision or rationale. A design record or repo-specific skill needs an actual non-obvious decision or confirmed local procedure. Generate [review](../templates/review.md) and [proposal](../templates/proposal.md) documents only for real findings or substantive decisions.
 
-Install the standalone [context checker](../scripts/validate_context.py) at `.agents/checks/validate_context.py` only if no suitable existing check exists. Preserve a customer-owned checker; upgrading a previous copy is a reviewed change. Register `python3 .agents/checks/validate_context.py --root .` in both maps where applicable. It checks the owned path/reference contract, not arbitrary JSON Schema extensions or runtime behavior. Run the customer's additional schema validator where applicable.
+Retain a suitable customer-owned checker and its mapped command. Preserve native JSON Schema, dlt config-section and dbt selector checks; record coverage gaps without replacing them with the weaker portable check. If no suitable check exists and the shared schema is adopted, install the standalone [context checker](../scripts/validate_context.py) at `.agents/checks/validate_context.py` and register `python3 .agents/checks/validate_context.py --root .` in both maps. Upgrading a previous copy is a reviewed change. It checks owned paths/references, not arbitrary schema extensions or runtime behavior. Run additional customer validators where applicable.
 
 ## Reruns and maintenance
 
@@ -54,5 +54,7 @@ Update the repo map in the change that adds, moves, renames or removes a source,
 Use the customer's requested runtime, otherwise the active runtime. Run the mapped context checker from the repository root. Verify normal instruction loading in a fresh session of that runtime without naming or pasting the canonical file in the probe; reuse recorded loading evidence when its instruction inputs are unchanged. If the probe cannot run, mark loading unverified. Rehearse a later task through the maps and applicable rules.
 
 Run understood project checks only against an established, authorized target. Report context readiness and execution verification separately, naming the verified scope and unavailable checks. Structural validation does not prove runtime loading, consumer behavior or warehouse execution.
+
+Reuse a recorded check only when its covered files, configuration, tool versions and relevant data/environment are unchanged. Cite the command, input revision and result; changed or unknown inputs require a new authorized check or an unverified status.
 
 The full Claude/Codex/VibeData matrix is plugin release verification, not a customer onboarding prerequisite. Run a real supported VibeData consumer trial only when it is a requested target; if unavailable, mark that target unverified. Unselected runtimes need no report rows and do not block context readiness.

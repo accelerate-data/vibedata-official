@@ -53,7 +53,7 @@ Use `P = plugins/vibedata-repo-skills` and `S = plugins/vibedata-repo-skills/ski
 | Files | Responsibility |
 | --- | --- |
 | `S/SKILL.md` | Shared invocation conditions, workflow, approvals, routing, and completion criteria. |
-| `S/references/{brownfield,greenfield,artifact-contract,compatibility}.md` | Branch-specific discovery/setup, artifact/preservation requirements, and conditional runtime/path workarounds. |
+| `S/references/{brownfield,greenfield,artifact-contract,compatibility,studio-duckdb}.md` | Branch-specific discovery/setup, artifact/preservation requirements, conditional runtime/path workarounds and selected Studio/DuckDB readiness. |
 | `S/templates/{agents,glossary,adr-index,onboarding-report,review,proposal}.md` | Minimal documents and evidence tables; existing documents are reconciled rather than overwritten from these. Review/proposal outputs require actual findings or decisions. |
 | `S/templates/rules/{dbt-models,sql-style,dbt-testing,dlt,python,context,adr,design-records,git-and-prs,workarounds}.md` | Scoped defaults; emit only applicable content, using selected paths and confirmed overrides. |
 | `S/templates/{repo-map.schema,repo-map,test-map}.json` | Shared structural contract and honest empty-scaffold examples. |
@@ -63,6 +63,7 @@ Use `P = plugins/vibedata-repo-skills` and `S = plugins/vibedata-repo-skills/ski
 | `tests/test_onboarding_context.py`, `tests/test_onboarding_package.py` | Deterministic fixture/helper/template and packaging regression tests. |
 | `tests/fixtures/onboarding/` | Tiny human-style dbt/dlt, Python/notebook, blank, custom-path, and conflicting-instruction estates. |
 | `tests/onboarding/cases.json` | Behavioral scenario contracts A01–A16; no hidden implementation-specific answer key is installed in a customer fixture. |
+| `tests/onboarding/reference-refresh.json` | Read-only reference-refresh probes for native contracts, Studio readiness and a non-Studio counterexample; separate from live consumer acceptance. |
 | `context/onboarding-vibedata-validation.md` | Baseline and final evidence, commands/settings, preservation results, efficiency comparison, and blockers. Created only during implementation. |
 | `P/.claude-plugin/plugin.json`, `P/.codex-plugin/plugin.json` | Runtime packaging for the single shared source. |
 | Existing marketplace manifests, root plugin manifest, `AGENTS.md`, and `.github/workflows/ci.yml` | Registration/versioning, correction of the Codex manifest convention, and helper checks. |

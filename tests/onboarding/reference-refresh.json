@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "instructions": "Read-only application probes for supporting references. Use a fresh agent per case and arm. Control reads no skill; baseline reads the prior skill; treatment reads the current SKILL.md and follows its supporting links. Supply only the prompt and skill root, not assertions, audit notes or repository history. The repository is hypothetical: no edits or runtime commands. Inspect every output. These probes do not establish consumer execution or statistical efficiency.",
+  "cases": [
+    {
+      "id": "native-checker-and-studio",
+      "prompt": "The user explicitly invokes onboarding-vibedata for an existing dbt+dlt DuckDB repository selected for Studio. Existing AGENTS.md and native pytest map checker validate the customer JSON Schema, dlt config_section and dbt selectors. Maps lack key_references.instructions and artifact_paths.onboarding_report. Existing source refs name catalog domain; profile is fixed and stored views work in domain.duckdb. Domain data state is not supplied; no disposable consumer target is available. Customer uses docs/glossary.md and decisions/DEC-*.md. A future task rebuilds floating revenue and joins dimensions on derived keys; documented grain disagrees with grouping SQL; timestamps include timezone conversions. Standing customer decisions define Monday week boundaries and excluding NULL fares. A remote 20M-row source has a saved profile; repeated full loads are costly. Maintenance/evaluation answer keys live in docs/setup. Give a concise proposed onboarding result: rule text you would emit, compatibility findings/checks, existing-checker treatment, ADR/design placement, readiness. Preserve user code pending exact diff approval. Report supporting files consulted and omissions you cannot resolve.",
+      "assertions": [
+        "Preserve the native schema, checker and mapped command; missing portable-only map keys alone do not block context readiness or force schema changes.",
+        "Separate unknown Domain state from repository state; name version-aware profile/catalog checks and renamed-copy verification without rebuilding views. No target means unverified, not permission to create infrastructure or seed data.",
+        "Specify numeric precision, exact identity/membership/NULL checks, derived-key join coverage and actual-grain uniqueness. Timestamp conversion depends on source/type/timezone evidence.",
+        "Reuse valid source profiles, use bounded samples, scope full loads explicitly, and route maintenance/evaluation material outside ordinary build work.",
+        "Preserve standing business ADRs, distinguish component decisions, and maintain links to affected designs. Keep custom paths and history."
+      ]
+    },
+    {
+      "id": "non-studio-counterexample",
+      "prompt": "The user explicitly invokes onboarding-vibedata to refresh a local Python/notebook and dbt repository using a non-DuckDB warehouse, outside Studio. Its profile and attached-catalog references are deliberate. Money uses a confirmed three-decimal currency scale; keys and NULL behavior must remain exact. Source timestamps are timezone-aware with an established local-business-time grain. The loader has no DLT_INGEST_LIMIT support. A saved source profile describes yesterday's version, but the source version changed today. A passed check used an older tool version. Existing native map/schema checks are suitable and do not permit portable onboarding keys. State the scoped rules, checks to reuse or rerun, compatibility decisions, and readiness evidence. Do not edit or run commands.",
+      "assertions": [
+        "Do not require a Studio Domain, VD_* variables, catalog removal, DuckDB macros, Studio packages or a universal UTC rewrite.",
+        "Use the confirmed three-decimal money scale and exact keys/NULL semantics; do not force cents.",
+        "Use a supported sample mechanism; changed source/tool versions invalidate the previous profile/check evidence.",
+        "Retain existing schema/checker contracts and separate context readiness from unrun execution."
+      ]
+    }
+  ]
+}

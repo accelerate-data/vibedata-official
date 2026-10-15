@@ -110,7 +110,7 @@ Retain dbt's Jinja call when filling the template; replace only its confirmed id
 
 ## Verification
 
-1. Run `python3 .agents/checks/validate_context.py --root .` from the customer root.
+1. Run the mapped context check from the customer root. When the bundled checker was installed, its command is `python3 .agents/checks/validate_context.py --root .`; retain an existing suitable checker and its command.
 2. Use a supported Python interpreter and a project-local virtual environment. Install the resolved dependencies only when network/install scope permits. Preserve the resolved versions as evidence; an install error blocks execution verification.
 3. With `ONBOARDING_DUCKDB_PATH` set to a disposable absolute path, run `dbt parse --project-dir transformation --profiles-dir transformation --target dev`. Disable dbt telemetry for the local trial with `DBT_SEND_ANONYMOUS_USAGE_STATS=false`. An empty parse verifies configuration only.
 4. To verify the starter APIs, instantiate them with tiny synthetic rows in a disposable fixture, keeping pipeline state and the database there. Record the actual run and clean it afterwards. Keep that synthetic fixture out of the customer's source inventory.

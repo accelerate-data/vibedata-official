@@ -1,6 +1,6 @@
 # Repository instructions
 
-Read `repo-map.json` for locations and task routing. Read only the rules and examples for the current task, then the applicable entries in the mapped test map.
+Read `repo-map.json` once at task startup for locations and routing; reload when its facts change. Follow its exact paths to the current task's rules, examples and checks. Paths marked as maintenance material or evaluation answer keys are outside normal build-task routing; maintenance tasks use their explicit scope.
 
 {{preserved_universal_instructions}}
 

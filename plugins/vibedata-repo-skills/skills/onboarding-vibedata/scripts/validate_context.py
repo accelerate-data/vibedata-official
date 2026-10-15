@@ -276,7 +276,7 @@ def validate_context(root: Path) -> list[str]:
                 ):
                     errors.append(f"test-map.modules.{name}: sources must be a list")
                     continue
-                for field in ("sources", "unit", "data"):
+                for field in ("sources", "unit", "data", "structural"):
                     paths = entry.get(field, [])
                     if not isinstance(paths, list):
                         errors.append(

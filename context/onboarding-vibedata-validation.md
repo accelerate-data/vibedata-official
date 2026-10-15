@@ -318,3 +318,39 @@ A fresh A02 Python/notebook fixture explicitly invoked `/vibedata-repo-skills:on
 A separate normal-session follow-on loaded the generated instructions and reported the Python routing/preservation rules without its prompt naming or pasting canonical instructions. It correctly stated project execution was unverified and changed no files. A separate explicit refresh of the same snapshot changed zero bytes, including the report. Evidence: `simplification/followup-loading.json` and `simplification/followup-rerun.json`. The loading result is held here; it was not injected into the independent rerun's report.
 
 Final local checks: 29 focused tests pass; Ruff lint/format, catalog freshness, marketplace/version checks, Claude manifest validation, report-shape/invocation assertions and whitespace checks pass. The release case definitions now specify explicit treatment invocation and conditional reporting assertions. No full cross-runtime matrix or VibeData consumer trial was repeated. The latest prior CI run has 139/141 passing tests and the same two inherited wiki failures; those unrelated files remain untouched.
+
+## Reference refresh approved after audit
+
+The user approved the five audit recommendations against `sample-nyctaxi-comp@349d026`, starting from this branch's `57956a5`. The reference repository stayed read-only. Its prior preservation snapshot contains no commit SHA, so the audit compared current snapshots rather than claiming an exact historical change boundary.
+
+### Shipped scope
+
+- Add explicit numeric precision, derived-key join coverage, actual-grain uniqueness and conditional timestamp semantics to the applicable rules.
+- Add `references/studio-duckdb.md`, reached during inspection only for selected Studio/DuckDB targets. It checks repository and Domain state, deployed profile/environment and ingestion contracts, catalog/macro compatibility, renamed-copy tests without rebuilding, and consumer artifact/CI boundaries. All compatibility writes retain exact-diff approval. Domain creation and seeding are outside onboarding.
+- Preserve suitable native schemas/checkers and their commands. Shared-schema fields are not forced into existing customer contracts; missing portable-only keys alone do not block context readiness. Add `structural` test-path checks to the portable validator and demonstrate the field in its test-map template.
+- Add bounded sample loads, source-profile validity, input-aware check reuse and mapped maintenance/evaluation exclusions. Replacement checks apply only to `replace` pipelines.
+- Preserve standing business decisions and links between governing ADRs and affected designs. Keep customer formats, paths and history.
+
+The main skill remains five steps and 341 words, up from 331. Both explicit-invocation controls are unchanged. The plugin remains unreleased version 1.0.0 within draft PR #48; no new marketplace entry or catalog-description change was made.
+
+### Observed RED/GREEN and application probes
+
+`test_structural_test_paths_are_validated_without_execution` first failed on three subcases: a missing structural test path, a repository escape and a string instead of a path list all passed unchecked. Adding `structural` to the existing path-validation loop made them fail correctly. A valid structural path passes without executing its deliberate exception or changing fixture bytes. Temporary fixtures are cleaned by `TemporaryDirectory`.
+
+Fresh native Codex subagents ran four read-only application probes: no-guidance control, pre-edit skill, updated skill and a non-Studio counterexample. The matched task describes a hypothetical repository; agents may read the skill, but not test assertions, audit notes, reference repository or customer code. Prompts and acceptance criteria are retained in `tests/onboarding/reference-refresh.json`; full outputs are in the session's subagent transcript. Model/settings were inherited through native collaboration, without a model override.
+
+The pre-edit probe proposed adding the portable map keys and called their absence partial context despite the suitable native checker. It explicitly reported no concrete numeric/join/timestamp rule, saved-profile/sampling policy or maintenance/evaluation exclusion. For the working original catalog it stated: "the skill supplies no basis to rename the catalog or change the profile."
+
+The updated probe retained the native contract without forcing portable keys, retrieved version-aware Studio profile/catalog checks and the renamed-copy test, kept Domain state unknown, and emitted the precision, join/grain, conditional timezone, sampling/profile and routing guidance. It preserved standing business decisions and customer artifact paths. The non-Studio probe retained attached catalogs and local-business-time semantics, used the confirmed three-decimal money scale, rejected stale source/tool evidence and required no Studio setup or unsupported sample variable.
+
+These are single application samples, not statistical wording/efficiency trials or end-to-end generated-repository acceptance. No customer code, database, runtime command or infrastructure was exercised by the probes. They do not verify actual ADR backlinks or live consumer behavior.
+
+An independent review found two conflicting instructions: replacement testing was initially unconditional, and the greenfield branch still selected the portable checker without schema adoption. Both were corrected and the reviewer confirmed resolution. The review did not execute runtime tests.
+
+### Verification and remaining limits
+
+- Focused suite: **30/30 pass**, including invocation-policy, packaged links, standalone checker, schema/template and new path regressions.
+- Full suite: **140/142 pass**; only the inherited `test_lists_onboarding_and_operate_pages` and `test_real_home_page_renders_cleanly` fail. Coverage remains **89%**, above the 70% gate.
+- Ruff lint/format, Python compilation, marketplace and version checks against fetched `origin/main`, catalog freshness, Claude plugin manifest validation, probe JSON syntax and whitespace checks pass.
+- Live Studio consumer execution, CI installation and renamed-database verification remain **unverified**. The user previously confirmed no disposable VibeData environment is available. Reference setup details are inspection evidence, not proof of a deployed runtime's current contract.
+- The full Claude/Codex behavioral matrix was not repeated. Earlier Codex sandbox and consumer limitations remain in effect. No general efficiency improvement is claimed.

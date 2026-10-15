@@ -2,6 +2,8 @@
 
 A compatibility change is a concrete edit required for the selected runtime or platform to use the repository. It is separate from context generation.
 
+For Studio on DuckDB, use the conditional [readiness checks](studio-duckdb.md). Every resulting edit follows the decision procedure below.
+
 1. Capture current input revision or file hashes, exact affected files/diff, enabling behavior, proposed check and expected side effects.
 2. Use an existing explicit approval for that diff, or obtain a decision. Record `approved`, `declined`, or `pending`; elapsed time is never approval. A materially changed diff requires a new decision.
 3. Apply only approved changes, verify that the input is still the reviewed input, then run the understood check against the approved target. If the input changed, reconcile before applying.

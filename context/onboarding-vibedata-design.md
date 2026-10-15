@@ -75,7 +75,7 @@ It contains facts and routing information; rules own conventions, the glossary o
 | Repo-specific skills | Only confirmed procedures not already covered by available general skills. | Only procedures that setup actually establishes; no speculative skill library. |
 | Onboarding report | Changes, checks and blockers; a preservation ledger for instruction consolidation, and decision details for actual conflicts or compatibility changes. | The same compact report, with actual setup choices and outstanding configuration. |
 | Review and proposal documents | Evidence-backed findings at the mapped review location; a proposal only when a substantial finding needs a separate decision. | The same formats are available; no empty finding or proposal is invented to fill a directory. |
-| Context checker | Reuse an existing suitable check or install the small portable checker described below. | Install the portable checker and register its command. |
+| Context checker | Retain a suitable native checker; the portable checker applies when the shared schema is adopted. | Use the same selection rule and register the actual checker command. |
 | Project scaffold | Preserve existing application layout and package manager. | Minimal configuration, folders, safe commands, test configuration, and starter templates for dbt/dlt. |
 
 ### Map fields
@@ -86,7 +86,9 @@ Existing unknown keys survive reconciliation.
 `sources` contains only actual sources and records their existing implementation kind and artifact links; it does not require a Python source to have a dlt pipeline.
 Each registered source lists the artifacts actually required by its confirmed convention.
 
-The following role keys are stable, while their values are customer-selected:
+Existing maps retain a suitable native schema/checker contract. Portable-only missing fields do not alone block context readiness; equivalent locations are resolved through the customer contract, with the report path stated in onboarding output when no map role exists. Adoption of the shared schema requires an explicit compatibility decision.
+
+For the shared schema, the following role keys are stable, while their values are customer-selected:
 
 | Key under `artifact_paths` | Default for a new repository | Meaning |
 | --- | --- | --- |
@@ -98,7 +100,7 @@ The following role keys are stable, while their values are customer-selected:
 | `proposal` | `docs/proposal/{nnnn}-{slug}.md` | Optional proposals for substantial follow-up work. |
 | `onboarding_report` | `docs/onboarding.md` | Durable inventory, decisions, and verification for onboarding. |
 
-`key_references.agents` names the bootstrap file, `key_references.instructions` the canonical instruction file, and `key_references.rules`, `key_references.schema`, and `key_references.test_map` the actual rules directory, map schema, and test map.
+In the shared schema, `key_references.agents` names the bootstrap file, `key_references.instructions` the canonical instruction file, and `key_references.rules`, `key_references.schema`, and `key_references.test_map` the actual rules directory, map schema, and test map.
 `notes_for_agents` states the startup sequence and maps task kinds to rules and suitable existing examples or templates.
 Paths are repo-relative and preserve case; placeholder patterns are distinguished from existing instances.
 A repository with different ADR identifiers retains them and declares its actual pattern; `{nnnn}` is a default, not a renumbering instruction.
@@ -110,7 +112,7 @@ Empty inventories are valid; a missing check is a reported gap, never a fabricat
 Neither the map nor the report includes credentials, notebook outputs, data rows, or secret-file contents.
 
 `test-map.json` retains the reference repo's `taxonomy` and `modules` structure.
-Each module has `sources` paths and optional `unit`, `data`, `selectors`, and `commands` entries; Python modules need no dbt selector.
+Each module has `sources` paths and optional `unit`, `data`, `structural`, `selectors`, and `commands` entries; Python modules need no dbt selector.
 An optional `gaps` list records missing coverage explicitly, and existing extra keys are preserved.
 Only actual test files and runnable check commands are registered; a command that needs unavailable infrastructure is labeled unverified in the onboarding report.
 Selector resolution is checked with the appropriate project/runtime command when available, not by pretending a path-only validator executes dbt.
