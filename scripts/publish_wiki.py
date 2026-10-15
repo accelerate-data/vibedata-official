@@ -45,24 +45,23 @@ INSTALLER_URL = f"{RELEASES_URL}/download/install.sh"
 GIT_AUTHOR_NAME = "github-actions[bot]"
 GIT_AUTHOR_EMAIL = "41898282+github-actions[bot]@users.noreply.github.com"
 
-# The sidebar reading path. The page names are wiki page names (no extension) —
-# the onboarding pages 01a-09 and 90, then the Operate pages.
+# The sidebar reading path. The page names are wiki page names (no extension).
 GETTING_STARTED_PAGES: tuple[tuple[str, str], ...] = (
     ("Overview", "Home"),
-    ("01a · Microsoft Entra admin", "01a-prereqs-entra-admin"),
-    ("01b · Microsoft Fabric admin", "01b-prereqs-fabric-admin"),
-    ("01c · GitHub organisation owner", "01c-prereqs-github-org-owner"),
-    ("01d · Azure infrastructure owner", "01d-prereqs-azure-infra"),
-    ("01e · MotherDuck organisation admin", "01e-prereqs-motherduck-admin"),
-    ("02 · Operator setup", "02-prereqs-operator"),
-    ("03 · Deploy: Local Docker", "03-deploy-docker"),
-    ("04 · Deploy: Kubernetes on Azure", "04-deploy-kubernetes-azure"),
-    ("05 · Configure the organisation", "05-configure-org"),
-    ("06 · Create your first domain", "06-first-domain"),
-    ("07 · Confirm you are done", "07-verify"),
-    ("08 · Domain contributor", "08-getting-started-contributor"),
-    ("09 · Worked example", "09-worked-example-salesforce"),
-    ("90 · Troubleshooting", "90-troubleshooting"),
+    ("Microsoft Entra administrator", "Prerequisites-Entra-Administrator"),
+    ("Microsoft Fabric administrator", "Prerequisites-Fabric-Administrator"),
+    ("GitHub organisation owner", "Prerequisites-GitHub-Organisation-Owner"),
+    ("Azure infrastructure owner", "Prerequisites-Azure-Infrastructure"),
+    ("MotherDuck administrator", "Prerequisites-MotherDuck-Administrator"),
+    ("Operator setup", "Prerequisites-Operator"),
+    ("Deploy: Local Docker", "Deploy-with-Local-Docker"),
+    ("Deploy: Kubernetes on Azure", "Deploy-on-Kubernetes-on-Azure"),
+    ("Configure the Studio instance", "Configure-the-Studio-Instance"),
+    ("Create your first Domain", "Create-Your-First-Domain"),
+    ("Verify the first Domain", "Verify-the-First-Domain"),
+    ("Getting started as a contributor", "Getting-Started-as-a-Contributor"),
+    ("Worked example: Salesforce", "Worked-Example-Salesforce"),
+    ("Troubleshooting", "Troubleshooting"),
 )
 
 OPERATE_PAGES: tuple[tuple[str, str], ...] = (
