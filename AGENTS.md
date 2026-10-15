@@ -23,7 +23,7 @@ edited by hand; CI fails when they are stale.
 - Each plugin lives at `plugins/<name>/` with a `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`
 - Only `plugin.json` goes inside `.claude-plugin/` — no other files
 - Only `plugin.json` goes inside `.codex-plugin/` — no other files
-- Skills are auto-discovered from `skills/` — do not add a `skills` field to `plugin.json`
+- Claude skills are auto-discovered from `skills/`; do not add a `skills` field to `.claude-plugin/plugin.json`. Codex compatibility manifests in `.codex-plugin/plugin.json` declare `"skills": "./skills/"` for the same shared directory.
 - `plugin.json` required fields: `name`, `version`, `description`
 
 ## Codex marketplace rules
@@ -58,7 +58,7 @@ edited by hand; CI fails when they are stale.
 
 - Files other than `plugin.json` inside `.claude-plugin/`
 - Files other than `plugin.json` inside `.codex-plugin/`
-- `"skills"` field in `plugin.json` — skills are auto-discovered
+- `"skills"` field in `.claude-plugin/plugin.json` — Claude skills are auto-discovered; the Codex compatibility manifest declares the shared skills path.
 - Single-line `plugin.json` — use pretty-printed JSON
 - `version` field in marketplace entries — version lives in `plugin.json`
 - Bumping `version` in both `plugin.json` and the marketplace entry — manifest always wins

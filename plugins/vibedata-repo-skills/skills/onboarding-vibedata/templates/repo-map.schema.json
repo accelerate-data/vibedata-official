@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Onboarding repository map",
+  "type": "object",
+  "required": [
+    "modules",
+    "sources",
+    "entrypoints",
+    "commands",
+    "artifact_paths",
+    "key_references",
+    "notes_for_agents"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "modules": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required_artifacts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "artifacts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "entrypoints": {
+      "type": [
+        "object",
+        "array"
+      ],
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      },
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "commands": {
+      "type": "object"
+    },
+    "artifact_paths": {
+      "type": "object",
+      "required": [
+        "context",
+        "adr",
+        "design_record_model",
+        "design_record_pipeline",
+        "review",
+        "proposal",
+        "onboarding_report"
+      ],
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "key_references": {
+      "type": "object",
+      "required": [
+        "agents",
+        "instructions",
+        "rules",
+        "schema",
+        "test_map"
+      ],
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "notes_for_agents": {
+      "type": [
+        "object",
+        "array"
+      ]
+    }
+  }
+}

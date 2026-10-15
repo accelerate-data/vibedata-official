@@ -17,6 +17,7 @@ Third-party content is collated from upstream sources, provided as is, and used 
 | `dbt-snapshot-scd2` | vibedata-dbt-skills | Implement SCD Type 2 snapshots in dbt on Microsoft Fabric. Use when building snapshot models, choosing between timestamp and check strategies, or handling Fabric-specific datetime2 quirks. Also use when tracking slowly changing dimensions or debugging snapshot drift. |
 | `elementary-data-quality` | vibedata-dbt-skills | Configure Elementary anomaly detection for dbt on Microsoft Fabric. Use when placing data quality tests by medallion layer, setting up volume or column anomalies, or configuring timestamp_column. Also use when debugging silent test failures or choosing severity levels. |
 | `dlt-rest-api-connector` | vibedata-dlt-skills | Build dlt REST API pipelines to ADLS Gen2 and OneLake. Use when configuring RESTAPIConfig, handling pagination, or setting schema contracts for REST sources. Also use when landing REST API data into Fabric lakehouses or debugging schema evolution. |
+| `onboarding-vibedata` | vibedata-repo-skills | Prepare or refresh a data-engineering repository for VibeData while preserving existing code and conventions. |
 
 ----
 

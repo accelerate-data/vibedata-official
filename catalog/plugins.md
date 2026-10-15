@@ -12,6 +12,7 @@ Third-party content is collated from upstream sources, provided as is, and used 
 | `fabric-skills` | Microsoft Skills for Fabric — semantic model authoring, Spark and warehouse CLI operations, migration, and end-to-end medallion architecture | Microsoft | MIT | microsoft/skills-for-fabric (plugins/fabric-skills) |
 | `vibedata-dbt-skills` | Customize vibedata dbt agents with Fabric modeling, snapshot, semantic layer, and Elementary quality standards |  | Elastic-2.0 | in-repo |
 | `vibedata-dlt-skills` | Customize vibedata ingestion agents with dlt REST API standards for ADLS Gen2, OneLake, and Fabric lakehouses |  | Elastic-2.0 | in-repo |
+| `vibedata-repo-skills` | Onboard repositories for VibeData with preserved instructions, mapped context, and explicit readiness. |  | Elastic-2.0 | in-repo |
 
 ----
 

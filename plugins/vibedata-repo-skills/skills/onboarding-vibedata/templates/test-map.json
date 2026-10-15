@@ -1,0 +1,24 @@
+{
+  "taxonomy": {
+    "structural": "Repository context paths and instruction references."
+  },
+  "modules": {
+    "context": {
+      "sources": [
+        "repo-map.json",
+        "test-map.json",
+        "AGENTS.md",
+        ".agents/rules/"
+      ],
+      "structural": [
+        ".agents/checks/validate_context.py"
+      ],
+      "commands": {
+        "structural": "python3 .agents/checks/validate_context.py --root ."
+      }
+    }
+  },
+  "gaps": [
+    "No business-test coverage is established. Runtime loading and warehouse execution remain unverified."
+  ]
+}
