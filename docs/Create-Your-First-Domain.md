@@ -1,175 +1,93 @@
 # Create your first Domain
 
-A Domain connects a GitHub repository to one Data Platform Type and one exact persistent resource. It also defines the authentication policy inherited by Intents.
+A Domain binds a GitHub repository to a data platform and persistent resource. It also defines user authentication, service authentication, and a secret store for work in that Domain.
 
 ## Before you start
 
-Confirm:
+Complete [[Configure the Studio Instance]]. Confirm that you can access the repository, that your downstream user connection is healthy, and that the intended persistent data resources exist. Studio can create supported schemas and managed DuckDB files from the form.
 
-- Studio is running;
-- GitHub access works;
-- at least one LLM Profile exists;
-- delegated users are signed in through SSO;
-- Fabric has an active downstream Identity Provider on delegated deployments;
-- the intended persistent data-platform resources already exist, except schemas or local DuckDB files that Studio can create from the form.
+## Open Create domain
 
-## 1. Open the Domain form
+1. Open **Domains** from the application rail.
+2. Select **Add domain**.
 
-Open **Settings → Domains → Add Data Domain**.
+The **Create domain** page has **Basics**, **Data platform**, and **Secret store** steps. Switching steps preserves the draft. Leaving with changes requires confirmation to discard them.
 
-Fill in:
+## Complete Basics
 
-- **Name**;
-- **Icon**;
-- optional **Description**;
-- optional **Domain Instructions**.
+1. Enter **Name**.
+2. Review the derived **Slug**, which cannot change after creation.
+3. Choose an **Icon** if required.
+4. Add an optional **Description**.
+5. Select **Account / organization**.
+6. Select **Repository**.
+7. Select **Continue to data platform** while the draft is incomplete.
 
-Domain Instructions are injected into the agent context for Intents in this Domain. Put stable business and engineering guidance there, not credentials.
+Repositories come from the GitHub App installations and your authorised GitHub view. The creating identity must have the required access, including write permission where Studio must seed or update repository content.
 
-## 2. Select the Git repository
+The repository binding and recorded default branch become read-only after creation. Domain instructions are edited later under **General**; keep credentials out of them.
 
-Choose:
+## Configure Data platform
 
-- **Organization**;
-- **Repository**.
+1. Select **Data platform type**.
+2. Complete the displayed user-authentication fields.
+3. Complete **Service authentication** where required.
+4. Continue to the resource configuration with **Continue to workspace**.
+5. Select the persistent resources for the chosen platform.
+6. Select **Continue to secret store** while the draft is incomplete.
 
-On Kubernetes, organisations come from GitHub App installations and the user's authorized GitHub view. On Local Docker, Studio uses the imported `gh` session.
-
-The repository binding and recorded default branch become read-only after Domain creation. To move a Domain to another repository, create a new Domain.
-
-Make sure the creating identity can access the repository and, where Studio must seed or update repository content, has the required write authority.
-
-## 3. Choose the Data Platform Type
-
-Choose one:
-
-- Microsoft Fabric;
-- MotherDuck;
-- DuckDB-local.
-
-There is no instance-level Data Platform entry to select. The form builds a typed Domain candidate directly.
-
-## 4. Choose user authentication
-
-The available options come from the selected Data Platform descriptor.
+The fields depend on the selected platform. There is no instance-level data-platform registration step. Search resource lists using part of the visible name. Where a selector supports an exact identifier, select its explicit option to commit it; typing alone does not select a resource.
 
 ### Microsoft Fabric
 
-> **Applies to: Microsoft Fabric.**
+Select the connected Entra **Identity provider** for user access. If no eligible connection is available, complete **User Settings → Connections**, or ask an owner to repair the provider when the message requires one. Return to Domain creation after the connection is healthy.
 
-- On Kubernetes, select OAuth/OIDC and the Entra **Identity Provider** registered in Org Settings.
-- On Local Docker, Studio uses the ambient Azure CLI identity in the API container.
+For **Service authentication**, select **Reuse user identity provider** when eligible, or **Dedicated identity**. Dedicated identity requires a separate client ID and client secret in the selected provider's tenant. Reuse follows the provider's active credentials and their rotation; it does not copy a secret into an independent Domain credential.
 
-If the delegated Identity Provider is not connected for your user, use the connection action and complete the OAuth flow before relying on automatic resource discovery.
+Select the persistent workspace, Lakehouse, and schema, and the capacity for ephemeral workspaces. The persistent workspace and Lakehouse must already exist. Studio can create a schema; that external schema remains if you later cancel Domain creation.
 
 ### MotherDuck
 
-> **Applies to: MotherDuck.**
+Use your own connected PAT for interactive work and configure the Domain service PAT for unattended work. Select the database and schema. Studio can discover accessible resources and create a schema.
 
-- On Kubernetes, each user connects their own PAT.
-- On Local Docker, the shared Domain PAT is the ambient operating credential.
-
-### DuckDB-local
-
-> **Applies to: DuckDB.**
-
-No external user credential is required.
-
-## 5. Configure service authentication
-
-Current Domain auth UI supports a separate service lane.
-
-Where the provider allows it, **Defer service identity** is the default. That lets the Domain record be created, but Studio warns that Intents cannot activate until the required service identity is configured.
-
-For a first usable Domain, configure the service identity now when possible.
-
-### Fabric service identity
-
-Enter the Domain service-principal credential supplied by the Entra administrator. This is independent of the user's OAuth Identity Provider unless the current UI explicitly offers an eligible application-reuse option.
-
-### MotherDuck service identity
-
-On a delegated deployment, enter the Domain service PAT for unattended work. On Local Docker, the ambient/shared PAT is required rather than deferred.
+The acting identity must own the bound database to activate an Intent. Access through a shared database does not satisfy that requirement. See [[Prerequisites MotherDuck Administrator]].
 
 ### DuckDB
 
-No service identity is required.
+Select an existing Studio-managed database file or create one through the form, then select or create the schema. You cannot supply an arbitrary host filesystem path. No external user or service identity is required.
 
-The form can offer **Test service authentication**. This is diagnostic. Current create semantics validate the complete candidate at the persistence boundary, but the UI does not require every optional test action to have been run manually before Create.
+## Configure Secret store
 
-## 6. Select the persistent data resources
+1. Open **Secret store**.
+2. Select **Secret store type** from the available options.
+3. Complete the selected store's displayed authentication and resource fields.
 
-Where a platform supports both, **Auto** discovery is the default and **Manual** is available as a fallback.
+The registered types include **Internal**, **Local File**, **Azure Key Vault**, and **GCP Secret Manager**. Use only the types available in your deployment.
 
-### Microsoft Fabric
+| Store | Setup and later secret entry |
+| --- | --- |
+| Internal | No external connection or resource fields. After saving, open the Domain's **Secrets** tab to add secrets. |
+| Local File | No connection fields in the form. The operator supplies the Domain's secrets file outside Studio and outside Git. Selecting this store does not make every other store file-based. |
+| Azure Key Vault | Configure its connection and vault. Use **Reuse data platform connection** where eligible, or **Separate connection**; configure service authentication as shown. Add values through the vault's secret-management surface. |
+| GCP Secret Manager | Complete the displayed connection and resource fields if the type is available. Add values through the external store's secret-management surface. |
 
-Select or enter:
+The source-connection agent later supplies the exact secret names for a store supported by the deployed source workflow. Store availability in Domain creation alone does not prove connector delivery. Never put values in agent chat, Domain instructions, or Git. Changing stores does not copy secret values between them.
 
-- Workspace;
-- Lakehouse;
-- Schema;
-- optional Ephemeral Workspace Capacity.
+## Create and check the result
 
-Auto mode discovers workspaces and Lakehouses visible to your user. Studio resolves the SQL endpoint. The persistent Workspace and Lakehouse must already exist; Studio does not create them from this form.
+1. Review the Domain summary and all three steps.
+2. Select **Create** when the complete draft enables it.
+3. Open the saved Domain's **Resources** tab.
+4. Read the checks for repository, data platform, and secret store.
+5. Repair any missing access or configuration reported by those checks.
+6. Select **Reconcile** to run the applicable readiness checks again.
 
-Studio can create a schema from the form. A schema created before the Domain is finally saved remains on Fabric even if you cancel the Domain.
+**Create** can appear on an earlier step when the whole draft is complete. Step completion checks required form values; it does not prove that external credentials and resources work. Saving starts the applicable readiness checks. A saved Domain can still need repair before an Intent can activate.
 
-### MotherDuck
+Treat the repository, data-platform type, and bound database/workspace/Lakehouse/schema identity as fixed after creation. Supported credential rotation, ephemeral capacity, and secret-store changes use their own update controls.
 
-Select or enter:
-
-- Database;
-- Schema;
-- optional Share where the current editor exposes it.
-
-Studio can discover databases and schemas visible to the acting PAT and can create a schema.
-
-The backend supports an optional MotherDuck Share for cross-identity access. The database is the binding identity; a Share is access configuration, not a replacement database.
-
-### DuckDB-local
-
-Pick an existing Studio-managed `.duckdb` file or create a new database through the form, then select or create the schema.
-
-You do not enter an arbitrary host filesystem path. Studio owns the DuckDB directory under its data area.
-
-## 7. Secret Store behavior
-
-There is **no Domain Secret Store picker** in the current create UI.
-
-When the Domain is persisted, Studio initializes a local secrets file for it under the Studio data directory. This file is outside the Git repository.
-
-Source connection setup later tells you the exact keys to place there. Never put those values into Domain Instructions or Git.
-
-## 8. Create the Domain
-
-Select **Create Domain**.
-
-Studio persists the Domain and starts provisioning/reconciliation. Service-lane readiness depends on the authentication you selected:
-
-- a complete service credential can reconcile immediately;
-- a deferred required service credential remains not configured and prevents Intent activation until repaired;
-- external permission or resource failures move the relevant readiness lane into failure and surface a safe diagnostic.
-
-## 9. What is immutable
-
-Treat these as fixed after creation:
-
-- Git repository binding;
-- Data Platform Type;
-- persistent Fabric workspace/Lakehouse/schema;
-- MotherDuck database/schema;
-- DuckDB database/schema resource identity.
-
-Operational settings such as a Fabric ephemeral capacity and replaceable service credentials have separate update paths. MotherDuck Share configuration is not the database identity and can be changed by the supported Domain update path.
-
-## 10. GitHub Actions setup
-
-GitHub Actions setup is separate from basic Domain persistence/readiness. Fabric and MotherDuck CI/CD may require repository variables/secrets and, for Fabric, a correctly configured federated credential.
-
-Do not infer that an `Active` badge proves every CI/CD prerequisite. [[Verify the First Domain]] covers the post-create checks.
-
-Continue to [[Verify the First Domain]].
+GitHub Actions setup is separate from basic Domain readiness. Continue to [[Verify the First Domain]] for an Intent run, LLM turn, and any CI checks you need.
 
 ---
 
-_Applies to: studio/main (unreleased snapshot). Verified against `studio@5c9d2bbf339a` on 2026-08-22._
+_Release scope and source-review limits: [Home](README.md#release-and-verification-scope)._

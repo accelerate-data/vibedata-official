@@ -1,130 +1,48 @@
-# Vibedata Studio onboarding — current `main`
+# VibeData Studio onboarding
 
-This is a deployment and first-use guide for the current `accelerate-data/studio` `main` branch, at the commit stamped on this page.
+Install Studio from your cloud marketplace into your own subscription. Start with [Operator prerequisites](Prerequisites-Operator.md), then [Install from your cloud marketplace](Deploy-via-Cloud-Marketplace.md).
 
-It is intentionally **not pinned to the latest public Vibedata release**. `main` may contain behavior that has not yet been published in `vibedata-official`. When installing a published build, use the version-matched `vibedata` binary for that release and re-check release-specific differences.
+## Choose the Domain's data platform
 
-## The two choices
+A Domain connects a GitHub repository to a persistent data resource. Select its data platform, authentication, resource, and secret store when you create the Domain.
 
-Choose one deployment style and one data platform.
-
-### Deployment style
-
-| Style | Authentication posture | GitHub identity | Best fit |
+| Platform | Interactive identity | Unattended identity | Domain resource |
 | --- | --- | --- | --- |
-| **Local Docker** | Ambient, single operator (`AUTH_ENABLED=false`) | Host `gh` session imported into Studio | Local evaluation, demos, single-operator work |
-| **Kubernetes on Azure** | Delegated, multi-user (`AUTH_ENABLED=true`) | Customer-owned GitHub App plus per-user authorization | Shared production-style deployment |
+| DuckDB | No external credential | No external credential | Studio-managed database file and schema |
+| MotherDuck | Each user's PAT | Domain service PAT | Database and schema; the acting identity must own the database for Intent activation |
+| Microsoft Fabric | Connected Microsoft Entra ID provider | Reused provider application or dedicated service principal, where offered | Workspace, Lakehouse, and schema, with capacity for ephemeral workspaces |
 
-Local Docker is deliberately not the same security model as the Kubernetes deployment. It exposes no Studio login gate. Anyone who can reach its UI can use the instance, so network access must be restricted by the operator.
+## Prepare administrator prerequisites
 
-### Data platform
-
-| Platform | Interactive identity | Service identity | Domain resource |
-| --- | --- | --- | --- |
-| **DuckDB-local** | None | None | Studio-managed `.duckdb` file + schema |
-| **MotherDuck** | User PAT in delegated mode; shared Domain PAT in ambient mode | Domain PAT in delegated mode | Database + schema |
-| **Microsoft Fabric** | Entra OAuth/OIDC in delegated mode; container `az` identity in ambient mode | Domain service principal | Workspace + Lakehouse + schema |
-
-The most important architectural rule in current `main`: **Data Platform configuration belongs to the Domain.** There is no instance-level Data Platform registration step. A Domain chooses its Data Platform Type, user authentication, service authentication, and exact resource coordinates when it is created.
-
-## Identity model
-
-Current Studio has three different identity concepts. Do not combine them casually.
-
-1. **SSO Provider** — signs a person into Studio. Used only in delegated deployments.
-2. **Identity Provider** — lets an already-signed-in user obtain downstream OAuth/OIDC credentials, such as Fabric access. It does not sign the user into Studio.
-3. **Domain service credential** — belongs to one Domain and is used for unattended work. For Fabric, this is a service principal. For MotherDuck, this is a PAT.
-
-A GitHub App is a fourth, separate identity used for repository access in delegated deployments.
-
-## Domain Secret Store behavior in current `main`
-
-Every new Domain currently receives a **local Secret Store automatically**. Studio creates it under its data directory. The Domain create UI does not expose a Secret Store picker.
-
-Legacy Secret Store administration still exists under Org Settings, including Azure Key Vault support. Do not mistake that registry surface for the current Domain-create path. This onboarding flow follows the currently executable Domain-create implementation.
-
-For source connections, the agent tells the user the exact secret names to create. Secret values are entered out of band in the Domain's local secrets file; they are never given to the agent or committed to Git.
-
-## Which prerequisite pages apply
-
-| Combination | Read before deployment |
+| Administrator | What to prepare |
 | --- | --- |
-| Local Docker + DuckDB | [[Prerequisites Operator]] |
-| Local Docker + MotherDuck | [[Prerequisites MotherDuck Administrator]], [[Prerequisites Operator]] |
-| Local Docker + Fabric | [[Prerequisites Entra Administrator]], [[Prerequisites Fabric Administrator]], [[Prerequisites Operator]] |
-| Kubernetes + DuckDB | [[Prerequisites Entra Administrator]] for Studio SSO, [[Prerequisites GitHub Organisation Owner]], [[Prerequisites Azure Infrastructure]], [[Prerequisites Operator]] |
-| Kubernetes + MotherDuck | the Kubernetes pages above plus [[Prerequisites MotherDuck Administrator]] |
-| Kubernetes + Fabric | all prerequisite pages |
+| Cloud subscription administrator | Marketplace purchase and deployment permission, region, capacity quota, and an address choice; see [Operator prerequisites](Prerequisites-Operator.md) |
+| Identity administrator | An eligible provider for Studio sign-in; for Entra and Fabric, see [Microsoft Entra prerequisites](Prerequisites-Entra-Administrator.md) |
+| GitHub organisation owner | A customer-owned GitHub App and repository access; see [GitHub prerequisites](Prerequisites-GitHub-Organisation-Owner.md) |
+| Fabric administrator, when using Fabric | Persistent resources, ephemeral capacity, and service access; see [Fabric prerequisites](Prerequisites-Fabric-Administrator.md) |
+| MotherDuck administrator, when using MotherDuck | User and service PATs, database ownership, and schema; see [MotherDuck prerequisites](Prerequisites-MotherDuck-Administrator.md) |
 
-`01a` contains separate sections for Studio SSO, Fabric user OAuth, and the Fabric service principal. Skip the sections that do not apply to your combination.
+## Configure and use Studio
 
-## Reading path
+1. [Install from your cloud marketplace](Deploy-via-Cloud-Marketplace.md).
+2. [Configure the Studio instance](Configure-the-Studio-Instance.md).
+3. [Create your first Domain](Create-Your-First-Domain.md).
+4. [Verify the first Domain](Verify-the-First-Domain.md).
+5. [Start as a contributor](Getting-Started-as-a-Contributor.md).
+6. [Add a Salesforce source](Worked-Example-Salesforce.md).
 
-### 1. Collect administrator prerequisites
+## Identity and secrets
 
-- [[Prerequisites Entra Administrator]] — Entra registrations for Studio SSO and Fabric identities.
-- [[Prerequisites Fabric Administrator]] — Fabric tenant, capacity, workspace, Lakehouse, schema, and service-principal access.
-- [[Prerequisites GitHub Organisation Owner]] — customer-owned GitHub App for delegated deployments.
-- [[Prerequisites Azure Infrastructure]] — AKS, Azure Files, Key Vault, DNS/Front Door, and cluster identity.
-- [[Prerequisites MotherDuck Administrator]] — MotherDuck user/service PAT and database preparation.
+**Org settings → Identity providers** manages provider registrations. Eligible providers can sign users in when **Allow sign-in** is selected. A provider can also serve downstream delegation, such as Fabric access. Users connect their own downstream accounts under **User Settings → Connections**. Domain service authentication is a separate policy for unattended work.
 
-### 2. Prepare the operator
+Choose **Secret store type** in the Domain's **Secret store** step. Use the saved store's entry method for source credentials. **Internal** exposes a **Secrets** tab after saving; external stores use their own secret-management surface, and **Local File** requires operator access outside Studio. Never enter credential values in agent chat or Git.
 
-Read [[Prerequisites Operator]].
+## Operate the deployment
 
-### 3. Deploy Studio
+Use [Update Studio](update.md), [Recovery and rollback](rollback.md), and [Troubleshooting](Troubleshooting.md) after onboarding.
 
-- Local Docker: [[Deploy with Local Docker]]
-- Kubernetes on Azure: [[Deploy on Kubernetes on Azure]]
+## Release and verification scope
 
-### 4. Configure the instance
+Use the documentation for the Studio release delivered by your marketplace deployment. The wiki's generated **Release** page, when present, identifies the release tag and Studio commit for that publication; it does not select or upgrade your installed release. A documentation-only publication may have no Release page.
 
-Read [[Configure the Studio Instance]].
-
-The current minimum delegated setup normally includes:
-
-- an SSO Provider;
-- a GitHub Commit Provider backed by the GitHub App;
-- an LLM Profile;
-- an Identity Provider when a downstream platform requires delegated OAuth/OIDC, such as Fabric;
-- user and role setup.
-
-There is no instance-level Data Platform registration step.
-
-### 5. Create and verify the first Domain
-
-- [[Create Your First Domain]]
-- [[Verify the First Domain]]
-
-### 6. Start data work
-
-- [[Getting Started as a Contributor]]
-- [[Worked Example Salesforce]]
-
-Use [[Troubleshooting]] as a symptom-based reference.
-
-## Current implementation boundaries to remember
-
-- Local Docker is ambient/single-operator only. The supported installer does not turn it into the delegated SSO topology.
-- Kubernetes install currently supports Azure as its cloud provider. AWS and GCP are not implemented in the current CLI.
-- `vibedata install kubernetes` currently uses explicit CLI flags such as `--domain`, `--storage-url`, and `--vault-url`. Design documents describing a declarative `--config` installer are ahead of the executable CLI and are not used in this guide.
-- A Domain can defer a supported service identity at creation, but current UI warns that Intents cannot activate until the required service identity is configured.
-- Data-platform resource identity is immutable after Domain creation. Fabric ephemeral capacity and service credentials are mutable operational settings.
-- Git repository binding is immutable after Domain creation.
-- Domain readiness is not automatically re-checked just by opening settings. Use **Verify** on an Active Domain or **Retry provisioning** after a failure.
-
-## Verification policy for this snapshot
-
-This refresh treated current implementation and current rendered UI as authoritative when they conflicted with older or future-looking design documents. In particular:
-
-- CLI command definitions were checked directly in `cli/vibedata/src/vibedata/commands/`.
-- Domain-create behavior was checked against the current UI, request schemas, and persistence path.
-- GitHub App permissions were checked against the current GitHub provider contract.
-- image-signature policy was checked against the workflows that actually sign candidate images.
-- data-engineering behavior was checked against the exact `ext/vd-data-engineering` submodule pinned by this Studio SHA.
-
-This is therefore a **main-branch snapshot**, not a promise about an older released binary or a future design.
-
----
-
-_Applies to: studio/main (unreleased snapshot). Verified against `studio@5c9d2bbf339a` on 2026-08-22._
+This content was reviewed against Studio source `a4df79ffcd5dc9d71697887804626a8ae4983177` and its pinned data-engineering plugin `16f90f637d1617f89dab74661857f914caccd106` on 15 October 2026 (GST). Source review is not a completed marketplace deployment, provider login, or Intent run. Before publishing for a release, check these instructions against that release and complete the deployment and first-Domain checks.
