@@ -152,7 +152,7 @@
       },
       {
         "name": "onboarding-vibedata",
-        "description": "Use when a user explicitly asks to onboard, initialize, or refresh a data-engineering repository for VibeData, including an existing dbt/dlt or Python/notebook estate, a partly onboarded repository, or a blank project.",
+        "description": "Prepare or refresh a data-engineering repository for VibeData while preserving existing code and conventions.",
         "plugin": "vibedata-repo-skills",
         "path": "plugins/vibedata-repo-skills/skills/onboarding-vibedata"
       }

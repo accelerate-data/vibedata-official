@@ -24,10 +24,21 @@ class OnboardingTemplateTests(unittest.TestCase):
         text = (SKILL / "SKILL.md").read_text()
         metadata = yaml.safe_load(text.split("---", 2)[1])
         self.assertEqual(metadata["name"], "onboarding-vibedata")
-        self.assertTrue(metadata["description"].startswith("Use when"))
+        self.assertTrue(metadata["description"].strip())
         for name in ("brownfield", "greenfield", "artifact-contract", "compatibility"):
             self.assertIn(f"references/{name}.md", text)
             self.assertTrue((SKILL / f"references/{name}.md").is_file())
+
+    def test_skill_requires_explicit_user_invocation_in_both_runtimes(self):
+        metadata = yaml.safe_load((SKILL / "SKILL.md").read_text().split("---", 2)[1])
+        with self.subTest(runtime="claude"):
+            self.assertIs(metadata.get("disable-model-invocation"), True)
+            self.assertIs(metadata.get("user-invocable", True), True)
+        with self.subTest(runtime="codex"):
+            path = SKILL / "agents/openai.yaml"
+            self.assertTrue(path.is_file(), "Codex invocation policy is missing")
+            config = yaml.safe_load(path.read_text())
+            self.assertIs(config["policy"]["allow_implicit_invocation"], False)
 
     def test_all_local_document_links_resolve(self):
         self.assertTrue((SKILL / "SKILL.md").is_file())

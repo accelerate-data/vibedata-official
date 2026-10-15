@@ -53,6 +53,7 @@ Customer-repository onboarding does not automatically commit, push, create a PR,
 | R14 | Fresh sessions locate task files, applicable rules, examples/templates, and checks through the generated context; reduced discovery is measured alongside correctness. |
 | R15 | Both plugin manifests and marketplace catalogs expose the skill, and the generated catalog is updated through the existing generator. |
 | R16 | Baseline scenarios precede authoring; `writing-for-agents` guides creation and `writing-skills` supplies the subsequent behavioral verification pass. |
+| R17 | Only explicit user invocation starts the skill; Claude and Codex cannot select it implicitly. |
 
 ## Artifact contract
 
@@ -201,7 +202,7 @@ Preserve a customer-owned checker; replacement of a previously installed helper 
 
 Use `writing-for-agents` to author the skill and generated instructions: explicit completion criteria, conditional context pointers, and a single owner for each instruction.
 Use `writing-skills` to define baseline scenarios before authoring and to verify behavior afterward.
-Invocation requires an explicit onboarding/initialization request; a normal source/model task must not trigger repository onboarding.
+Invocation is user-only: `/vibedata-repo-skills:onboarding-vibedata` in Claude Code or `$onboarding-vibedata` in Codex. Set `disable-model-invocation: true` in skill frontmatter and `policy.allow_implicit_invocation: false` in `agents/openai.yaml`; a matching natural-language request alone must not trigger the skill.
 Resolve helper paths relative to the installed skill and pass an explicit target repository; never write into the installed plugin as if it were the customer repo.
 
 The target instructions currently prohibit a `skills` manifest field while shipped Codex compatibility manifests declare `"skills": "./skills/"`.

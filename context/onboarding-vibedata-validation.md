@@ -278,3 +278,13 @@ Codex A16 returned code 124 after 360 seconds. The runtime reported ``failed to 
 Final A13 trial 2 removes the duplicate-glossary defect and preserves the repaired one-way bootstrap. Final A09 pending trial 2 preserves configuration bytes, completes independent maps and leaves all denied paths blocked. Remaining Codex structural failures correspond to missing sandbox-protected artifacts, plus earlier failed trials explicitly retained as negative evidence. A full Codex onboarding pass is not claimed.
 
 The completed reviewer is inactive. No implementation agent was dispatched. The final diff contains only the approved plugin/package/fixture/test/CI/catalog/instruction-rule and evidence-plan files. All local checks are recorded; no remote CI, VibeData consumer environment, normal-profile install, commit, push, PR or publication occurred.
+
+## User-only invocation follow-up
+
+After draft PR #48 was opened, the user required explicit invocation only. R17 records this requirement. Claude Code now uses `disable-model-invocation: true` in `SKILL.md`; Codex uses `policy.allow_implicit_invocation: false` in `agents/openai.yaml`. User invocation remains available through `/vibedata-repo-skills:onboarding-vibedata` and `$onboarding-vibedata`, respectively. The description is now a short user-facing summary. The onboarding workflow and artifact contract are unchanged.
+
+Verified against [official Codex skill documentation](https://developers.openai.com/codex/skills) and [Claude Code invocation controls](https://code.claude.com/docs/en/slash-commands). Claude's flag is not a substitute for Codex's policy file.
+
+The regression `test_skill_requires_explicit_user_invocation_in_both_runtimes` first failed for both missing runtime controls, then passed with the configuration changes. Final focused result: 29/29. Ruff lint/format, catalog freshness, marketplace/version checks, Claude plugin manifest validation and whitespace checks pass. Generated catalog descriptions were regenerated with `scripts/build_catalog.py`.
+
+This follow-up verifies the documented runtime configuration, not a new live invocation trial. The full suite and behavioral matrix were not repeated for this metadata change. The first PR CI run independently reproduced only the two inherited wiki-test failures; its marketplace and version checks passed. Earlier behavioral and integration limits remain in effect. Simplifying the workflow is a recommendation for a separate change, not an untested rewrite in this follow-up.

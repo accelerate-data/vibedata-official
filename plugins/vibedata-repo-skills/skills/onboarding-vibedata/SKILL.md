@@ -1,9 +1,12 @@
 ---
 name: onboarding-vibedata
-description: Use when a user explicitly asks to onboard, initialize, or refresh a data-engineering repository for VibeData, including an existing dbt/dlt or Python/notebook estate, a partly onboarded repository, or a blank project.
+description: Prepare or refresh a data-engineering repository for VibeData while preserving existing code and conventions.
+disable-model-invocation: true
 ---
 
 # Onboarding VibeData
+
+Invoke explicitly with `/vibedata-repo-skills:onboarding-vibedata` in Claude Code or `$onboarding-vibedata` in Codex.
 
 Prepare reusable repository context. Keep customer conventions and application behavior. A normal source/model task uses existing context; it does not start onboarding.
 

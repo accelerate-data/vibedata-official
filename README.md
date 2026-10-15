@@ -111,7 +111,7 @@ Standalone skills that are not tied to a plugin bundle live in [`skills/`](./ski
 | `dbt-snapshot-scd2` | vibedata-dbt-skills | Implement SCD Type 2 snapshots in dbt on Microsoft Fabric. Use when building snapshot models, choosing between timestamp and check strategies, or handling Fabric-specific datetime2 quirks. Also use when tracking slowly changing dimensions or debugging snapshot drift. |
 | `elementary-data-quality` | vibedata-dbt-skills | Configure Elementary anomaly detection for dbt on Microsoft Fabric. Use when placing data quality tests by medallion layer, setting up volume or column anomalies, or configuring timestamp_column. Also use when debugging silent test failures or choosing severity levels. |
 | `dlt-rest-api-connector` | vibedata-dlt-skills | Build dlt REST API pipelines to ADLS Gen2 and OneLake. Use when configuring RESTAPIConfig, handling pagination, or setting schema contracts for REST sources. Also use when landing REST API data into Fabric lakehouses or debugging schema evolution. |
-| `onboarding-vibedata` | vibedata-repo-skills | Use when a user explicitly asks to onboard, initialize, or refresh a data-engineering repository for VibeData, including an existing dbt/dlt or Python/notebook estate, a partly onboarded repository, or a blank project. |
+| `onboarding-vibedata` | vibedata-repo-skills | Prepare or refresh a data-engineering repository for VibeData while preserving existing code and conventions. |
 <!-- END GENERATED: skill-library -->
 
 The table above lists the Skill Library (`skills/`) and the skills bundled in this
