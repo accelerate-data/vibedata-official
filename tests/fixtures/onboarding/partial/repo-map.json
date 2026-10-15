@@ -1,0 +1,16 @@
+{
+  "modules": {},
+  "sources": {},
+  "entrypoints": [],
+  "commands": {},
+  "artifact_paths": {
+    "context": "docs/glossary.md",
+    "adr": "decisions/DEC-{id}-{slug}.md"
+  },
+  "notes_for_agents": [
+    "Human note: preserve CSV compatibility."
+  ],
+  "customer_extension": {
+    "ticket": "OPS-17"
+  }
+}

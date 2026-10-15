@@ -1,0 +1,2 @@
+# Human-style input fixtures are preserved byte-for-byte for matched behavioral trials.
+exclude = ["*"]

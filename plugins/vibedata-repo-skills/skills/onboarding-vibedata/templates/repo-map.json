@@ -1,0 +1,31 @@
+{
+  "modules": {},
+  "sources": {},
+  "entrypoints": {
+    "context_check": ".agents/checks/validate_context.py"
+  },
+  "commands": {
+    "context": "python3 .agents/checks/validate_context.py --root ."
+  },
+  "artifact_paths": {
+    "context": "CONTEXT.md",
+    "adr": "docs/adr/{nnnn}-{slug}.md",
+    "design_record_model": "docs/design/models/{layer}/{model}.md",
+    "design_record_pipeline": "docs/design/pipelines/{pipeline}.md",
+    "review": "docs/review/{date}-{type}-{slug}.md",
+    "proposal": "docs/proposal/{nnnn}-{slug}.md",
+    "onboarding_report": "docs/onboarding.md"
+  },
+  "key_references": {
+    "agents": "AGENTS.md",
+    "instructions": "AGENTS.md",
+    "rules": ".agents/rules/",
+    "schema": "repo-map.schema.json",
+    "test_map": "test-map.json"
+  },
+  "notes_for_agents": {
+    "startup": "Read the repo map, then task-specific rules and the test map.",
+    "maintenance": "Update maps when a source, module, entrypoint, artifact, test or command changes.",
+    "coverage": "No business sources or tests are registered yet."
+  }
+}

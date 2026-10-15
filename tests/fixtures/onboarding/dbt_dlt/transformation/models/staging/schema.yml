@@ -1,0 +1,10 @@
+version: 2
+sources:
+  - name: inventory
+    tables:
+      - name: items
+models:
+  - name: stg_items
+    columns:
+      - name: item_id
+        data_tests: [not_null, unique]

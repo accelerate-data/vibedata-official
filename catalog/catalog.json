@@ -62,6 +62,13 @@
         "license": "Elastic-2.0",
         "source": "in-repo",
         "install": "/plugin install vibedata-dlt-skills@vibedata-plugins-official"
+      },
+      {
+        "name": "vibedata-repo-skills",
+        "description": "Onboard repositories for VibeData with preserved instructions, mapped context, and explicit readiness.",
+        "license": "Elastic-2.0",
+        "source": "in-repo",
+        "install": "/plugin install vibedata-repo-skills@vibedata-plugins-official"
       }
     ],
     "skills": [
@@ -142,6 +149,12 @@
         "description": "Build dlt REST API pipelines to ADLS Gen2 and OneLake. Use when configuring RESTAPIConfig, handling pagination, or setting schema contracts for REST sources. Also use when landing REST API data into Fabric lakehouses or debugging schema evolution.",
         "plugin": "vibedata-dlt-skills",
         "path": "plugins/vibedata-dlt-skills/skills/dlt-rest-api-connector"
+      },
+      {
+        "name": "onboarding-vibedata",
+        "description": "Use when a user explicitly asks to onboard, initialize, or refresh a data-engineering repository for VibeData, including an existing dbt/dlt or Python/notebook estate, a partly onboarded repository, or a blank project.",
+        "plugin": "vibedata-repo-skills",
+        "path": "plugins/vibedata-repo-skills/skills/onboarding-vibedata"
       }
     ],
     "recipes": [
