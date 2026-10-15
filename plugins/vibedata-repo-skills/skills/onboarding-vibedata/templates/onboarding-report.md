@@ -1,55 +1,28 @@
 # Onboarding report
 
-## Readiness
+Context: {{ready_partial_or_blocked_with_reason}}
+Execution: {{verified_scope_or_unverified_with_reason}}
+Selected runtime: {{requested_runtime_or_active_runtime}}
 
-| Outcome | Status: ready / partial / blocked / unverified | Evidence and blockers |
+## Changes
+
+- {{changed_paths_and_reason_or_no_changes}}
+- {{preservation_result_and_evidence}}
+
+Record new conventions or setup choices here with their sources/verified versions. Link to existing maps and rules instead of duplicating their inventory. Add the preservation ledger defined in the artifact contract only when existing instructions are merged, moved or replaced.
+
+## Checks
+
+| Target and side effects | Command or loading probe | Exit status and observed result |
 | --- | --- | --- |
-| Repository context | {{status}} | {{preservation_and_structure_evidence}} |
-| Execution | {{status}} | {{target_commands_results_or_unavailable_reason}} |
-| Codex instruction loading | {{status}} | {{fresh_session_evidence}} |
-| Claude instruction loading | {{status}} | {{fresh_session_evidence}} |
-| VibeData consumer | {{status}} | {{real_consumer_evidence_or_blocker}} |
+| {{scope}} | {{actual_command_or_probe}} | {{result_or_unrun_reason}} |
 
-## Convention inventory
+Include structural checks, the selected runtime's loading evidence and authorized project checks. Record results here; an ephemeral transcript link alone is insufficient.
 
-| Convention or exception | Source location | Scope | Retained artifact |
-| --- | --- | --- | --- |
-| {{observed_fact}} | {{file_line}} | {{applies_to}} | {{mapped_destination}} |
+## Blockers
 
-## Instruction preservation ledger
+{{none_or_each_finding_with_evidence_next_action_and_context_or_execution_effect}}
 
-| Original clause or linked rule | Original source | Retained destination | Original and retained scope | Link/import target verified | Approved replacement, if any |
-| --- | --- | --- | --- | --- | --- |
-| {{exact_clause_or_rule_identity}} | {{file_line}} | {{file_section}} | {{scope}} | {{target}} | {{decision_or_none}} |
+For an actual conflict, record sources, alternatives, effect, recommendation, decision and blocked writes. For a compatibility change, retain the exact diff, input revision/hash, disposition and verification; put applied changes under Changes and pending/declined changes here.
 
-Every original instruction needs a row or an identified exact duplicate. Record original hashes and where the complete original text was secured before the first edit; omit secrets. Hashes alone cannot restore content. Replace CLAUDE only after this ledger is complete and destinations are checked.
-
-Quote original imports and Markdown links as code in the ledger so they do not become active references from the report's directory. Any active retained-destination link must resolve relative to this report.
-
-## Conflicts
-
-| Sources | Competing requirements | Effect | Recommendation | Decision | Blocked writes |
-| --- | --- | --- | --- | --- | --- |
-| {{locations}} | {{alternatives}} | {{effect}} | {{resolution}} | {{pending_or_explicit_choice}} | {{dependent_paths}} |
-
-## Compatibility changes
-
-| Exact diff and input revision/hash | Enables | Disposition | Applied diff | Verification |
-| --- | --- | --- | --- | --- |
-| {{reviewable_change}} | {{behavior}} | {{approved_declined_pending}} | {{actual_or_none}} | {{command_and_result}} |
-
-## Verification and follow-ups
-
-| Check | Target and side effects | Actual command | Observed result |
-| --- | --- | --- | --- |
-| {{check}} | {{scope}} | {{command}} | {{observed_or_unrun}} |
-
-After running each check, record its actual exit status and result here. A pointer to an ephemeral session transcript is not a durable result. If the same check has the same outcome on an unchanged rerun, preserve this report's bytes.
-
-| Finding and evidence | Proposed action | Disposition | Blocks context / execution / neither |
-| --- | --- | --- | --- |
-| {{finding}} | {{action}} | {{decision}} | {{effect}} |
-
-## Setup choices and sources
-
-Record selected platform, package manager, verified versions/URLs, applied conventions and known gaps. Record uncertain meaning as unknown. Review/proposal links exist only for actual findings/decisions. An unchanged rerun leaves this report unchanged.
+Keep existing report history, including prior ledgers and decisions. Omit unused optional detail rather than adding empty tables. Preserve this report's bytes when facts and outcomes are unchanged.

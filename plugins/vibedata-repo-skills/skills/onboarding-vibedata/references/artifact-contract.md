@@ -2,11 +2,17 @@
 
 ## Instructions and preservation
 
-`AGENTS.md` is canonical in all four ownership states. Update it in place if it is the only instruction file. Create it when neither exists. If only CLAUDE exists, or both exist, merge every unique instruction into AGENTS or an appropriately routed rule; CLAUDE ends as only `@AGENTS.md`.
+`AGENTS.md` is canonical. Update it in place if it is the only instruction file; create it when neither exists. If CLAUDE contains instructions, consolidate every unique instruction into AGENTS or an appropriately routed rule; CLAUDE ends as only `@AGENTS.md`. An existing valid wrapper needs no reconsolidation.
 
-Before writing, inventory instruction text, imports, links, scoped rule front matter, actual casing, symlink targets and same-file identities. Use filesystem identity as well as path spelling to detect aliases. Secure the complete original text in the in-memory ledger or a bounded local backup before the first instruction edit; keep it until the retained destinations are verified. For a disk backup, use a unique temporary directory and remove only that backup after verified consolidation. A hash detects a change but cannot recover content. Name the actual preservation method in the report and never describe hashes alone as a backup. The report ledger records each original clause or linked rule, its source location, retained destination and scope, or the explicit approved replacement. Exact duplicates may have one destination. Preserve the meaning and force of each instruction; a short index is not permission to drop detail.
+Before editing instructions, inventory text, imports, links, scoped front matter, casing and filesystem identities. Resolve symlink/hardlink aliases and cycles before replacing an entrypoint. Secure the complete original text in memory or a bounded, unique temporary backup until preservation is verified. Record the method and original hashes; hashes alone cannot restore text. Remove only that task-created backup after verification.
 
-Keep scoped instructions scoped. If text moves, repair relative links/imports against the destination and verify their original targets. Preserve customer-owned source rules when routing already works. Resolve cycles and same-file aliases before replacing either entrypoint. Triage conflicting instructions with the user before dependent writes. Replace CLAUDE with the placeholder only after every ledger row and destination has been checked. A normal fresh-session probe must verify the resulting entrypoint for each available runtime.
+When existing instructions are merged, moved or replaced, append this ledger to the report for every original clause or linked rule in the affected instruction files. Exact duplicates may share a destination. For unchanged instructions or additions that retain all original text in place, a preservation check and short report note suffice.
+
+| Original clause or linked rule | Source | Retained destination and scope | Link/import target verified | Approved replacement, if any |
+| --- | --- | --- | --- | --- |
+| {{clause_or_rule}} | {{file_location}} | {{file_section_and_scope}} | {{target}} | {{decision_or_none}} |
+
+Keep scope, meaning and force. Repair moved relative links/imports and verify their original targets. Quote original imports/links as code in the ledger; active destination links resolve from the report. Preserve customer-owned rules when routing already works. Pending conflicts retain affected files until the user decides. Replace CLAUDE only after every ledger row and destination has been checked.
 
 ## Maps
 
@@ -41,4 +47,12 @@ Install the standalone [context checker](../scripts/validate_context.py) at `.ag
 
 Compare current artifacts with live facts and human edits. Preserve unmapped content until it has a retained destination or approved replacement. Keep existing ordering and timestamps when facts are unchanged. Do not regenerate whole documents from a template or create default duplicates of custom artifacts.
 
-Update the repo map in the change that adds, moves, renames or removes a source, module, entrypoint, command or artifact. Update the test map with test/selector changes. Update rules when a convention changes, vocabulary when confirmed meaning changes, ADRs when a qualifying decision occurs, and the report when a readiness blocker changes. Verify each affected link/check in that same change. When refreshing after a human edit, reconcile its preservation-ledger row in the same run. Do not defer that documentation to a later unchanged run. An unchanged rerun produces no file diff.
+Update the repo map in the change that adds, moves, renames or removes a source, module, entrypoint, command or artifact. Update the test map with test/selector changes. Update rules when a convention changes, vocabulary when confirmed meaning changes, ADRs when a qualifying decision occurs, and the report when a readiness blocker changes. Verify affected links/checks in that change. If an edited instruction has an existing ledger row, reconcile that row in the same refresh. Retain report history; an unchanged rerun produces no file diff.
+
+## Verification
+
+Use the customer's requested runtime, otherwise the active runtime. Run the mapped context checker from the repository root. Verify normal instruction loading in a fresh session of that runtime without naming or pasting the canonical file in the probe; reuse recorded loading evidence when its instruction inputs are unchanged. If the probe cannot run, mark loading unverified. Rehearse a later task through the maps and applicable rules.
+
+Run understood project checks only against an established, authorized target. Report context readiness and execution verification separately, naming the verified scope and unavailable checks. Structural validation does not prove runtime loading, consumer behavior or warehouse execution.
+
+The full Claude/Codex/VibeData matrix is plugin release verification, not a customer onboarding prerequisite. Run a real supported VibeData consumer trial only when it is a requested target; if unavailable, mark that target unverified. Unselected runtimes need no report rows and do not block context readiness.

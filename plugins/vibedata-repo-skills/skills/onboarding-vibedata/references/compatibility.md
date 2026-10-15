@@ -17,8 +17,6 @@ Removal condition: the consuming skill and its executable checks resolve the map
 
 ## Runtime discovery
 
-Load the packaged skill normally. Resolve helpers from its installed directory, pass `--root` explicitly, and keep customer writes under that root. Preserve instruction filename casing; report unsupported discovery before renaming. Consolidate only after checking symlink/hardlink aliases, import cycles and relocated references. Prove wrapper loading with a fresh normal session whose prompt does not name or paste the canonical file.
+Keep customer writes under the explicit repository root. Preserve instruction filename casing; report unsupported discovery before renaming. Treat denied context paths, such as Codex workspace-write protection of `.agents/`, as partial context. Record the denied path and required permission without relaxing the sandbox. A proposed alternate location follows the same compatibility-decision procedure above.
 
-If the runtime denies a required context path (for example, Codex workspace-write protects `.agents/`), leave that artifact blocked and report context readiness as partial. Do not relax the sandbox or silently move the checker into application directories. Record the denied path and required permission; alternate artifact locations need an explicit compatibility decision. Independent allowed context work can proceed.
-
-Standalone Codex/Claude success is separate from a VibeData build-session trial. Use a disposable supported consumer environment; an unavailable environment is a blocker, not a simulated pass. Stop the affected lane on authentication failure and report the exact login/refresh action. Continue independent authorized checks.
+Use the [verification contract](artifact-contract.md#verification) for the selected runtime and requested consumer targets.

@@ -288,3 +288,33 @@ Verified against [official Codex skill documentation](https://developers.openai.
 The regression `test_skill_requires_explicit_user_invocation_in_both_runtimes` first failed for both missing runtime controls, then passed with the configuration changes. Final focused result: 29/29. Ruff lint/format, catalog freshness, marketplace/version checks, Claude plugin manifest validation and whitespace checks pass. Generated catalog descriptions were regenerated with `scripts/build_catalog.py`.
 
 This follow-up verifies the documented runtime configuration, not a new live invocation trial. The full suite and behavioral matrix were not repeated for this metadata change. The first PR CI run independently reproduced only the two inherited wiki-test failures; its marketplace and version checks passed. Earlier behavioral and integration limits remain in effect. Simplifying the workflow is a recommendation for a separate change, not an untested rewrite in this follow-up.
+
+## Reporting and verification simplification
+
+The user approved the recommended simplification after the invocation follow-up. R18–R19 now define compact reporting and selected-runtime verification. The five-step workflow remains; the duplicate reference table and common-failure list are removed. The main skill falls from 627 to 331 words, and the report template from 468 to 177 words.
+
+Routine reports have Changes, Checks and Blockers, with separate context/execution status. Consolidation still requires complete instruction preservation, original text recovery, scope/link checks and a ledger. Conflicts and compatibility changes retain their evidence and dispositions only when present. Existing report history survives refreshes. Customer checks target the requested runtime, otherwise the active runtime; the full Claude/Codex/VibeData matrix remains a plugin release check. The portable helpers, map schema, user-only invocation controls and application-write boundaries are unchanged.
+
+### Matched report probes
+
+The existing guidance was captured before edits and tested in five fresh Claude sessions. Each routine report included seven top-level sections, including empty/unneeded ledger, conflict and compatibility sections. This reproduced the excess reporting before the rewrite.
+
+Twenty-five bounded report-writing calls used `claude-sonnet-5-5`, medium effort, no tools, no MCP servers and no persistent session. Inputs supplied verified fixture facts plus either no guidance, the full prior guidance, or the full revised skill/references/template. These are wording/output-shape tests; supplied facts are not new execution or runtime-loading evidence.
+
+| Guidance and case | Trials | Median words | Observed result |
+| --- | --- | --- | --- |
+| Prior guidance, routine refresh | 5 | 731 | Seven mandatory sections in every report. |
+| No guidance, routine refresh | 5 | 251 | Six or seven varying sections; no stable report contract. |
+| Revised guidance, routine refresh | 5 | 241 | Changes, Checks and Blockers; no unnecessary ledger or unselected-runtime blocker. |
+| Revised guidance, instruction consolidation | 5 | 374 | All original clauses/imported rules retained in the ledger, with scope, target and recovery method. |
+| Revised guidance, pending conflict/denied write | 5 | 557 | Conflicting sources, unchanged files, exact pending diff/input hash, denied path and readiness effects retained. |
+
+All outputs were inspected. The reduction measures report words for the matched routine case; it is not a total-token or cost claim. Raw prompts, outputs and scores: `.superpowers/sdd/onboarding-vibedata-plan/simplification/`.
+
+### Packaged workflow and rerun
+
+A fresh A02 Python/notebook fixture explicitly invoked `/vibedata-repo-skills:onboarding-vibedata` through the plugin in Claude Code. The real run produced the mapped artifacts and three-section report, passed the structural checker, preserved every original application file and created no execution marker. It recorded loading and project execution as unverified instead of claiming those checks ran. Evidence: `A02-skill-101.json` and its snapshot.
+
+A separate normal-session follow-on loaded the generated instructions and reported the Python routing/preservation rules without its prompt naming or pasting canonical instructions. It correctly stated project execution was unverified and changed no files. A separate explicit refresh of the same snapshot changed zero bytes, including the report. Evidence: `simplification/followup-loading.json` and `simplification/followup-rerun.json`. The loading result is held here; it was not injected into the independent rerun's report.
+
+Final local checks: 29 focused tests pass; Ruff lint/format, catalog freshness, marketplace/version checks, Claude manifest validation, report-shape/invocation assertions and whitespace checks pass. The release case definitions now specify explicit treatment invocation and conditional reporting assertions. No full cross-runtime matrix or VibeData consumer trial was repeated. The latest prior CI run has 139/141 passing tests and the same two inherited wiki failures; those unrelated files remain untouched.

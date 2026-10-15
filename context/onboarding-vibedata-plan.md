@@ -6,7 +6,7 @@
 **Architecture:** Package the shared skill, conditional references, templates, and two small portable helpers in `plugins/vibedata-repo-skills/`. Generated instructions route later sessions through repository maps and applicable rules; custom-path compatibility is handled by an explicit tested workaround, with no upstream VibeData edits in this change.
 **Tech stack:** Markdown, JSON, Python standard library for customer-facing helpers, existing repository `unittest`/Ruff/coverage/jsonschema tooling, and real Codex/Claude behavioral sessions. The generated greenfield target is dbt/dlt.
 **Spec:** [onboarding-vibedata design](onboarding-vibedata-design.md). Read both documents before executing.
-**Status:** Local implementation and verification are complete with the recorded limitations. See [validation evidence](onboarding-vibedata-validation.md): Codex sandbox restrictions leave full onboarding partial, the real VibeData consumer lane is unverified by user direction, and two inherited wiki tests fail; one Codex A16 trial timed out. No commit or publication occurred.
+**Status:** The original execution is recorded below; the user subsequently authorized draft PR #48, explicit-only invocation, and simpler reporting/verification. The current contract is in design requirements R17–R19. See [validation evidence](onboarding-vibedata-validation.md) for those follow-ups and retained limits: Codex sandbox restrictions leave full onboarding partial, the real VibeData consumer lane is unverified by user direction, and two inherited wiki tests fail; one Codex A16 trial timed out.
 
 ## Contents
 

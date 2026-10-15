@@ -54,6 +54,8 @@ Customer-repository onboarding does not automatically commit, push, create a PR,
 | R15 | Both plugin manifests and marketplace catalogs expose the skill, and the generated catalog is updated through the existing generator. |
 | R16 | Baseline scenarios precede authoring; `writing-for-agents` guides creation and `writing-skills` supplies the subsequent behavioral verification pass. |
 | R17 | Only explicit user invocation starts the skill; Claude and Codex cannot select it implicitly. |
+| R18 | Routine reports contain changes, checks and blockers with separate context/execution status. Instruction consolidation adds a complete preservation ledger; other details appear only for actual findings or decisions. Existing report history survives refreshes. |
+| R19 | Customer onboarding verifies the requested runtime, or the active runtime by default. The full Claude/Codex/VibeData matrix is plugin release verification; unselected runtimes do not block customer readiness. |
 
 ## Artifact contract
 
@@ -71,7 +73,7 @@ It contains facts and routing information; rules own conventions, the glossary o
 | ADRs, via `artifact_paths.adr` | Preserve location, numbering, decisions, and history. | Record actual qualifying setup decisions; otherwise create an index stating that no ADRs are recorded. No empty numbered ADR. |
 | Design records | Decisions not recoverable from code, with evidence and rationale; no mandatory record for every trivial artifact. | Templates, and records only for substantive components actually introduced. |
 | Repo-specific skills | Only confirmed procedures not already covered by available general skills. | Only procedures that setup actually establishes; no speculative skill library. |
-| Onboarding report | Convention inventory, preservation ledger, conflict decisions, change approvals, baseline results, follow-ups, and verification evidence. | Setup choices, the same approvals/evidence, and outstanding configuration. |
+| Onboarding report | Changes, checks and blockers; a preservation ledger for instruction consolidation, and decision details for actual conflicts or compatibility changes. | The same compact report, with actual setup choices and outstanding configuration. |
 | Review and proposal documents | Evidence-backed findings at the mapped review location; a proposal only when a substantial finding needs a separate decision. | The same formats are available; no empty finding or proposal is invented to fill a directory. |
 | Context checker | Reuse an existing suitable check or install the small portable checker described below. | Install the portable checker and register its command. |
 | Project scaffold | Preserve existing application layout and package manager. | Minimal configuration, folders, safe commands, test configuration, and starter templates for dbt/dlt. |
@@ -136,11 +138,11 @@ Human-facing setup notes may explain the generated scaffold; existing human docu
 | Neither | Create `AGENTS.md`. |
 
 Preserve actual filename casing in references.
-Verify that each runtime discovers the resulting entrypoint; surface an unsupported casing/discovery case rather than silently renaming customer files.
+Verify that the selected runtime discovers the resulting entrypoint; surface an unsupported casing/discovery case rather than silently renaming customer files. The release suite verifies both runtimes.
 Existing import chains and scoped rules are part of the inventory.
 Resolve symlink aliases and cycles before writing so a file cannot be overwritten through its own alias.
 
-The preservation ledger assigns each original instruction or linked rule a source location and retained destination, or an explicit user-approved replacement.
+When existing instructions are merged, moved or replaced, the preservation ledger assigns each original instruction or linked rule in the affected files a source location and retained destination, or an explicit user-approved replacement. Unchanged instructions and in-place additions need a preservation check and a short report note; an already valid CLAUDE wrapper needs no reconsolidation. Existing report history and applicable ledger rows survive refreshes.
 Exact duplicates may be stored once.
 Move a convention into a rule only when startup routing preserves when it is read; moving a scoped instruction must retain its scope.
 Repair relative references when their owning text moves.
@@ -155,10 +157,10 @@ Elapsed time is not approval, and the skill never silently chooses its own defau
 ## Workflow and approval boundaries
 
 1. **Inspect.** Establish scope and mode; collect mechanical facts and read relevant conventions without running application code.
-2. **Reconcile.** Present the evidence-backed convention inventory, artifact destinations, instruction preservation ledger, and conflicts; ask only for unresolved facts or decisions that change the result.
+2. **Reconcile.** Resolve conventions and artifact destinations, using a preservation ledger for instruction consolidation and decision records for actual conflicts; ask only for unresolved facts or decisions that change the result.
 3. **Propose changes.** Separate artifact work from compatibility changes; show exact affected files/diffs and the behavior each compatibility change enables.
 4. **Apply.** Write independent artifact work, resolve approved conflicts, and apply only approved compatibility changes. Preserve pending/declined items as follow-ups.
-5. **Verify and report.** Validate structure and preservation, run understood checks against the approved target, rehearse a later task, and report context and execution readiness separately.
+5. **Verify and report.** Validate structure and preservation, verify the selected runtime, run understood checks against the approved target, and rehearse a later task. Report changes, checks and blockers with separate context and execution status. Reuse recorded loading evidence only when its instruction inputs are unchanged.
 
 Compatibility approval attaches to the presented change and input revision; a materially different diff needs a new decision.
 Each follow-up states evidence, proposed action, disposition, and whether it prevents context readiness, execution verification, or neither.
@@ -211,6 +213,8 @@ This is packaging work, not a marketplace-format migration.
 
 ## Verification and acceptance cases
 
+This is the plugin release suite. It exercises both Claude and Codex, plus a supported VibeData consumer when available. Customer onboarding runs checks for its selected runtime and explicitly requested consumer target; it does not launch this entire matrix. Unavailable requested checks remain unverified. Report-writing probes can test output shape and preservation detail, but do not establish runtime loading or full onboarding behavior.
+
 All fixture repositories are tiny, offline, and disposable; no warehouse or customer dataset is copied.
 Use bounded temporary-directory cleanup, and keep retained evidence small and redacted.
 Each case specifies its requirement IDs, fixture state, prompt, expected artifact effects, allowed writes, and checks.
@@ -221,16 +225,16 @@ Each case specifies its requirement IDs, fixture state, prompt, expected artifac
 | A02 Existing Python and notebooks | R02, R11 | Inventory imports/configuration/execution assumptions without running notebooks or converting their logic. |
 | A03 Greenfield dbt/dlt | R03, R09, R12 | Scaffold and rules agree; no invented sources, domain terms, ADR rationale, or business-test coverage. |
 | A04 Only AGENTS / neither file | R05 | Retain the existing canonical content or create one canonical entrypoint, with correct routing. |
-| A05 Only CLAUDE | R01, R05, R06 | Consolidate all unique instructions into AGENTS, preserving scope and links; triage conflicts before dependent changes; replace CLAUDE with only `@AGENTS.md` and prove fresh sessions load the canonical instructions. |
-| A06 Both instruction files | R05, R06 | Every unique instruction survives; scope and links survive; conflicts are triaged; CLAUDE becomes the exact placeholder. |
+| A05 Only CLAUDE | R01, R05, R06, R18 | Consolidate all unique instructions into AGENTS with a complete preservation ledger, preserving scope and links; triage conflicts before dependent changes; replace CLAUDE with only `@AGENTS.md` and prove fresh sessions load the canonical instructions. |
+| A06 Both instruction files | R05, R06, R18 | Every unique instruction survives with a consolidation ledger; scope and links survive; conflicts are triaged; CLAUDE becomes the exact placeholder. |
 | A07 Custom glossary and ADR paths | R04, R08 | New and updated artifacts and filename checks use the map, including a fresh VibeData consumer session. |
-| A08 Existing-rule conflict | R06 | Present competing sources and defer dependent writes until a decision; permissible custom naming passes. |
+| A08 Existing-rule conflict | R06, R18 | Present competing sources and defer dependent writes until a decision; preserve their decision details in the report; permissible custom naming passes. |
 | A09 Compatibility approved / declined / pending | R07, R13 | Apply only the approved diff; document other changes and their readiness effects. |
 | A10 Empty vocabulary and decisions | R09 | Minimal glossary and ADR index; no empty numbered ADR or fabricated historical reason. |
-| A11 Rerun and partial onboarding | R10 | No substantive diff for unchanged input; preserve human edits and reconcile missing artifacts. |
+| A11 Rerun and partial onboarding | R10, R18, R19 | Preserve human edits and report history; reconcile actual gaps; use a compact routine report without unnecessary ledgers or unselected-runtime blockers; unchanged input produces no substantive diff. |
 | A12 Workaround applicability | R08 | Include only relevant platform/runtime rules, with a removal condition and task routing. |
 | A13 Path and reference safety | R04, R05, R12 | Detect import cycles, path escapes, symlink aliases, case ambiguity, broken links, and registered-but-missing artifacts. |
-| A14 Cross-runtime package discovery | R01, R15 | Both runtimes load the shared installed skill and supporting files; catalogs and versions validate. |
+| A14 Cross-runtime package discovery | R01, R15, R17, R19 | Both runtimes load the shared installed skill through explicit user invocation; catalogs and versions validate. The matrix is a release check, not a customer onboarding step. |
 | A15 Fresh-session efficiency | R14 | Locate correct files/rules/checks with fewer discovery calls or context read, while preserving task correctness. |
 | A16 Scope and side effects | R02, R07, R11 | No secret contents, production execution, silent conversion, unrelated repair, or implicit publication. |
 

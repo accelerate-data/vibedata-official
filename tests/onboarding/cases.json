@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "instructions": "Copy fixtures to a disposable git repository. Overlays apply in order. Prompts are identical between control and installed-skill arms. Scenario assertions stay outside the customer fixture. Runtime loading is never manufactured by prompt injection. Auth failure stops that runtime lane.",
+  "instructions": "Plugin release suite, not a customer onboarding prerequisite: run the runtime matrix here. Copy fixtures to a disposable git repository; overlays apply in order. Task text is identical between control and installed-skill arms; treatment additionally invokes /vibedata-repo-skills:onboarding-vibedata in Claude Code or $onboarding-vibedata in Codex. Keep assertions outside the fixture and never inject canonical instructions into loading probes. Customer checks use the requested runtime, otherwise the active runtime. Auth failure stops that runtime lane.",
   "retention": {
     "temporary_repositories": "TemporaryDirectory cleanup after bounded capture",
     "max_bytes_per_run": 1048576,
@@ -157,7 +157,8 @@
       "requirements": [
         "R01",
         "R05",
-        "R06"
+        "R06",
+        "R18"
       ],
       "fixture": "dbt_dlt",
       "overlays": [
@@ -176,7 +177,7 @@
         "CONTEXT.md"
       ],
       "assertions": [
-        "All original clauses, imported reports policy and scoped SQL policy retained.",
+        "All original clauses, imported reports policy and scoped SQL policy retained, with a complete preservation ledger for the consolidation.",
         "Canonical AGENTS.md exists; CLAUDE.md is exactly @AGENTS.md plus optional final newline.",
         "Fresh follow-on session reports owner: indigo without a prompt naming the hidden instruction."
       ],
@@ -186,7 +187,8 @@
       "id": "A06",
       "requirements": [
         "R05",
-        "R06"
+        "R06",
+        "R18"
       ],
       "fixture": "python",
       "overlays": [
@@ -205,7 +207,7 @@
         "CONTEXT.md"
       ],
       "assertions": [
-        "Every unique original instruction retained, exact duplicate may occur once.",
+        "Every unique original instruction retained with a consolidation ledger; an exact duplicate may occur once.",
         "Relative links and import scope survive.",
         "Fresh follow-on session reports owner: amber and reviewer: indigo.",
         "CLAUDE.md is the reference-only placeholder."
@@ -243,7 +245,8 @@
     {
       "id": "A08",
       "requirements": [
-        "R06"
+        "R06",
+        "R18"
       ],
       "fixture": "dbt_dlt",
       "overlays": [
@@ -337,7 +340,9 @@
     {
       "id": "A11",
       "requirements": [
-        "R10"
+        "R10",
+        "R18",
+        "R19"
       ],
       "fixture": "python",
       "overlays": [
@@ -358,6 +363,8 @@
       "assertions": [
         "Human glossary text, human-note: cerulean and customer_extension survive.",
         "Missing artifacts reconciled from live facts.",
+        "Routine reports use Changes, Checks and Blockers with separate context/execution status; a new ledger is needed only when instructions are merged, moved or replaced.",
+        "Existing report history and applicable ledger rows survive; unselected runtimes add no readiness blockers.",
         "Unchanged rerun produces identical bytes, including timestamps and key order."
       ]
     },
@@ -449,7 +456,9 @@
       "id": "A14",
       "requirements": [
         "R01",
-        "R15"
+        "R15",
+        "R17",
+        "R19"
       ],
       "fixture": "blank",
       "overlays": [],
@@ -466,7 +475,7 @@
         "CONTEXT.md"
       ],
       "assertions": [
-        "Fresh runtime discovers packaged onboarding-vibedata and relative references.",
+        "Fresh runtime discovers packaged onboarding-vibedata and relative references through explicit user invocation; implicit invocation is disabled in both runtimes.",
         "One shared skill source; no injected body or test answer key.",
         "Both manifests, marketplace entries and generated catalog agree."
       ]
