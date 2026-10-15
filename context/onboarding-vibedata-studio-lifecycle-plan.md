@@ -1,12 +1,12 @@
 # Studio onboarding lifecycle implementation plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` for native execution, then an independent whole-change review. Implement only after the user reviews this plan. Steps use checkbox syntax.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` for native execution, then an independent whole-change review. The user's 2026-10-15 instruction to execute the handoff unattended authorizes this plan within its stated scope. Task 1's consumer capability gate still applies. Steps use checkbox syntax.
 
 **Goal:** Explicit Studio onboarding proceeds from repository discovery through supported setup, sandbox verification, certification and one remotely verified PR, with failures reported at their actual stage.
 **Architecture:** Keep the shared user-invoked skill and its short core workflow. Add one conditional `references/studio-lifecycle.md` that composes supported consumer capabilities; reuse `studio-duckdb.md` for platform checks and the existing artifact/report contracts. Do not create another workflow engine or copy the upstream skills.
 **Tech stack:** Existing Markdown/JSON skill package, Python structural checks, repository unittest/Ruff tooling, native Claude/Codex trials and the deployed Studio consumer.
 **Spec:** User-requested lifecycle extension and requirements below, extending [the current design](onboarding-vibedata-design.md). The existing preparation-only publication boundary changes only for an explicitly requested Studio lifecycle.
-**Status:** Proposed; no implementation authorized by this document. **We have not added VD onboarding: the full VibeData Studio lifecycle is not implemented.** The existing skill prepares and refreshes repository context. The user requested PR #48 be marked ready for Hemanta Banerjee's review of the implemented scope and this proposed extension. Implementation baseline: `f9908cc`; reference: `sample-nyctaxi-comp@349d026`. Continue from the [agent handoff](../docs/handoffs/onboarding-vibedata-studio-lifecycle.md).
+**Status:** Execution authorized; blocked at Task 1's supported-consumer gate. **We have not added VD onboarding: the full VibeData Studio lifecycle is not implemented.** The existing skill prepares and refreshes repository context. PR #48 was merged by `admiraldata` on 2026-10-15 at 20:39 +04; GitHub records no submitted review. The [Task 1 dependency report](onboarding-vibedata-validation.md#studio-lifecycle-task-1-consumer-dependency-report) pins current upstream source, its side effects and the separately scoped work needed to continue. Implementation baseline: `f9908cc`; execution baseline: `36ab98d`; reference: `sample-nyctaxi-comp@349d026`. Continue from the [agent handoff](../docs/handoffs/onboarding-vibedata-studio-lifecycle.md).
 
 ## Contents
 
@@ -32,7 +32,7 @@
 
 ## Constraints and integration findings
 
-- Keep implementation in the named worktree and branch. Preserve unrelated work and submodule pins. The user's latest instruction makes PR #48 ready for review; this status does not establish lifecycle completion or approval of this plan. L07's draft rule applies to PRs produced by the future customer workflow.
+- Keep implementation in the named worktree and branch. Preserve unrelated work and submodule pins. PR #48 is merged and cannot serve as the active implementation PR. A later implementation needs a new PR; its merge does not establish lifecycle completion. L07's draft rule applies to PRs produced by the future customer workflow.
 - Preserve one skill, explicit-only invocation, bounded discovery, native map/checker contracts and the three-section report. Put Studio orchestration behind one conditional link; target a main skill under 400 words.
 - Source/SDK/runtime facts must be checked against the selected deployed version before commands or scaffolds are authored. Authentication failures stop the affected operation.
 - No provisioning, Domain creation, seeding, production writes, destructive Git operations or automatic merge. Use small synthetic fixtures and bounded temporary storage; never copy the reference warehouse.
@@ -77,9 +77,11 @@ Let `S` denote `plugins/vibedata-repo-skills/skills/onboarding-vibedata` in this
 **Deliverable:** A versioned capability/side-effect table in the validation record, with a runnable native path or an explicit upstream dependency. This task gates downstream lifecycle wiring.
 
 - [ ] Identify the deployed consumer version and supported onboarding entrypoints; compare with the inspected local snapshot.
-- [ ] Verify kind registration, the actual review capability, runtime wrapper, CI bundle contract, artifact paths and certification/shipping checks. Source anchors include consumer `lib/kinds/registry.json`, `skills/{install-ci,verifying,shipping}/SKILL.md` and `_shared/references/conventions/artifact-paths.md`.
-- [ ] Record which operations write files, alter hooks, commit, push, publish a PR or require native approval; map them to the requested Studio scope before invoking anything.
-- [ ] If onboarding support is absent, define the minimal companion consumer change and its acceptance tests before proceeding. Use an onboarding playbook/registered capability where required; do not disguise onboarding as transformation. Resolve the missing review stage through a supported implementation.
+- [x] Verify kind registration, the actual review capability, runtime wrapper, CI bundle contract, artifact paths and certification/shipping checks in pinned upstream source. Source anchors include consumer `lib/kinds/registry.json`, `skills/{install-ci,verifying,shipping}/SKILL.md` and `_shared/references/conventions/artifact-paths.md`. Deployed bundle contents and execution remain unverified.
+- [x] Record which operations write files, alter hooks, commit, push, publish a PR or require native approval; map them to the requested Studio scope before invoking anything.
+- [x] If onboarding support is absent, define the minimal companion consumer change and its acceptance tests before proceeding. Use an onboarding playbook/registered capability where required; do not disguise onboarding as transformation. Resolve the missing review stage through a supported implementation before wiring it here.
+
+**2026-10-15 result:** Dependency report complete; Task 1's gate remains blocked. Upstream `df262dc` still carries plugin `0.127.2`, no onboarding kind and no supported onboarding review entrypoint. No deployed runtime or disposable Domain is identified. Tasks 2–4 cannot consume a supported phase contract; Task 5's live acceptance cannot run. See the validation record for companion scope and concrete acceptance checks. No upstream implementation or provisioning is authorized.
 
 **Gate:** Every delegated operation exists and accepts the intended artifacts. Any upstream change needs its own approved scope and supported release; a missing capability blocks the full path while independent context work remains possible.
 
