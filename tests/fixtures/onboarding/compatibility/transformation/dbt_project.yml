@@ -1,0 +1,6 @@
+name: inventory
+version: "1.0"
+config-version: 2
+profile: old_profile
+model-paths: [models]
+test-paths: [tests]

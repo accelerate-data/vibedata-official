@@ -104,6 +104,18 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Data Engineering"
+    },
+    {
+      "name": "vibedata-repo-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/vibedata-repo-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Data Engineering"
     }
   ]
 }

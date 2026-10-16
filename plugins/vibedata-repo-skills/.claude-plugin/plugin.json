@@ -1,0 +1,9 @@
+{
+  "name": "vibedata-repo-skills",
+  "version": "1.0.0",
+  "description": "Onboard existing or blank data-engineering repositories for VibeData with preserved instructions, mapped context, and verified readiness.",
+  "author": {
+    "name": "Accelerate Data"
+  },
+  "license": "Elastic-2.0"
+}
