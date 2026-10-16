@@ -1,140 +1,88 @@
 # Getting started as a Domain contributor
 
-This page describes the data-engineering behavior baked into the exact `vd-data-engineering` submodule pinned by this Studio SHA.
+Open an Intent in a ready Domain. Select the agent for the work you need.
 
-## The three main agents
-
-Current plugin behavior has three sibling identities:
+## Choose the agent
 
 | Agent | Use it for |
 | --- | --- |
-| `build` | New or changed data products: ingestion, transformation, orchestration, semantic models |
-| `fix` | A defect or question anchored on an already-shipped product |
-| `detect` | Domain-wide runtime-health investigation and triaged findings |
+| `build` | New or changed data products, bounded operations, and a `fix` for an already-shipped product |
+| `detect` | Read-only runtime-health investigation, triaged findings, and bounded reconciliation between sources it can already read |
 
-They are siblings. `build` does not dispatch `fix` or `detect` as subagents when the request belongs to one of them; it tells you to switch to the right identity.
+`fix` is a task kind owned by the Build agent. For a defect in a shipped product, its flow retains **Explain**, **Investigate**, and **Remediate**, with a stop before writes. Use the Detect agent for investigation across the Domain; it does not change code or data. The Build agent does not monitor the Domain.
 
-## The first decision is size
-
-`build` classifies the request by the finished outcome.
+## Let the Build agent classify the request
 
 ### Question
 
-If nothing changes, it answers the question using the relevant skill or tool. No product-change workflow is created just because the topic is technical.
+If nothing changes, the agent answers using the relevant skill or tool. A technical question does not require a product-change workflow.
 
 ### Bounded operation
 
-If the request changes something inside an already-decided shape, the owning skill runs directly.
-
-Examples:
-
-- add or update a source connection;
-- test a connection;
-- make one bounded model/configuration change.
-
-A bounded operation does not enter the full intent/design/plan loop.
+For a change inside an already-decided shape, the owning skill runs directly. Examples include adding a source connection, testing a connection, or making a bounded configuration change.
 
 ### Product change
 
-If the request changes what a data product commits to deliver, the staged workflow begins.
+If the request changes what a data product commits to deliver, the staged workflow begins. The product kinds are ingestion, transformation, orchestration, and semantic-model. One Intent can contain more than one kind.
 
-Current product kinds are:
+## Follow the product-change workflow
 
-- ingestion;
-- transformation;
-- orchestration;
-- semantic-model.
+1. **capturing-requirements** records the Requirement and resolves the ordered `kinds:` list.
+2. **designing** records the design for the approved requirement.
+3. **planning** records the implementation plan.
+4. **executing-the-plan** carries out the approved plan.
+5. **verifying** records evidence and certification.
+6. **shipping** checks the ship gates and asks for final approval before producing the registered ship product.
 
-A compound request can contain more than one kind in one Intent.
+A later stage does not start only because the previous stage finished. The agent proposes the next stage and follows its approval rules.
 
-## Current product-change chain
+## Find the durable artifacts
 
-The current plugin no longer uses the older simplified five-label description from this onboarding set. Its durable chain is built from explicit skills:
+Unless repository instructions or existing artifact locations specify otherwise, the default files are:
 
-1. **capturing-intent** — records the Requirement in `intent.md` and resolves the ordered `kinds:` list;
-2. **designing** — creates the design records for the approved requirement;
-3. **planning** — creates `plan.md`;
-4. **executing-the-plan** — carries out the approved plan;
-5. **verifying** — records evidence and certification in `verify.md`;
-6. **shipping** — enforces ship gates, makes the branch PR-ready, asks for the final ship approval, and produces the registered ship product.
+- `intents/<slug>/requirement.md` — requirement, kinds, scope, and success criteria;
+- design records for the Intent;
+- `intents/<slug>/plan.md` — implementation plan;
+- `intents/<slug>/verify.md` — verification evidence, certification, and ship approvals.
 
-The plugin uses proposal chaining between stages. A later stage does not silently begin merely because an earlier one finished.
+Transformation work can also produce a data-slice artifact during requirement capture. The repository and these files are the durable record; the agent reads them when it resumes.
 
-## Durable artifacts
+## Approve shipping only after verification
 
-For product work, expect the working branch to contain durable records such as:
+For product work, the ship product is an Intent PR. A `fix` produces its Intent PR on a case branch. Detect work remains read-only and can produce triaged issues.
 
-- `intent.md` — requirement, kinds, scope, success criteria, approvals;
-- design records — architecture and product-specific decisions;
-- `plan.md` — implementation plan;
-- `verify.md` — verification evidence, gate results, certification, and ship approvals.
+Shipping requires certified verification, a clean diff, and explicit final ship approval. Breaking schema changes require their own approval. Runtime outputs, generated artifacts, and secrets must stay out of the PR. The clean-diff protection also checks pushes and PR creation.
 
-Transformation work can also create a data-slice artifact during intent capture.
+## Add a source connection
 
-The repository and these files are the durable record. The agent is expected to re-read disk when resuming rather than trusting conversational memory.
+Ask the Build agent in conversation. The source flow:
 
-## Shipping now includes the pull request
+1. checks the Domain platform and saved secret-store type;
+2. discovers and prepares an available connector;
+3. introspects its authentication methods and required fields;
+4. asks for non-secret configuration;
+5. gives you the exact secret names for the selected store;
+6. verifies the connection through the runtime path;
+7. records the non-secret configuration only after verification succeeds.
 
-For the four `build` product kinds, the current registry declares the ship product as **an intent PR**. For `fix`, it is an intent PR on a case branch. `detect` is read-only and ships raised triaged issues instead.
+Enter credential values outside the agent:
 
-This reverses an old onboarding statement that the agent deliberately stopped before opening a pull request.
+- for **Internal**, use the saved Domain's **Secrets** tab;
+- for **Azure Key Vault**, use the vault's secret-management surface;
+- for **Local File**, ask the operator to update the Domain's secrets file outside Git.
 
-Shipping has hard gates:
+Use a store supported by the deployed source workflow. A store being offered in Domain creation does not by itself prove every connector-delivery path works with it. A missing required secret can cause the first verification to fail; add it through the correct store, then ask the agent to retry. Never paste the value in chat.
 
-- verification must be certified first;
-- the branch must pass the clean-diff gate;
-- generated/runtime artifacts and secrets must not enter the PR;
-- breaking schema changes require explicit approval;
-- the final ship action requires explicit user approval.
+## Keep development work isolated
 
-The clean-diff protection also runs outside the conversational workflow on `git push` and PR creation, so the agent cannot simply claim the branch is clean.
+Work happens on an Intent branch and in the runtime-declared ephemeral data destination. The agent must use the Domain's declared platform and must not write to the persistent production resource during development.
 
-## Source connections are a bounded operation
+Do not commit dbt `target/`, package directories, logs, `.env`, or secret files. Do not ask the agent to dump environment variables or read credential files.
 
-Adding or updating a source does not require the whole product-change chain by itself.
+Use `CONTEXT.md` and `docs/adr/` for durable Domain knowledge. Keep lasting terminology and architecture decisions there when relevant.
 
-You ask the agent in conversation. The source flow then:
-
-1. checks the Domain platform and available connector catalogue;
-2. selects and prepares the connector;
-3. introspects the connector for supported authentication methods and required fields;
-4. asks for non-secret configuration only;
-5. tells you the exact secret key names to create out of band;
-6. verifies the connection through the real runtime path;
-7. persists the source configuration only after verification is green.
-
-The agent never needs the secret value.
-
-For the current Domain-create path in this onboarding snapshot, those secret values go in the Domain's local secrets file under Studio's data directory.
-
-## Git and working branches
-
-Work happens on an Intent branch. Shipping pushes the branch and, for `build`/`fix`, opens the registered Intent PR after the required stop is approved.
-
-Do not manually commit runtime outputs such as dbt `target/`, package directories, logs, `.env`, or secret TOML files. The shipping clean-diff gate blocks these classes of files.
-
-## Platform guardrails
-
-The current `build` agent reads the Domain's declared platform before choosing platform-specific tools or dialects.
-
-It must not:
-
-- substitute one data platform for another;
-- write to the persistent production Domain while doing development work;
-- dump environment variables;
-- read `.env` or credential files;
-- create or repair its own virtual environment as a workaround.
-
-Development writes go to the runtime-declared ephemeral destination.
-
-## Domain knowledge
-
-The current plugin reads `CONTEXT.md` and `docs/adr/` as durable Domain knowledge and expects lasting language or architectural decisions to be recorded there when relevant.
-
-## Next step
-
-[[Worked Example Salesforce]] applies this model to one source-connection example. Treat the connector's own introspection result as authoritative if it differs from a static example.
+Continue to [[Worked Example Salesforce]].
 
 ---
 
-_Applies to: studio/main (unreleased snapshot). Verified against `studio@5c9d2bbf339a` on 2026-08-22._
+_Release scope and source-review limits: [Home](README.md#release-and-verification-scope)._

@@ -1,150 +1,74 @@
 # Verify the first Domain
 
-Do not treat Domain creation as the final check. Verify both Domain readiness and the separate CI/CD prerequisites you intend to use.
+Verify the saved Domain, an Intent run, and the separate CI prerequisites you intend to use. Saving a Domain does not prove that all external operations will succeed.
 
-## 1. Check the Domain state
+## Check the saved resources
 
-Open **Settings → Domains → <your Domain>**.
+1. Open **Domains**.
+2. Select your Domain.
+3. Open **Resources**.
+4. Read the repository, data-platform, and secret-store checks.
+5. Repair any reported configuration or access failure.
+6. Select **Reconcile** to run the applicable checks again.
 
-For a fully usable Domain, the required human and service lanes must be ready for the operations you intend to run.
+Reopening the page is not a replacement for an explicit readiness check. Keep the saved diagnostics while you investigate; do not recreate the Domain as a first response.
 
-A required service identity left as **deferred** is not a harmless cosmetic warning. Current Domain-create UI states that Intents cannot activate until the service identity is configured.
+## Verify GitHub access
 
-## 2. Use Verify deliberately
+Confirm the repository binding is correct. Access is bounded by the selected App installation, its repository selection and approved permissions, and the acting user's GitHub authorisation for user-driven work.
 
-Current Studio does not re-run full Domain verification simply because you reopened Settings.
+A repository excluded from the App installation cannot be used by that Domain. See [[Prerequisites GitHub Organisation Owner]].
 
-For an Active Domain, use the supported **Verify** action to check current external readiness.
+## Verify the data-platform resource
 
-For a Domain that failed provisioning, use **Retry provisioning** after fixing the underlying cause.
+| Platform | Check |
+| --- | --- |
+| DuckDB | The selected Studio-managed database and schema can be opened. No external platform credential is required. |
+| MotherDuck | The acting PAT reaches the bound database and its identity owns it; the schema exists; the service PAT supports unattended operations; plan and retention limits allow cloning. A Share is not an ownership workaround. |
+| Microsoft Fabric | The user reaches the persistent workspace, Lakehouse, SQL endpoint, and schema; the service identity has its required persistent access; the selected ephemeral capacity exists and has room for temporary workspaces. |
 
-Do not repeatedly recreate the Domain as a first troubleshooting step. The persisted diagnostics are intended to tell you which external prerequisite is wrong.
+Studio verifies persistent Fabric workspace access. It does not silently grant a missing role. See [[Prerequisites Fabric Administrator]] or [[Prerequisites MotherDuck Administrator]].
 
-## 3. Verify GitHub repository access
+## Verify the secret store
 
-Confirm the bound repository is the one you selected and still exists.
+Confirm **Resources** shows the store you intended to select and that any required connection and service checks pass. For **Internal**, confirm the saved Domain exposes **Secrets**. For an external store or **Local File**, confirm the responsible administrator can add values through that store's own mechanism.
 
-On Kubernetes, repository access is bounded by:
+A later connector verification must still prove that the runtime can use the required secret names. An available store type does not prove every connector-delivery path works.
 
-- the selected GitHub App installation;
-- the App's repository selection;
-- the App's approved permission map;
-- the acting user's GitHub authorization where the operation is user-driven.
+## Verify an Intent can activate
 
-On Local Docker, it is bounded by the imported `gh` CLI credential and that GitHub account's repository permissions.
+1. Create an Intent in the Domain.
+2. Wait for its runtime to become usable.
+3. Read the data-platform diagnostic if activation fails.
 
-## 4. Verify the data-platform resource
+This checks the ephemeral-resource path: a Fabric workspace and Lakehouse, an isolated MotherDuck clone, or a DuckDB runtime resource. Failure here can prevent chat even when an LLM profile is valid.
 
-### DuckDB
+## Verify an LLM turn
 
-> **Applies to: DuckDB.**
+Run a simple question with the intended LLM profile. Confirm that the profile is selectable, the runtime reaches the provider, and the model supports the requested behaviour.
 
-Confirm the Studio-managed database file exists under Studio's data directory and the selected schema can be opened.
+Profile creation tests the connection. An actual Intent turn checks the runtime path.
 
-No external data-platform credential is required.
+## Verify GitHub Actions separately
 
-### MotherDuck
+For MotherDuck or Fabric Domains that use CI/CD, complete the Domain's GitHub Actions setup and inspect its platform-specific results. Core Domain readiness does not certify CI/CD setup.
 
-> **Applies to: MotherDuck.**
-
-Verify that:
-
-- the acting user PAT can reach the bound database or configured Share;
-- the Domain service PAT can perform the unattended operations expected of it;
-- the selected schema exists;
-- MotherDuck plan/retention constraints do not prevent the per-Intent clone.
-
-A PAT that authenticates successfully but cannot see the bound database is not enough.
-
-### Microsoft Fabric
-
-> **Applies to: Microsoft Fabric.**
-
-Verify that:
-
-- the acting user can reach the persistent workspace, Lakehouse, SQL endpoint, and schema;
-- the Domain service principal can reach the persistent workspace;
-- the selected ephemeral capacity exists and has capacity for temporary workspace creation;
-- the service principal has the rights needed for its unattended operations.
-
-Current Studio's persistent-workspace access step is verify-only. It does not silently grant a missing persistent workspace role.
-
-## 5. Verify GitHub Actions setup separately
-
-For MotherDuck and Fabric Domains that use CI/CD, run or review the Domain's GitHub Actions setup flow.
-
-Repository profile materialization and platform-specific CI checks are separate from the basic Domain resource binding. A Domain can have valid core provisioning while GitHub Actions setup is incomplete.
-
-### Fabric federated credential
-
-> **Applies to: Microsoft Fabric.**
-
-The expected Entra federated credential is pinned to the Domain repository and the Domain's **recorded default branch**:
+Fabric's expected federated credential is tied to the repository and its **recorded default branch**:
 
 ```text
 repo:<org>/<repo>:ref:refs/heads/<default-branch>
 ```
 
-The old rule that this must always end in `refs/heads/main` is obsolete.
+Use the remediation Studio reports to repair a missing or invalid credential on the Domain service principal's application. Do not assume the default branch is `main`.
 
-Studio verifies the credential. If it is missing or invalid, use the remediation Studio reports to create or replace it on the Domain service principal's Entra application.
+Successful token exchange proves identity, not Fabric authorisation. If deployment fails after federation succeeds, check the service identity's workspace permissions and relevant tenant/API permissions.
 
-### Fabric deployment role
+## Check completion
 
-Successful OIDC federation proves identity, not authorization. The CI service identity must still have enough Fabric workspace access for the deployment operation.
+Confirm that a real user can sign in, repository access works, required resource checks pass, an Intent activates, and an LLM turn succeeds. Complete the separate CI checks if you intend to use CI/CD.
 
-A workflow can therefore pass token exchange and fail on its first Fabric operation. Fix the Fabric role rather than changing the federated credential when that is the failure.
-
-## 6. Verify an LLM turn
-
-Open an Intent and run a simple question or bounded task using the intended LLM Profile.
-
-An LLM Profile save includes a connection test, but an actual Intent turn is the end-to-end proof that:
-
-- the profile is selectable;
-- the runtime can reach the provider;
-- the configured model supports the requested runtime behavior.
-
-## 7. Verify an Intent can activate
-
-Create an Intent in the Domain and ensure its runtime can become usable.
-
-This is the first real proof of the Domain's ephemeral-resource path:
-
-- Fabric creates an ephemeral workspace/Lakehouse/schema and applies the required service-principal grant;
-- MotherDuck creates or resolves the isolated clone path;
-- DuckDB creates the isolated local runtime resource.
-
-If activation fails, use the exact data-platform diagnostic before looking at the chat layer.
-
-## 8. Kubernetes deployment health
-
-> **Applies to: Kubernetes on Azure.**
-
-The installer already requires enabled companion applications to become healthy, but verify the cluster after setup:
-
-```bash
-kubectl -n argocd get applications
-kubectl -n studio get pods
-```
-
-`studio-obot` being degraded is a real condition to investigate on current `main`, not an expected successful-install state.
-
-## Done criteria
-
-For the first usable Domain, confirm:
-
-- Studio deployment is healthy;
-- a real user can sign in where delegated auth applies;
-- GitHub repository access works;
-- the Domain's required human/service lanes are ready;
-- the persistent data resource is reachable;
-- an Intent can activate;
-- an LLM turn succeeds;
-- CI/CD-specific checks are green if you intend to use CI/CD.
-
-Then continue to [[Getting Started as a Contributor]].
+Continue to [[Getting Started as a Contributor]].
 
 ---
 
-_Applies to: studio/main (unreleased snapshot). Verified against `studio@5c9d2bbf339a` on 2026-08-22._
+_Release scope and source-review limits: [Home](README.md#release-and-verification-scope)._

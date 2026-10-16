@@ -11,12 +11,10 @@ A Fabric Domain binds to:
 - one schema in that Lakehouse;
 - optionally, a capacity ID used for later ephemeral workspaces.
 
-For delegated deployments, it also needs:
+It also needs:
 
 - a user who can discover and validate those resources through the selected Entra Identity Provider;
 - a Domain service principal for unattended work.
-
-For Local Docker, user operations use the Azure CLI identity inside Studio's API container. A separate Domain service principal is still required for unattended features when the Domain configuration selects one.
 
 ## 1. Enable service-principal Fabric API access
 
@@ -129,4 +127,4 @@ The Entra tenant/client/secret values are returned through [[Prerequisites Entra
 
 ---
 
-_Applies to: studio/main (unreleased snapshot). Verified against `studio@5c9d2bbf339a` on 2026-08-22._
+_Release scope and source-review limits: [Home](README.md#release-and-verification-scope)._

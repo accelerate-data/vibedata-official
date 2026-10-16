@@ -1,6 +1,6 @@
 # Request for your GitHub organisation owner: create a GitHub App
 
-> **Applies to: Kubernetes on Azure.** Skip if you chose Local Docker. Local Docker uses the operator's `gh` CLI session instead.
+Prepare this customer-owned GitHub App for your marketplace deployment. The App is separate from the cloud marketplace purchase.
 
 Studio uses a customer-owned GitHub App for delegated deployments. There is no Accelerate Data-hosted Marketplace App to install instead.
 
@@ -11,7 +11,7 @@ The App has two identities:
 - an **installation identity** for headless Domain repository work;
 - a **per-user authorization flow** so Studio can act on GitHub as a signed-in user, bounded by both the user and the App installation.
 
-Each GitHub account where the App is installed gets its own installation ID. The Domain repository binding stores the selected installation. Org Settings does not configure a global default installation.
+Each GitHub account where the App is installed gets its own installation ID. The Domain repository binding stores the selected installation. Org settings does not configure a global default installation.
 
 ## Create the App
 
@@ -96,22 +96,10 @@ Send the client secret and PEM through a secret manager or another approved cred
 
 ## Where the operator enters the values
 
-The operator configures them under **Org Settings → GitHub** after the first real Studio owner can sign in.
+The operator configures them under **Org settings → GitHub** after the first real Studio owner can sign in.
 
 Provider Save validates the App identity and required permission map. User authorization is a separate flow that occurs later when a person connects GitHub.
 
-## Local Docker comparison
-
-> **Applies to: Local Docker.**
-
-There is no GitHub App prerequisite. Run this on the operator machine before installing Studio:
-
-```bash
-gh auth login --scopes repo,read:org,workflow
-```
-
-The Compose installer imports that session into Studio's API container.
-
 ---
 
-_Applies to: studio/main (unreleased snapshot). Verified against `studio@5c9d2bbf339a` on 2026-08-22._
+_Release scope and source-review limits: [Home](README.md#release-and-verification-scope)._
