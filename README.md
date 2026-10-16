@@ -66,7 +66,7 @@ edit them by hand. CI fails when they are stale.
 | --- | --- | --- |
 | Plugins | 9 | [catalog/plugins.md](catalog/plugins.md) |
 | Skills | 14 | [catalog/skills.md](catalog/skills.md) |
-| Recipes | 22 | [catalog/recipes.md](catalog/recipes.md) |
+| Recipes | 41 | [catalog/recipes.md](catalog/recipes.md) |
 | Connector sources | 1 | [catalog/connectors.md](catalog/connectors.md) |
 | Themes | 9 | [catalog/themes.md](catalog/themes.md) |
 | MCP servers | 211 | [catalog/mcp.md](catalog/mcp.md) |
