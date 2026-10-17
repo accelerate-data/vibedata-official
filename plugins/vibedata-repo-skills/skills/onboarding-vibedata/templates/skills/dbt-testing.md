@@ -1,3 +1,8 @@
+---
+name: dbt-testing
+description: Use when adding dbt unit or data tests, changing selectors or comparing rebuilt results.
+---
+
 # dbt testing
 
 Scope: {{confirmed_dbt_paths}}.
@@ -6,3 +11,5 @@ Use the mapped tests and existing YAML key/style. Add checks for the actual mode
 Comparisons of rebuilt measures name their precision in the acceptance criteria: the confirmed currency/business scale for money, an explicit absolute or relative tolerance for floating measures. DuckDB floating aggregates can differ in their last bits; compare matched values at the agreed precision, not hashes of raw doubles. Check identifiers, row membership and NULL semantics exactly.
 
 A left join on a derived key needs a coverage assertion: every required left row matches, or unmatched rows are the documented exceptions. State the full grain from grouping keys and test uniqueness at that grain. Report disagreements between documented and implemented grain before changing either.
+
+Make unit-test inputs self-contained: put each relevant model variable in `overrides.vars` and explicit environment/macro overrides where needed. dbt supports overriding project variables; do not assume project vars never apply. Verify current version-specific behavior through approved documentation. Keep the repository's YAML style and test conventions.

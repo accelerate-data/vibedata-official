@@ -1,3 +1,8 @@
+---
+name: dbt-models
+description: Use when adding or changing dbt models and their derived keys.
+---
+
 # dbt models
 
 Scope: {{confirmed_model_paths}}.

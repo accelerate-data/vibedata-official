@@ -1,3 +1,8 @@
+---
+name: sql-style
+description: Use when writing or changing SQL in the mapped project.
+---
+
 # SQL style
 
 Scope: {{confirmed_sql_paths}}.

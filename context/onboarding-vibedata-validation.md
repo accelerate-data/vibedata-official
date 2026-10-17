@@ -1,6 +1,6 @@
 # onboarding-vibedata validation
 
-**Latest status:** Lifecycle execution is authorized but blocked at Task 1's consumer gate. See the [consumer dependency report](#studio-lifecycle-task-1-consumer-dependency-report). Earlier sections retain the evidence and limits of their own runs.
+**Latest status:** The user selected remaining gates 1–3 and excluded Studio work. Preservation passes; Claude file/network scope still fails; actual Codex package installation needs a permitted route. See the [current run ledger](onboarding-vibedata-source-alignment-run.md). Earlier sections retain the evidence and limits of their own runs.
 
 ## Contents
 
@@ -421,3 +421,71 @@ Documentation verification passed: 22 local Markdown links/anchors, the exact th
 An independent `gpt-6-astra` reviewer passed the dependency report and confirmed that no independent implementation work was omitted. It independently checked the source hashes and identified one minor source-attribution error: the conflicting “nothing leaves the branch” claim belongs to `shipping/SKILL.md`, not proposal chaining. The table now names the correct source and its push-before-approval steps. No findings remain deferred. The reviewer completed and is inactive. Live behavior, deployed acceptance and existing remote CI observations retain their stated evidence limits; the review does not convert them into execution passes.
 
 **Next action:** Approve the U01–U05 companion scope in `vibedata-data-engineering`; after a supported release and existing target are identified, recheck Task 1 and resume Task 2 in this worktree.
+
+## Source alignment execution — 2026-10-16
+
+This entry appends current evidence; all earlier results remain historical. Execute/resume the [approved alignment plan](../docs/superpowers/plans/2026-10-16-onboarding-vibedata-source-alignment.md) through the [run ledger](onboarding-vibedata-source-alignment-run.md). Work is local on `docs/onboarding-vibedata-plan@d07d1a8`, with no commit, push, PR, merge, publication or consumer edit. Fetched base: `b878bf8`. Read-only reference: `b75841f`.
+
+The current consumer source is `65222435e3483c4be0a612e20910abfbaf56d9cb`, version 0.128.12. It still has no onboarding kind or supported review entrypoint. Generic Verification now follows Domain-mapped paths; the older canonical certification-path observation above does not describe this version. Runtime coordinates come from `/run/vd/intent-context.json`. CI installation and verification commit/push; shipping pushes before final approval. Source support, deployed support and authorization remain separate gates. No deployed version, mounted bundle or existing authorized disposable target was supplied. No lifecycle reference or phase implementation is claimed.
+
+### Deterministic and release evidence
+
+- Baseline: 30 focused passes; full suite 140/142 with inherited wiki failures `test_lists_onboarding_and_operate_pages` and `test_real_home_page_renders_cleanly`.
+- Task 2: canonical convention templates, legacy roots, contained aliases and conditional Studio roles passed observed RED/GREEN tests. `inspect_repo.py` is unchanged.
+- Tasks 4–5: generated ADR/native-map checks and workflow/config scaffolds pass. Actual dlt sample is one seven-row page, loaded twice with replacement; seven rows remain and two load records succeed. dbt returns 43; a renamed database copy queries the stored view without rebuilding. The database path is explicit and nondefault.
+- Independent review caught sibling-source imports failing in the documented pipelines/sources layout. Both the small CLI regression and upgraded integration failed before the PYTHONPATH fix and passed afterward (15/15 enabled scaffold checks). See `review-import-{red,integration-red,green}.log` in the evidence directory.
+- Coverage initially failed on deleted temporary source paths. Tests now execute rendered code with retained template source identity and a disposable runtime root; generated code remains in coverage. The corrected report is 89%, above 70%. The same two inherited wiki failures remain; no blanket suite pass is claimed.
+- Root version is 1.4.0; both child manifests are 1.1.0. Marketplace/version gates, generator freshness, Ruff check/format, Python compilation, Claude package validation and diff whitespace passed. No plugin-set/catalog metadata bump was needed.
+- The exact CI-pinned theme validator (`147006d73dc48a835a0d56a749927b3319a2f772`) and its required source files were available locally; all nine themes passed in a disposable snapshot. Remote CI was not run.
+
+### Runtime evidence and limits
+
+Codex 0.163.0 used the configured gpt-6-astra/xhigh/omniroute route. Claude Code 2.1.301 reported claude-opus-5-5/firstParty; effort was not reported, so no Codex effort is imputed to it. Initial contaminated probes were discarded. V2 controls read no files by instruction; baselines read an immutable pre-edit plugin snapshot. All 180 control/baseline answers completed. Per-trial content verdicts and relevant source hashes are in the final evidence index/independent review; process success alone is not a behavior pass. Claude answer-only JSON lacks tool events, so its allowed-file isolation/reference consultation is unverified.
+
+Claude actual package sessions used `--plugin-dir` and stream-json tool events. dbt/dlt and Python context outputs preserved every pre-existing application hash and passed structural checks. Python nevertheless wrote and removed `/tmp/onb1.sha` outside the fixture; blank used outside-fixture temporary paths and ran parse/lint beyond its probe scope. Those scope checks fail. The dbt/dlt `/tmp/onb-before.sha` attempt was permission-denied, not a completed write. Blank was incomplete and custom-map onboarding never reached edits when Claude returned HTTP 429 `usage_limit_reached`; the reported reset is 04:00 +04. No provider/model substitution occurred.
+
+Codex lists the local package through `plugin list --available`, but a fresh exec with session-only marketplace/plugin enablement reported the skill absent. CLI `plugin add` offers no session install scope, and normal-runtime installs are excluded. Its installed-package onboarding lane remains blocked. A raw-path wording probe is not installed-package evidence.
+
+A fresh Codex ordinary Python task loaded the canonical generated convention without onboarding or a supplied canonical filename. Real app-server `thread/compact/start` emitted completed `contextCompaction`; the next turn reloaded the applicable workaround and ADR skill and resolved the custom DEC-27 path. That test used generated context with a deliberate custom-path fixture extension, not a deployed Studio consumer. Claude ordinary loading, refresh/idempotence and compaction remain quota-blocked. No new R14 efficiency, token or cost claim is made.
+
+Authentication failures from unrelated Codex MCP startup remain stopped: `codex mcp login linear` and `codex mcp login reduck` are the required recovery commands. Runtime-only probes disabled those integrations rather than changing their data source.
+
+### Completion boundary
+
+Implementation and deterministic checks do not establish complete local acceptance while required wording, preservation or runtime lanes fail or remain blocked. Studio lifecycle remains blocked independently. Consult the final ledger rows for task status, final check counts, retained evidence and the exact restart action.
+
+### Final local checks and review corrections
+
+Final focused suite: **54 pass, 1 opt-in integration skip** (55 total). Final full suite: **164 pass, 2 inherited failures, 1 skip** (167 total). The inherited failures are still `test_lists_onboarding_and_operate_pages` and `test_real_home_page_renders_cleanly`. Coverage is **89%**. The enabled scaffold suite passed **15/15** on the final execution code; later changes affect prose and a justified test-only lint annotation. All local release checks pass apart from those two full-suite failures. No remote CI ran.
+
+The independent reviewer inspected all 247 substantive original wording answers. Codex treatment passes all 45 content checks. Claude treatment has 17 passes, one failure, four partial results and 23 blocked trials; its explicit installed-source recommendation and missed workaround reload prevent a startup pass. Claude controls/baselines lack tool events. Codex traces show one failed outside-root read attempt in a baseline due to a mistyped path; it returned no content. No treatment outside absolute paths or writes were observed. Control/baseline warning answers already preserve semantics, so no gain is claimed for that case. The non-Studio prompt's “native schema” cannot by itself establish native repo-map ownership.
+
+The reviewer also found that generated design conventions incorrectly required a verification role in valid standalone/native maps. Observed RED left measured evidence unrecorded or conditional on a schema/convention change. The fixed convention uses the existing native mapped/report destination and keeps design content qualitative; all five frozen-input Codex followups pass. Shared design-area roles are conditional too. Shared verification now states startup/workaround and approved-documentation routing. Temporary backups and hashes are explicitly repository-contained, with no denial bypass. Claude revalidation of these changes remains quota-blocked. The first startup follow-up batch had a contradictory no-commands harness instruction and is discarded; its corrected replacement is indexed separately.
+
+See the ledger's requirement table for S01–S12 status, the full content scorecard, retained unresolved runtime findings and restart instructions. These results do not establish complete local alignment or release readiness.
+
+Final corrected startup followups pass **5/5 in Codex**. Independent review covered all A1–A12 groups and found no remaining confirmed implementation defect. It retains three Important acceptance findings: Claude scope failures, Claude startup failure/incompleteness, and missing required runtime/preservation/Studio evidence. Historical trace completeness is a deferred Minor finding. The reviewer completed and is inactive. The final checkpoint retains local diffs and bounded evidence; task-created environments/caches were removed. Resume the Claude gate after **2026-10-17 04:00 +04** using the ledger's exact command; no retry is scheduled automatically.
+
+## Resumed gates 1–3 — 2026-10-17
+
+The current user scope permits only Codex tests and excludes Studio capability work. Do not resume Claude testing from historical instructions above. Captured Claude Code evidence uses 2.1.302, compared with 2.1.301 in the historical controls/baselines. All 50 new wording answers report firstParty; 49 report `claude-opus-5-5` and native-fallback trial 5 reports `claude-sonnet-5-5`. Tool calls are retained. This is neither a uniformly Opus matrix nor a controlled runtime-version improvement study.
+
+- **Gate 1 remains failed.** Claude now loads the generated Python convention on ordinary tasks and reloads the custom-path workaround after a real `/compact` event. Both Python scope trials nevertheless write temporary hashes outside the fixture. The second wording repair also fails and is reverted; the exact candidate snapshot and traces remain. The dbt/dlt trial additionally makes a network request through `dbt --version`. Application hashes stay unchanged, which does not excuse those boundary violations.
+- **Gate 2 remains blocked.** Official docs, the current config schema, native CLI help and app-server request fields show no session/repository install destination for CLI 0.163.0. The plugin feature is enabled, but the onboarding package is absent from the installed list. Catalogue discovery and session enablement are not installation. Normal-runtime installs remain outside the approved scope; no home/config override is used. A concrete pending install command is retained in the evidence workspace.
+- **Gate 3 passes for the exercised fixtures.** Human-edited Python skill bytes survive refresh. The unchanged second run preserves 18/18 file hashes and all aliases. The custom fixture preserves its native schema/map/checker, glossary, DEC-27, legacy rule and existing Claude skill. AGENTS keeps its original prefix; new aliases remain contained. The two-sided pre-existing canonical/Claude collision remains wording coverage, distinct from the actual Claude-owned collision.
+
+The actual blank-fixture no-cache Ruff checks are treated as permitted read-only structural checks under the exact prompt; they execute no application/dbt code. The unmapped format-check failure stays disclosed. This is separate from historical dbt parse, which invokes project/adapter/Jinja behavior. No Studio runtime or live database operation is credited.
+
+Evidence: `.superpowers/sdd/2026-10-16-onboarding-vibedata-source-alignment/resumed-review.md`, `resumed-review-scores.json`, `resumed-fixtures-index.json`, `codex-isolated-install-diagnosis.json`, and the `acceptance-v2-*`, `acceptance-v3-*`, `ordinary-v2-*`, `refresh-v2-*`, `unchanged-v2-*`, `claude-compact-v2-*` logs. Generated snapshots retain actual symlinks. The 699.8 MiB task environment/cache is removed. No product change from this resumed turn remains; prior implementation and historical deterministic results are preserved.
+
+### Codex-only continuation — 2026-10-17 08:30 +04
+
+Two new ordinary Codex checks pass: generated Python context including the human field-order edit, and custom native-map vocabulary/ADR discovery including DEC-27. All ten observed commands are repository-only reads/listings and exit 0. Python retains 18/18 files and three contained aliases; custom retains 16/16 files and two contained aliases. The prompts do not invoke onboarding or name canonical instructions. No application code or checks execute. This proves generated-context loading on these two fixtures, not installed-package onboarding or refresh in Codex.
+
+The CLI is 0.163.0. Current global config has changed to `gpt-6.1-sol` / `high`; these two commands explicitly request the historical `gpt-6-astra` / `xhigh` / `omniroute` route, with all MCP integrations disabled. The served model is not independently identified by the CLI events. Global settings remain unchanged. Temporary copies were removed after hash/link verification. Evidence: `codex-only-loading-evidence.json`, `codex-only-fixtures.json` and `ordinary-v3-codex-*` under the same evidence root.
+
+Final review of already captured Claude answers is 44 full passes/6 partial across 50 answers, with 120 passing/10 partial assertions and 50 passing wording-scope checks. This review launched no Claude tests and does not cure the actual-package scope failures. The user permits only Codex tests from now on. Gate 2 still needs a permitted installation route; gate 4 remains excluded. Historical deterministic checks were not rerun for these documentation-only updates.
+
+### Draft PR scope — 2026-10-17
+
+The user subsequently declined the Codex installation test and authorized a scoped commit, branch update, push and draft PR. Installed-package onboarding is deliberately skipped and remains unverified; it is not a blocker to opening this draft. Captured Claude scope failures remain disclosed, and further Claude tests and Studio work remain excluded. Draft status does not establish release acceptance. Current-head CI and any changed-base checks are recorded separately from the historical results above.

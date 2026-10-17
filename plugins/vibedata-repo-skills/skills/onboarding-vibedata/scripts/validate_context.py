@@ -18,7 +18,14 @@ ROLES = {
     "proposal",
     "onboarding_report",
 }
-REFERENCES = {"agents", "instructions", "rules", "schema", "test_map"}
+STUDIO_ROLES = {
+    "requirement",
+    "plan",
+    "verification",
+    "case_record",
+    "design_record_area",
+}
+REFERENCES = {"agents", "instructions", "schema", "test_map"}
 PATH_FIELDS = {"path", "module", "pipeline", "docs", "tests", "design_record", "config"}
 PATTERN = re.compile(r"\{[a-zA-Z_][a-zA-Z_0-9]*\}")
 MAX_BYTES = 1024 * 1024
@@ -87,7 +94,7 @@ def instruction_findings(root: Path, starts: list[Path]) -> list[str]:
     imports: dict[Path, list[Path]] = {}
     pending = list(starts)
     while pending:
-        file = pending.pop()
+        file = pending.pop().resolve()
         if file.resolve() in visited or file.suffix.lower() != ".md":
             continue
         if len(visited) >= 1000:
@@ -154,7 +161,9 @@ def instruction_findings(root: Path, starts: list[Path]) -> list[str]:
     return errors
 
 
-def validate_context(root: Path) -> list[str]:
+def validate_context(root: Path, *, consumer: str = "standalone") -> list[str]:
+    if consumer not in {"standalone", "studio"}:
+        raise ValueError(f"Unknown consumer: {consumer}")
     errors = []
     try:
         root = root.resolve(strict=True)
@@ -185,13 +194,16 @@ def validate_context(root: Path) -> list[str]:
             errors.append(f"repo-map.json: {key} must be an object or list")
     roles = repo.get("artifact_paths", {})
     if isinstance(roles, dict):
-        for key in sorted(ROLES - roles.keys()):
+        required_roles = ROLES | STUDIO_ROLES if consumer == "studio" else ROLES
+        for key in sorted(required_roles - roles.keys()):
             errors.append(f"artifact_paths: missing role {key}")
         for key, value in roles.items():
             check_path(value, f"artifact_paths.{key}", pattern=True)
     refs = repo.get("key_references", {})
     resolved_refs = {}
     if isinstance(refs, dict):
+        if not {"conventions", "rules"} & refs.keys():
+            errors.append("key_references: missing conventions or legacy rules")
         for key in sorted(REFERENCES - refs.keys()):
             errors.append(f"key_references: missing {key}")
         for key, value in refs.items():
@@ -298,6 +310,38 @@ def validate_context(root: Path) -> list[str]:
             checked = check_path(p.relative_to(root).as_posix(), "rules")
             if checked:
                 starts.append(checked)
+    skill_roots = [
+        resolved_refs.get("conventions"),
+        root / ".agents/skills",
+        root / ".claude/skills",
+    ]
+    pending = [
+        p for p in skill_roots if p is not None and (p.exists() or p.is_symlink())
+    ]
+    visited = set()
+    while pending:
+        directory = pending.pop()
+        checked = check_path(directory.relative_to(root).as_posix(), "conventions")
+        if checked is None or checked.resolve() in visited:
+            continue
+        if not checked.is_dir():
+            errors.append(
+                f"conventions: {directory.relative_to(root)} must be a directory"
+            )
+            continue
+        if len(visited) >= 1000:
+            errors.append("Convention discovery exceeds 1000 directories")
+            break
+        visited.add(checked.resolve())
+        for entry in checked.iterdir():
+            if entry.is_symlink() or entry.is_dir() or entry.name == "SKILL.md":
+                target = check_path(entry.relative_to(root).as_posix(), "conventions")
+                if target is None:
+                    continue
+                if target.is_dir():
+                    pending.append(target)
+                elif target.name == "SKILL.md":
+                    starts.append(target)
     claude = root / "CLAUDE.md"
     if claude.exists() or claude.is_symlink():
         checked = check_path("CLAUDE.md", "bootstrap")
@@ -318,16 +362,19 @@ def validate_context(root: Path) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
+    parser.add_argument(
+        "--consumer", choices=("standalone", "studio"), default="standalone"
+    )
     args = parser.parse_args()
     try:
-        findings = validate_context(args.root)
+        findings = validate_context(args.root, consumer=args.consumer)
     except (OSError, ValueError, TypeError, RuntimeError) as exc:
         findings = [str(exc)]
     if findings:
         print("\n".join(findings), file=sys.stderr)
         return 1
     print(
-        "Context structure valid; runtime instruction loading and execution remain unverified."
+        "Context structure valid; metadata, runtime instruction loading and execution remain unverified."
     )
     return 0
 

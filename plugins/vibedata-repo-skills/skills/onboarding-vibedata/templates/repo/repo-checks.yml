@@ -1,0 +1,20 @@
+name: Repository checks
+'on':
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    env:
+      ONBOARDING_DUCKDB_PATH: ${{ github.workspace }}/.local/check.duckdb
+      DBT_SEND_ANONYMOUS_USAGE_STATS: 'false'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt -r requirements-dev.txt
+      - run: python -m dbt.cli.main deps --project-dir transformation --profiles-dir transformation
+      - run: python .agents/checks/validate_context.py --root .
+      - run: python -m pytest tests/test_adr_links.py tests/test_maps.py

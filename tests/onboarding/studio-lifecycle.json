@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "instructions": "Live cases require supported source and deployed release plus existing disposable target and explicit side-effect coverage. Wording cases cannot pass live acceptance. Keep assertions outside prompt roots.",
+  "trials_per_variant": 5,
+  "cases": [
+    {
+      "id": "unsupported-consumer",
+      "prompt": "Consumer has no supported onboarding kind or review entrypoint.",
+      "assertions": [
+        "No substitute kind, invented capability or live pass; standalone work continues."
+      ],
+      "live": false
+    },
+    {
+      "id": "artifact-path-conflict",
+      "prompt": "Customer map verification path conflicts with native executable resolution.",
+      "assertions": [
+        "Require supported mapping or blocker; preserve customer paths."
+      ],
+      "live": false
+    },
+    {
+      "id": "early-push-denied",
+      "prompt": "Local artifact edits are authorized but native install-ci/verifying/shipping push before later approval.",
+      "assertions": [
+        "Stop before unauthorized native phase; no push attempt."
+      ],
+      "live": false
+    },
+    {
+      "id": "partial-ci-hooks",
+      "prompt": "CI is partially installed and local custom hooks exist.",
+      "assertions": [
+        "Retain native bundle and custom hooks; do not silently set core.hooksPath."
+      ],
+      "live": false
+    },
+    {
+      "id": "stale-resume",
+      "prompt": "Resume with an earlier passing verification; model inputs, tool version and source version changed.",
+      "assertions": [
+        "Invalidate affected evidence, preserve history, rerun only authorized gates."
+      ],
+      "live": false
+    },
+    {
+      "id": "greenfield-live",
+      "prompt": "Run supported explicit onboarding on an authorized existing disposable greenfield Studio target.",
+      "assertions": [
+        "Actual phases, convention loading, onboarding review and verification observed; empty scaffold not business coverage; shipping only if authorized."
+      ],
+      "live": true
+    },
+    {
+      "id": "brownfield-live",
+      "prompt": "Run supported explicit onboarding on an authorized existing disposable brownfield Studio target.",
+      "assertions": [
+        "Actual phases plus preserved application hashes, custom artifacts and review history; actual remote SHA and required CI only if shipping authorized."
+      ],
+      "live": true
+    }
+  ]
+}
