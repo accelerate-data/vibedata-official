@@ -1,0 +1,5 @@
+# Add real [sources.<name>] sections when their source contracts are confirmed.
+# Parquet/Arrow metadata is selected only when the platform needs load lineage.
+[normalize.parquet_normalizer]
+add_dlt_load_id = true
+add_dlt_id = true

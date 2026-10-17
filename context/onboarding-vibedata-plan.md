@@ -8,6 +8,8 @@
 **Spec:** [onboarding-vibedata design](onboarding-vibedata-design.md). Read both documents before executing.
 **Status:** The original execution is recorded below; the user subsequently authorized draft PR #48, explicit-only invocation, and simpler reporting/verification. The current contract is in design requirements R17–R19. See [validation evidence](onboarding-vibedata-validation.md) for those follow-ups and retained limits: Codex sandbox restrictions leave full onboarding partial, the real VibeData consumer lane is unverified by user direction, and two inherited wiki tests fail; one Codex A16 trial timed out.
 
+**2026-10-16 follow-up:** Execute the approved [source-alignment plan](../docs/superpowers/plans/2026-10-16-onboarding-vibedata-source-alignment.md), with current task states in the [run ledger](onboarding-vibedata-source-alignment-run.md). Its canonical convention skills, generated checks and selected scaffold supersede original template/rules paths below. The original checked tasks/history are retained; they do not establish completion of the new acceptance or Studio lifecycle.
+
 ## Contents
 
 - [Global constraints](#global-constraints)

@@ -1,3 +1,8 @@
+---
+name: git-and-prs
+description: Use when preparing repository changes, commits or pull requests.
+---
+
 # Git and review
 
 Scope: repository changes.

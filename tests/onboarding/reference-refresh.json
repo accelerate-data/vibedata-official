@@ -22,6 +22,93 @@
         "Use a supported sample mechanism; changed source/tool versions invalidate the previous profile/check evidence.",
         "Retain existing schema/checker contracts and separate context readiness from unrun execution."
       ]
+    },
+    {
+      "id": "convention-discovery",
+      "prompt": "A dbt/dlt repository already has .agents/rules/python.md, a task-specific .agents/skills/python/SKILL.md, and a different customer-owned .claude/skills/python directory. The user invokes onboarding for Claude and Codex. Explain the output paths, discovery and preservation checks, and how you handle the collision. Do not edit or run application commands. Report supporting files consulted.",
+      "assertions": [
+        "Canonical conventions have valid metadata at .agents/skills/<name>/SKILL.md; Claude uses contained symlinks only after ownership checks.",
+        "Preserve legacy active references and customer skill content; collision blocks only its dependent alias.",
+        "Discovery and metadata validation need separate evidence."
+      ]
+    },
+    {
+      "id": "legacy-custom-preservation",
+      "prompt": "A customer native schema disallows key_references and uses decisions/DEC-alpha.md. Existing instructions import legacy rules. Onboard without changing the native checker or document paths. An inactive skill template has a placeholder link; a live skill has a broken link. State checks and changes. Do not edit or run application commands. Report supporting files consulted.",
+      "assertions": [
+        "Keep native schema/checker and custom ADR IDs; no portable schema adoption by default.",
+        "Check live entrypoint links, leave inactive templates alone, preserve legacy scope and imports."
+      ]
+    },
+    {
+      "id": "measurement-placement",
+      "prompt": "A new dlt source profile measured 12003 rows, 4 null IDs and a 9-second load. The design chooses replacement loading because the source is a full snapshot. The map has verification docs/verify/{intent}.md and design_record_area docs/design/{area}/{subject}.md. Draft the design and evidence placement including their links. Do not edit or run application commands. Report supporting files consulted.",
+      "assertions": [
+        "Design contains qualitative decision, rationale and verification link; numeric measurements and check outcomes live only in verification.",
+        "Preserve existing document paths and history."
+      ]
+    },
+    {
+      "id": "startup-and-compaction",
+      "prompt": "Continue a model change after context compaction. A generated workaround applies to custom ADR paths. The map declares Ruff --config config/lint.toml, excludes ingestion/vendor, and points to model/dbt-testing conventions. A dbt unit test depends on var(currency_scale). You are unsure how the current library works; installed sources are easy to inspect. Give the next actions and unit test shape. Do not edit or run application commands. Report supporting files consulted.",
+      "assertions": [
+        "Invoke relevant conventions and reload applicable workarounds.",
+        "Use mapped lint configuration and exclusions.",
+        "State relevant unit test vars under overrides.vars without claiming project vars never apply.",
+        "Use approved docs or repo examples instead of installed package source."
+      ]
+    },
+    {
+      "id": "page-sampling-resource-extension",
+      "prompt": "Add an accounts resource to the existing crm source. The loader exposes dlt add_limit; one yielded page holds 12003 rows and the requested nominal sample is 1000. Its full snapshot replaces prior data. Yesterday's saved profile used an older source version. State the bounded sample decision, evidence and changed registrations. Do not edit or run application commands. Report supporting files consulted.",
+      "assertions": [
+        "Account for whole page or row-group overshoot and approved cost before execution; report actual landed identity/count/load metadata.",
+        "Require fresh profile evidence when the source version changed and prove replacement with repeated samples.",
+        "Extend crm rather than creating another source/pipeline; update applicable docs/tests/design/dbt staging and source registration."
+      ]
+    },
+    {
+      "id": "sandbox-state-and-authorization",
+      "prompt": "Studio persistent Domain is empty. No sandbox target or load approval is available. A colleague says to run all sources now and call onboarding seeded when they load. Give the report and follow-up artifact. Do not edit or run application commands. Report supporting files consulted.",
+      "assertions": [
+        "No load attempt; precise missing target/authorization blocker and mapped proposal.",
+        "Separate context, runtime loading, sandbox execution and persistent Domain state; sample success would not seed persistent Domain."
+      ]
+    },
+    {
+      "id": "inventory-review-rehearsal",
+      "prompt": "Onboard a brownfield repository. Confirmed customer decisions already establish SQL naming and Monday weeks. An undocumented ordered repair procedure may be useful but is unconfirmed. A review has R-1 gap and R-2 style; the user defers R-1 and declines R-2 as intentional. Show inventory/review updates and source, mart, and connected-model rehearsal outputs. Do not edit or run application commands. Report supporting files consulted.",
+      "assertions": [
+        "Inventory C-n records evidence, exceptions, destination and confirmation state; do not ask again about established facts.",
+        "No skill for the unconfirmed procedure.",
+        "Typed review metadata and R-n IDs/text remain stable; triage separate from proposed-edit approval.",
+        "Rehearsals record read/change paths and mapped commands without production execution."
+      ]
+    },
+    {
+      "id": "warning-cleanup-equivalence",
+      "prompt": "A dbt warning cleanup parses successfully. Before it had tests unique_items and not_null_id, after it only has unique_items. Compiled unique_items SQL also changed WHERE active = true to WHERE true. May this be called behavior-free? Specify evidence needed. Do not edit or run application commands. Report supporting files consulted.",
+      "assertions": [
+        "Reject behavior-free claim for removed test or changed predicate despite successful parse.",
+        "Compare test unique IDs/counts and normalized compiled SQL; normalization cannot erase predicates/test arguments."
+      ]
+    },
+    {
+      "id": "non-studio-preservation",
+      "prompt": "Refresh a non-Studio Python/dbt repository with deliberate attached catalogs, three-decimal money, exact IDs and NULLs, local-business timezone meaning, non-dlt loader, and native schema. State scoped checks and conventions without changing those choices. Do not edit or run application commands. Report supporting files consulted.",
+      "assertions": [
+        "Preserve catalogs, precision, identities, NULLs, timezone and native schema.",
+        "No Studio variable, DuckDB setup, or unsupported loader limit is imposed."
+      ]
+    },
+    {
+      "id": "native-evidence-fallback",
+      "prompt": "A standalone customer native map has artifact_paths.design_record_model=docs/design/{model}.md and artifact_paths.onboarding_report=docs/onboarding.md. No verification role exists and the native schema forbids new keys. A source profile measured seven rows. The design chooses replacement loading for a full snapshot. Give the evidence destination and draft the design/evidence text with working relative links. Do not edit files. Use only the supplied generated design convention.",
+      "assertions": [
+        "Record measured evidence in the existing native mapped report without adding schema keys or creating a default verification path.",
+        "Keep the design qualitative and link to the report through a valid relative path; do not leave measured evidence unrecorded."
+      ]
     }
-  ]
+  ],
+  "trials_per_variant": 5
 }
