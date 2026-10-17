@@ -5,6 +5,7 @@ import subprocess
 import sys
 import tomllib
 from pathlib import Path
+from unittest import SkipTest
 
 import jsonschema
 
@@ -33,13 +34,21 @@ def test_repo_map_schema():
 
 def test_source_config_sections():
     repo = _json("repo-map.json")
+    gaps = []
     for name, source in repo["sources"].items():
         if source.get("kind") != "dlt":
             continue
         section = source.get("config_section")
+        config_path = source.get("config") or repo["artifact_paths"].get(
+            "source_config"
+        )
+        config_file = _path(config_path) if config_path else None
+        if config_file is None or config_file.suffix.lower() != ".toml":
+            assert section is None, f"{name}: config_section requires TOML"
+            gaps.append(name)
+            continue
         assert isinstance(section, str) and section, f"{name}: missing config_section"
-        config_path = source.get("config") or repo["artifact_paths"]["source_config"]
-        config = tomllib.loads(_path(config_path).read_text(encoding="utf-8"))
+        config = tomllib.loads(config_file.read_text(encoding="utf-8"))
         node = config
         for key in section.split("."):
             assert isinstance(node, dict) and key in node, (
@@ -47,6 +56,10 @@ def test_source_config_sections():
             )
             node = node[key]
         assert isinstance(node, dict), f"{name}: {section} must name a TOML section"
+    if gaps:
+        raise SkipTest(
+            f"source-registration gap: {', '.join(gaps)} use native non-TOML or embedded registration; retain its native check"
+        )
 
 
 def test_dbt_selectors():
@@ -61,6 +74,10 @@ def test_dbt_selectors():
                 f"{name}.{kind}: empty selector"
             )
             roles = repo["artifact_paths"]
+            if "dbt_profiles" not in roles:
+                raise SkipTest(
+                    "dbt-selector gap: no artifact_paths.dbt_profiles; verify selectors in the authorized native runtime"
+                )
             project = _path(roles["dbt_project"]).parent
             profiles = _path(roles["dbt_profiles"]).parent
             command = [
@@ -73,8 +90,6 @@ def test_dbt_selectors():
                 str(project),
                 "--profiles-dir",
                 str(profiles),
-                "--target",
-                "dev",
                 "--select",
                 selector,
                 "--resource-type",

@@ -298,6 +298,61 @@ class OnboardingContextTests(unittest.TestCase):
             self.inspect()
         self.assertNotIn("SECRET_SENTINEL", str(caught.exception))
 
+    def test_fabric_notebook_inventory_reads_imports_without_execution(self):
+        path = "ingestion/load.Notebook/notebook-content.py"
+        write(
+            self.root,
+            path,
+            "# Fabric notebook source\n# CELL ********************\n"
+            "%pip install dlt\n!echo SECRET_SENTINEL\n"
+            "# CELL ********************\nimport dlt\n"
+            "raise AssertionError('must not execute')\n"
+            "# CELL ********************\n%%sql\nSELECT * FROM bronze.items;\n"
+            "# CELL ********************\nfrom dlt import pipeline\n",
+        )
+        write(self.root, "ingestion/load.Notebook/.platform", "{}\n")
+        before = hashes(self.root)
+        result = self.inspect()
+        self.assertEqual(result["mode"], "brownfield")
+        self.assertIn(path, result["code_files"])
+        self.assertEqual(result["notebook_files"], [path])
+        self.assertEqual(result["stacks"], ["dlt", "fabric", "python"])
+        self.assertIn("ingestion/load.Notebook/.platform", result["config_files"])
+        self.assertNotIn("SECRET_SENTINEL", json.dumps(result))
+        self.assertEqual(hashes(self.root), before)
+
+    def test_fabric_magic_handling_requires_path_and_header(self):
+        for path, content in (
+            ("ordinary.py", "# Fabric notebook source\n%pip SECRET_SENTINEL\n"),
+            ("load.Notebook/notebook-content.py", "%pip SECRET_SENTINEL\n"),
+            (
+                "load.Notebook/other.py",
+                "# Fabric notebook source\n%pip SECRET_SENTINEL\n",
+            ),
+            (
+                "load.Notebook/notebook-content.py",
+                "# Fabric notebook source\ndef SECRET_SENTINEL(\n",
+            ),
+        ):
+            with self.subTest(path=path, content=content):
+                write(self.root, path, content)
+                with self.assertRaisesRegex(
+                    ValueError, "malformed or unreadable"
+                ) as caught:
+                    self.inspect()
+                self.assertNotIn("SECRET_SENTINEL", str(caught.exception))
+                (self.root / path).unlink()
+
+    def test_fabric_inventory_preserves_magic_like_lines_inside_python_strings(self):
+        write(
+            self.root,
+            "load.Notebook/notebook-content.py",
+            "# Fabric notebook source\n# CELL ********************\n%pip install package\n"
+            '# PARAMETERS CELL ********************\ntext = """\n%%not_a_magic\n'
+            '!not_a_command\n"""\nimport dlt\n',
+        )
+        self.assertEqual(self.inspect()["stacks"], ["dlt", "python"])
+
     def test_context_resolves_custom_paths_and_patterns(self):
         data = mapped_repo(self.root)
         before = hashes(self.root)

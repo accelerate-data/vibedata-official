@@ -26,6 +26,7 @@ EXCLUDED = {
     ".superpowers",
 }
 CONFIG_NAMES = {
+    ".platform",
     "dbt_project.yml",
     "profiles.yml",
     "packages.yml",
@@ -48,6 +49,30 @@ ARTIFACT_NAMES = {
     "onboarding.md",
 }
 MAX_BYTES = 1024 * 1024
+
+
+def fabric_import_tree(text: str) -> ast.Module:
+    """Keep Python for static import discovery; never evaluate notebook magics."""
+    lines = text.splitlines()
+    while True:
+        try:
+            return ast.parse("\n".join(lines))
+        except SyntaxError as exc:
+            index = exc.lineno - 1
+            line = lines[index]
+            stripped = line.lstrip()
+            if not stripped.startswith(("%", "!")):
+                raise
+            if stripped.startswith("%%"):
+                # shortcut: cell-magic bodies are opaque; add language-aware parsing if needed.
+                end = index + 1
+                while end < len(lines) and not lines[end].startswith(
+                    ("# CELL ", "# PARAMETERS CELL ", "# MARKDOWN ")
+                ):
+                    end += 1
+                lines[index:end] = [""] * (end - index)
+            else:
+                lines[index] = line[: len(line) - len(stripped)] + "pass"
 
 
 def secret_path(path: Path) -> bool:
@@ -102,6 +127,7 @@ def inspect_repository(root: Path) -> dict[str, object]:
         "instruction_files": [],
         "config_files": [],
         "code_files": [],
+        "notebook_files": [],
         "existing_artifacts": [],
         "stacks": [],
     }
@@ -140,6 +166,8 @@ def inspect_repository(root: Path) -> dict[str, object]:
             result["existing_artifacts"].append(name)
         if context_tool:
             continue
+        if path.name == ".platform":
+            stacks.add("fabric")
         if path.suffix in {".py", ".ipynb", ".sql", ".r", ".R", ".scala"}:
             result["code_files"].append(name)
             result["mode"] = "brownfield"
@@ -159,8 +187,17 @@ def inspect_repository(root: Path) -> dict[str, object]:
                         notebook.get("cells"), list
                     ):
                         raise ValueError("invalid notebook structure")
+                    result["notebook_files"].append(name)
                 else:
-                    tree = ast.parse(text)
+                    if (
+                        path.name == "notebook-content.py"
+                        and path.parent.name.endswith(".Notebook")
+                        and text.splitlines()[:1] == ["# Fabric notebook source"]
+                    ):
+                        result["notebook_files"].append(name)
+                        tree = fabric_import_tree(text)
+                    else:
+                        tree = ast.parse(text)
                     for node in ast.walk(tree):
                         if isinstance(node, ast.Import) and any(
                             n.name.split(".")[0] == "dlt" for n in node.names

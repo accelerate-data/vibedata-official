@@ -249,6 +249,112 @@ class ScaffoldTests(unittest.TestCase):
         ):
             self.assertIn(command, commands)
 
+    def test_native_source_checks_report_yaml_and_embedded_registration_gaps(self):
+        path = self.template("checks/test_maps.py", "tests/test_maps.py")
+        native = load_module(path, TEMPLATES / "checks/test_maps.py")
+        write(self.root, "sources/crm.yml", "tables: [customers]\n")
+        write(
+            self.root, "load.Notebook/notebook-content.py", "# Fabric notebook source\n"
+        )
+        for registration in (
+            {"config": "sources/crm.yml"},
+            {"pipeline": "load.Notebook/notebook-content.py"},
+        ):
+            with self.subTest(registration=registration):
+                self.repo["sources"] = {"crm": {"kind": "dlt", **registration}}
+                write_json(self.root, "repo-map.json", self.repo)
+                with self.assertRaisesRegex(
+                    unittest.SkipTest, "source-registration gap.*crm"
+                ):
+                    native.test_source_config_sections()
+
+    def test_native_source_checks_keep_toml_requirements_and_mixed_validation(self):
+        path = self.template("checks/test_maps.py", "tests/test_maps.py")
+        native = load_module(path, TEMPLATES / "checks/test_maps.py")
+        write(self.root, "sources/crm.yml", "tables: [customers]\n")
+        write(self.root, "config.toml", "[sources.other]\n")
+        self.repo["sources"] = {
+            "crm": {"kind": "dlt", "config": "sources/crm.yml"},
+            "billing": {"kind": "dlt", "config": "config.toml"},
+        }
+        write_json(self.root, "repo-map.json", self.repo)
+        with self.assertRaisesRegex(AssertionError, "billing: missing config_section"):
+            native.test_source_config_sections()
+        self.repo["sources"]["billing"]["config_section"] = "sources.billing"
+        write_json(self.root, "repo-map.json", self.repo)
+        with self.assertRaisesRegex(AssertionError, "billing: missing sources.billing"):
+            native.test_source_config_sections()
+        write(self.root, "config.toml", "[sources.billing]\n")
+        with self.assertRaisesRegex(unittest.SkipTest, "source-registration gap.*crm"):
+            native.test_source_config_sections()
+        self.repo["sources"]["crm"]["config_section"] = "sources.crm"
+        write_json(self.root, "repo-map.json", self.repo)
+        with self.assertRaisesRegex(
+            AssertionError, "crm: config_section requires TOML"
+        ):
+            native.test_source_config_sections()
+
+    def test_native_selectors_report_missing_profile_without_launching_dbt(self):
+        path = self.template("checks/test_maps.py", "tests/test_maps.py")
+        native = load_module(path, TEMPLATES / "checks/test_maps.py")
+        write_json(
+            self.root,
+            "test-map.json",
+            {"modules": {"items": {"selectors": {"data": "items"}}}},
+        )
+        with (
+            patch.object(
+                native.subprocess, "run", side_effect=AssertionError("must not launch")
+            ),
+            self.assertRaisesRegex(unittest.SkipTest, "dbt-selector gap.*dbt_profiles"),
+        ):
+            native.test_dbt_selectors()
+
+    def test_native_selectors_use_profile_target_and_reject_missing_mapped_profile(
+        self,
+    ):
+        path = self.template("checks/test_maps.py", "tests/test_maps.py")
+        native = load_module(path, TEMPLATES / "checks/test_maps.py")
+        self.repo["artifact_paths"].update(
+            {
+                "dbt_project": "dbt/dbt_project.yml",
+                "dbt_profiles": "runtime/profiles.yml",
+            }
+        )
+        write_json(self.root, "repo-map.json", self.repo)
+        write(
+            self.root,
+            "dbt/dbt_project.yml",
+            "name: data_project\nprofile: data_project\n",
+        )
+        write_json(
+            self.root,
+            "test-map.json",
+            {"modules": {"items": {"selectors": {"data": "items"}}}},
+        )
+        with self.assertRaisesRegex(
+            AssertionError, "runtime/profiles.yml: missing file"
+        ):
+            native.test_dbt_selectors()
+        write(
+            self.root,
+            "runtime/profiles.yml",
+            "data_project:\n  target: prod\n  outputs:\n    prod: {}\n",
+        )
+        with patch.object(
+            native.subprocess,
+            "run",
+            return_value=subprocess.CompletedProcess(
+                [], 0, '{"unique_id":"test.data_project.items"}\n', ""
+            ),
+        ) as run:
+            native.test_dbt_selectors()
+        command = run.call_args.args[0]
+        self.assertNotIn("--target", command)
+        self.assertEqual(
+            command[command.index("--profiles-dir") + 1], str(self.root / "runtime")
+        )
+
     def orchestration(self, name):
         return load_module(
             self.template(f"orchestration/{name}.py", f"orchestration/{name}.py"),
