@@ -21,6 +21,14 @@ Resolve `artifact_paths.context` and `artifact_paths.adr` from `repo-map.json` f
 
 Removal condition: the consuming skill and its executable checks resolve the map directly, with a passing fresh consumer trial. Record the consumer/version and observed hardcoded operation. If an executable hardcodes a default, prose cannot change it: record the failing check and follow-up, and leave that integration unverified. This change never patches the upstream consumer.
 
+## Microsoft Fabric
+
+Keep the repository's Fabric Lakehouse, notebook and dbt adapter/runtime conventions. Fabric Git stores notebook content as source files inside `*.Notebook` directories; see [Microsoft's source-control documentation](https://learn.microsoft.com/fabric/data-engineering/notebook-source-control-deployment) and [supported magics](https://learn.microsoft.com/fabric/data-engineering/author-execute-notebook#magic-commands-in-a-notebook). Inventory reads these files without executing cells or installing their packages.
+
+When dbt runs only in a Fabric notebook, retain its profile-generation procedure and actual target (for example `prod`); do not create a local profile, substitute DuckDB or run the notebook to make local selectors pass. Use the [conditional check contract](artifact-contract.md#repository-checks). SQLFluff with a dbt templater also remains unverified without its required profile and runtime. Record exact unavailable checks, environment requirements and an authorized non-production target when one exists. Context/schema validation can pass while selectors, lint or sandbox execution remain unverified.
+
+Fabric does not select Studio. Apply Studio readiness only when Studio is explicitly selected; this guidance establishes no Studio-on-Fabric runtime support. Production pipeline execution and provisioning retain their separate authorization gates.
+
 ## Runtime discovery
 
 Keep customer writes under the explicit repository root. Preserve instruction filename casing; report unsupported discovery before renaming. Treat denied context paths, such as Codex workspace-write protection of `.agents/`, as partial context. Record the denied path and required permission without relaxing the sandbox. A proposed alternate location follows the same compatibility-decision procedure above.

@@ -10,6 +10,10 @@ The completed report must distinguish observed facts from hypotheses. Unknown bu
 
 Retain native check ownership. When the shared scaffold needs missing checks, use the [repository-check contract](artifact-contract.md#repository-checks), register actual commands and verify the emitted ADR command and native map checks.
 
+For Fabric Git sources, `*.Notebook/notebook-content.py` with the `# Fabric notebook source` header is a notebook, even when it contains `%pip`, shell commands or cell magics. Inventory lists it in both `code_files` and `notebook_files`; `.platform` files add the `fabric` stack marker. Only static Python imports are inspected. Cell-magic bodies are opaque, so dependencies found only there need manual text inspection; ordinary malformed Python and malformed `.ipynb` still fail without source disclosure.
+
+Preserve single-file ADR collections and notebook Markdown cells at a literal `artifact_paths.adr`, including existing `ADR NNNN` identifiers. Use their native checker or record the named ADR-link gap; do not emit the per-Markdown-file checker for container ADRs. Keep YAML source registration and a repeated notebook `SOURCES` cell when that is the confirmed convention. Map the real files and record any missing parity check as a source-registration gap. A notebook-generated dbt profile needs no invented local file: omit the local `dbt_profiles` role, retain its generation procedure and record the dbt-selector gap. Emit independent map/schema checks even when these native checks are unavailable; skips remain gaps in both the test map and report. These gaps alone do not block context readiness. See [Fabric compatibility](compatibility.md#microsoft-fabric) for execution limits.
+
 ## Convention inventory and procedures
 
 Record every observed or moved convention once. Extend the existing preservation ledger with these columns when it already holds the evidence; do not maintain a second inventory of the same facts.
