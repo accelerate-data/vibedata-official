@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import re
 import subprocess
 import tempfile
 import unittest
@@ -140,6 +141,31 @@ class SidebarCoverageTests(unittest.TestCase):
         )
         self.assertEqual(unreachable, set())
 
+    def test_published_docs_use_only_marketplace_installation(self) -> None:
+        retired = re.compile(
+            r"kubernetes|kubectl|\bhelm\b|\bAKS\b|Local Docker|Docker Compose|"
+            r"vibedata install|vibedata update compose|--full-observability|Langfuse|"
+            r"install-cloud-installer\.sh|download/install\.sh",
+            re.IGNORECASE,
+        )
+        for name, source in publish_wiki.wiki_pages(DOCS).items():
+            with self.subTest(page=name):
+                self.assertIsNone(retired.search(source.read_text(encoding="utf-8")))
+
+    def test_internal_page_links_resolve(self) -> None:
+        stems = self._published_stems()
+        for name, source in publish_wiki.wiki_pages(DOCS).items():
+            body = publish_wiki.rewrite_wiki_links(source.read_text(encoding="utf-8"))
+            targets = re.findall(r"\]\(([^)\n]+)\)", body)
+            targets += [
+                p.replace(" ", "-") for p in re.findall(r"\[\[([^\]|]+)\]\]", body)
+            ]
+            for target in targets:
+                if target.startswith(("#", "mailto:", "//")) or "://" in target:
+                    continue
+                with self.subTest(page=name, target=target):
+                    self.assertIn(target.split("#", 1)[0], stems)
+
 
 class RenderReleasePageTests(unittest.TestCase):
     def test_names_the_tag_sha_and_notes(self) -> None:
@@ -154,28 +180,26 @@ class RenderSidebarTests(unittest.TestCase):
         sidebar = publish_wiki.render_sidebar(has_release=False)
         for page in (
             "Home",
-            "01a-prereqs-entra-admin",
-            "09-worked-example-salesforce",
-            "90-troubleshooting",
+            "Prerequisites-Entra-Administrator",
+            "Deploy-via-Cloud-Marketplace",
+            "Worked-Example-Salesforce",
+            "Troubleshooting",
             "update",
             "rollback",
-            "cloud-installer",
         ):
             self.assertIn(f"]({page})", sidebar)
         self.assertIn("### Getting started", sidebar)
         self.assertIn("### Operate", sidebar)
 
-    def test_lists_the_latest_release_and_installer_links(self) -> None:
-        # Reachable with or without a generated release page: the GitHub Release
-        # is the release-notes + assets entry point, and the installer is its
-        # attached install.sh asset.
+    def test_lists_the_latest_release_notes(self) -> None:
+        # Release notes remain reachable with or without a generated Release page.
         for has_release in (False, True):
             sidebar = publish_wiki.render_sidebar(has_release=has_release)
             self.assertIn("### Releases", sidebar)
             self.assertIn(
                 f"- [Latest release notes]({publish_wiki.RELEASES_URL})", sidebar
             )
-            self.assertIn(f"- [Installer]({publish_wiki.INSTALLER_URL})", sidebar)
+            self.assertNotIn("download/install.sh", sidebar)
 
     def test_generated_release_entry_only_when_a_release_exists(self) -> None:
         without = publish_wiki.render_sidebar(has_release=False)

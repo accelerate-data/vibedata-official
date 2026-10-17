@@ -1,164 +1,105 @@
 # Configure the Studio instance
 
-Studio is now running. This page covers instance-level configuration before creating the first Domain.
+After your marketplace deployment is running, complete these steps as a `vibedata_owner`. Data-platform and secret-store configuration belongs to each Domain; see [[Create Your First Domain]].
 
-The current architecture does **not** register Microsoft Fabric or MotherDuck as instance-level Data Platforms. Data Platform configuration happens on the Domain in [[Create Your First Domain]].
+## Configure an identity provider for sign-in
 
-## Local Docker
+1. Open **Org settings → Identity providers**.
+2. Select **Register identity provider**.
+3. Choose the appropriate **Provider type** and fill in **Display name**.
+4. Copy the displayed **Callback URL** into the external application's redirect configuration.
+5. Complete the provider-specific fields, including **Tenant ID**, **Client ID**, and **Client secret** for **Microsoft Entra ID**.
+6. Select **Allow sign-in** if this provider must sign users into Studio.
+7. Set **Automatically approve new users** according to your access policy.
+8. Select **Create**.
+9. Select **Test** on the saved provider row.
 
-> **Applies to: Local Docker.**
+A new provider shows **Pending test** until its test succeeds. A successful test activates it. Saving a replacement for an active provider keeps the previous active configuration in use until the replacement passes its test.
 
-Local Docker uses ambient auth and a single operator.
+An eligible provider can support both sign-in and downstream delegation. Clear **Allow sign-in** for a delegation-only provider. Automatic approval does not grant roles or Domain membership and does not approve existing pending users.
 
-Skip:
+For Entra preparation, see [[Prerequisites Entra Administrator]].
 
-- SSO Provider setup;
-- downstream Identity Provider administration for user OAuth;
-- GitHub App setup;
-- multi-user role provisioning.
+## Configure GitHub
 
-Your host `gh` session and, for Fabric, the container's `az` session provide the ambient user identities.
+1. Open **Org settings → GitHub**.
+2. Enter the customer-owned GitHub App's client ID, client secret, and private key PEM.
+3. Save the configuration.
 
-You still need an LLM Profile.
+Studio validates the App identity and required permissions. It derives the App metadata; you do not enter an App ID or a global installation ID. The Domain repository picker selects the installation and repository later.
 
-## Kubernetes on Azure
+Use [[Prerequisites GitHub Organisation Owner]] if validation fails or an installation needs permission approval.
 
-> **Applies to: Kubernetes on Azure.**
+## Connect downstream user accounts
 
-Complete these instance-level items as the first real `vibedata_owner`.
+For Fabric, register and activate an eligible **Microsoft Entra ID** provider. It can be the provider used for sign-in if it has the required downstream configuration and permissions, or a separate delegation-only provider.
 
-### 1. SSO Provider
+Each user then connects their own account under **User Settings → Connections**. Domain creation offers only active, compatible providers with a healthy connection for the signed-in user. Registering a provider alone does not complete that user's connection, and Domain creation does not start the OAuth flow.
 
-Open **Org Settings → SSO Providers**.
+MotherDuck uses user PATs. DuckDB needs no external data-platform credential.
 
-Register the provider users will use to sign in to Studio. Current UI supports provider-specific registrations and shows the callback URL for the provider.
+## Configure an LLM profile
 
-For an Entra deployment, use the tenant/client/secret supplied by the administrator and register the exact callback URL Studio displays in the Entra application.
+1. Open **Org settings → LLM profiles**.
+2. Start a new profile.
+3. Fill in **Profile name**.
+4. Select **Provider**.
+5. Complete the connection fields displayed for that provider.
+6. Select or enter **Model**.
+7. Review **Canonical model**.
+8. Save the profile and resolve any connection-test failure.
 
-SSO Provider means **Studio login**. It is not the downstream Fabric Identity Provider.
+Choose from the deployed provider list. For example, the Azure option is **Azure Foundry**; the list also includes providers such as DeepSeek and Ollama. Endpoint, credential, and model-discovery requirements depend on the provider.
 
-### 2. GitHub
+**Canonical model** supplies capabilities, limits, and price metadata. For providers that identify their own models, Studio resolves it. **Custom (OpenAI-compatible)** and Ollama offer a catalogue association picker, including **None — not in the catalogue**. An association is not mandatory for every profile.
 
-Open **Org Settings → GitHub**.
+Connection-field changes run a real provider test. A failed test prevents that connection change from being saved. Choose an instance default profile, then verify it with an actual Intent turn. There is no Domain-level LLM override.
 
-Enter the GitHub App:
+## Configure users and roles
 
-- Client ID;
-- client secret;
-- private key PEM.
-
-Studio validates the App identity and the required permission map before accepting the provider.
-
-No App ID or installation ID is entered here. Installations are selected later as part of Domain repository binding.
-
-### 3. Downstream Identity Provider, when required
-
-Open **Org Settings → Identity Providers**.
-
-> **Applies to: Microsoft Fabric on Kubernetes on Azure.**
-
-Register a Microsoft Entra ID Identity Provider with:
-
-- name;
-- tenant ID;
-- client ID;
-- client secret.
-
-This provider exists only for downstream user access. It does not sign users into Studio.
-
-After registration, copy the callback URL Studio displays and make sure that exact URL is registered on the Entra application.
-
-MotherDuck does not require an OAuth Identity Provider; its users connect PAT credentials. DuckDB needs no downstream identity.
-
-## Configure LLM Profiles
-
-Open **Org Settings → LLM Profiles**.
-
-Current Studio supports these curated provider types:
-
-- Anthropic;
-- OpenAI;
-- OpenRouter;
-- Azure AI Foundry;
-- plus a `custom` OpenAI-compatible profile type.
-
-The old onboarding rule that every installation must use Azure AI Foundry is no longer correct.
-
-Create at least one usable profile. The core connection fields are:
-
-| Field | Meaning |
-| --- | --- |
-| Profile name | Stable human-readable profile name |
-| Provider | Curated provider or custom |
-| API base | Provider endpoint/base URL |
-| API key | Secret, write-only after save |
-| Model | Model identifier or Azure deployment name |
-
-Studio runs a real connection test when a profile is created or its connection fields change. A failed test prevents that connection change from being saved.
-
-Choose one profile as the instance default. New Intents can inherit the default profile and users can change the bound profile through the supported Intent flow. There is no Domain-level LLM override.
-
-Advanced sampling, reasoning, caching, capability, and cost metadata can stay at defaults until you have a reason to tune them.
-
-## Users and roles
-
-> **Applies to: Kubernetes on Azure.**
-
-Open **Org Settings → Users** and add the people who should use Studio with the minimum required role.
-
-The main onboarding roles are:
+Open **Org settings → Users** and grant the minimum required access. The main onboarding roles are:
 
 - `vibedata_owner` — instance administration;
 - `domain_owner` — administration within a Domain;
 - `domain_contributor` — work within a Domain;
-- `user_access_administrator` — user/access administration without broad product ownership.
+- `user_access_administrator` — user and access administration.
 
-Domain membership is configured after a Domain exists.
+Configure Domain membership after the Domain exists.
 
-## Secret Stores: current-main caveat
+## Prepare the Domain secret store
 
-Org Settings still exposes a **Secret Stores** administration surface, including Azure Key Vault support.
+Choose the store during Domain creation. The **Secret store type** control shows which types your deployment offers and which are available.
 
-However, the current executable Domain-create path automatically initializes a local Domain secret store and does not present a Secret Store picker on the Domain form. For this onboarding snapshot, do not add a Secret Store merely because older documentation told you it was a required pre-Domain registry step.
+- **Internal** needs no external store connection. Saving it exposes the Domain's **Secrets** tab.
+- **Azure Key Vault** and other external stores need their displayed connection, identity, and resource configuration.
+- **Local File**, when selected, requires an operator to supply secrets outside Studio.
 
-The local Domain secrets file is created when the Domain is created and is used by the source-connection flow in this guide.
+There is no separate organisation-level Secret Stores registration prerequisite. See [[Create Your First Domain]] for the create flow and store-specific credential handling.
 
-## Settings you can leave alone for first onboarding
+## Optional settings
 
-The following current Org Settings surfaces are not prerequisites for the first Domain unless your organization has a specific requirement:
+Configure these only when your organisation requires them. Availability depends on permissions, deployment settings, and preview features:
 
-- OAuth Clients;
-- MCP Catalog;
-- Plugins;
-- Service Principals;
-- Connector Sources;
-- Automations;
-- Budgets;
-- Action Confirmation;
-- Capacity;
-- Announcements.
+- **OAuth clients**;
+- **MCP catalog**;
+- **Plugins**;
+- **Action confirmation**;
+- **Connector sources**;
+- **Maintenance jobs**;
+- **Capacity settings**;
+- **Credit packs**;
+- **Announcements**;
+- **Preview features**;
+- **Usage**;
+- **Audit records**;
+- **Archive**.
 
-Bundled product capabilities do not need to be manually installed as marketplace plugins for a basic first Domain.
+## Check before creating the first Domain
 
-## Checklist before creating the first Domain
-
-For Local Docker:
-
-- Studio is reachable;
-- GitHub ambient session works;
-- Fabric ambient Azure login works if Fabric is used;
-- at least one LLM Profile is usable.
-
-For Kubernetes on Azure:
-
-- real owner signs in through SSO;
-- GitHub provider validates;
-- Fabric Identity Provider is registered when Fabric is used;
-- users/roles needed for the first Domain exist;
-- at least one LLM Profile is usable.
+Confirm that a real owner can sign in, GitHub configuration validates, required users have access, and an LLM profile is usable. For Fabric, also confirm the creating user's downstream connection is healthy.
 
 Continue to [[Create Your First Domain]].
 
 ---
 
-_Applies to: studio/main (unreleased snapshot). Verified against `studio@5c9d2bbf339a` on 2026-08-22._
+_Release scope and source-review limits: [Home](README.md#release-and-verification-scope)._

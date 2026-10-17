@@ -2,100 +2,50 @@
 
 > **Applies to: MotherDuck.** Skip for DuckDB and Microsoft Fabric.
 
-Current Studio configures MotherDuck directly on each Domain. There is no instance-level MotherDuck registration step.
+Configure MotherDuck on each Domain. Prepare a user PAT for each contributor's interactive work and a Domain service PAT for unattended work. These are separate credential lanes; Studio does not fall back to another person's PAT.
 
-## Identity model
+## Prepare the database and schema
 
-MotherDuck uses PAT authentication in current Studio.
+1. Select the persistent database the Domain will bind to.
+2. Confirm that the intended acting identity owns that database.
+3. Select the primary schema, or let the operator create it from the Domain form.
 
-### Local Docker
+The database and schema form the Domain's immutable resource identity. Studio can discover visible databases and schemas, but visibility alone does not prove that an Intent can activate.
 
-Local Docker uses ambient authentication. One shared Domain PAT serves the operating identity. The Domain cannot defer that service credential in ambient mode.
+Intent activation requires ownership of the bound database by the acting MotherDuck identity. A MotherDuck Share does not provide a fallback for a non-owner. New Domains have no Share field; legacy Share state does not make non-owner activation valid.
 
-### Kubernetes on Azure
+Check this ownership restriction before onboarding contributors to a shared Domain. Do not promise multi-user activation based only on a sharing grant.
 
-Delegated deployments use two credential lanes:
+## Provide the service PAT
 
-- each contributor connects their own MotherDuck PAT for interactive work;
-- the Domain stores a service PAT for unattended work.
+Issue a PAT for the identity that will perform unattended Domain work. It must have the access required for validation and runtime operations; a read-only token is insufficient for work that writes.
 
-The Domain can initially defer its service identity, but Intents cannot activate while a required service credential remains unconfigured.
+Return the service PAT to the operator through an approved secret-management channel. Configure it on the Domain before expecting unattended work to succeed.
 
-## 1. Provide a Domain service PAT
+## Connect each user's PAT
 
-Create or select a MotherDuck identity for unattended Domain work and issue a PAT with the access Studio needs to validate the bound database and perform the Domain's runtime operations.
+Each contributor supplies their own PAT directly through **User Settings → Connections**. They do not send it to the Domain operator or the agent.
 
-Return the PAT through a secure credential channel.
+Confirm that the customer's MotherDuck organisation and plan permit the intended identities and operations. Seat counts, prices, and entitlements are vendor terms and can change independently of Studio.
 
-Do not provide a read-only token when the Domain's intended work requires writes. Studio uses one PAT credential type for this service lane and does not automatically upgrade a read-only token.
+## Verify Intent isolation
 
-## 2. Prepare the database
+Studio uses an isolated clone of the Domain's source database for an Intent. The ownership requirement applies before clone activation.
 
-Create or nominate the database the Domain will bind to.
+Snapshot-retention entitlements can also affect cloning. If activation fails after an account or plan change, check the source database's retention settings against the acting identity's current entitlement.
 
-The database is part of the Domain's immutable resource identity. Choose it before Domain creation. Current Studio can discover databases visible to the connected user and can select the database in the Domain form.
+Allow Studio and its agent runtime to reach MotherDuck over HTTPS and load the MotherDuck extension when required. Use the customer's current egress policy rather than a fixed hostname list copied from an old guide.
 
-Return the database name.
-
-## 3. Prepare the primary schema
-
-The Domain also binds to one schema. Current Studio can list existing schemas and create a schema from the Domain form.
-
-Return the intended schema name, or let the operator create it while creating the Domain.
-
-The database and schema form the persistent Domain resource and should be treated as immutable after creation.
-
-## 4. Decide whether the Domain needs a Share
-
-Current Studio's MotherDuck backend supports an optional `shareName` on the Domain.
-
-A Share is how an identity that does not own the bound database can gain read access to it. Studio does not create the Share or issue the MotherDuck grant; the customer establishes it out of band.
-
-Important current behavior:
-
-- without a Share, only an identity that can directly resolve the database can activate against it;
-- with a configured Share, a non-owner can use the granted Share as the source for its isolated Intent database;
-- the database identity stays fixed, but the Share association is not part of database uniqueness and current backend behavior supports changing or clearing it later.
-
-If several people will contribute to one MotherDuck Domain, plan the MotherDuck sharing model before onboarding them. Do not use the old assumption that every MotherDuck Domain is permanently single-contributor.
-
-## 5. User PATs on delegated deployments
-
-> **Applies to: Kubernetes on Azure.**
-
-Each human who will drive MotherDuck work needs a compatible MotherDuck user credential in Studio. They connect it from **User Settings → Connections** when the Domain requires it.
-
-Studio does not fall back to another person's PAT. User credentials are isolated per Studio user.
-
-The customer's MotherDuck organisation and commercial plan must allow the intended users and service identities. Do not rely on the seat counts or plan prices from an older copy of this onboarding guide; those are vendor terms and can change without a Studio release.
-
-## 6. Intent isolation and plan-dependent behavior
-
-Studio creates an isolated MotherDuck database for an Intent by cloning from the Domain's source database or an accessible Share.
-
-MotherDuck snapshot-retention entitlements can affect whether that clone succeeds. If a database carries retention settings outside the acting identity's current plan limits, activation can fail even though the PAT itself is valid.
-
-If this happens, verify the source database's retention and the acting MotherDuck account's current entitlement with MotherDuck. Do not treat it as a Studio authentication failure first.
-
-## Network access
-
-Allow Studio and its agent runtime to reach MotherDuck over HTTPS. The runtime may also need to load the MotherDuck DuckDB extension when it is not already available locally.
-
-In restricted egress environments, validate this path before the first Domain is created. Do not rely on a static wildcard hostname list as a permanent vendor contract.
-
-## Values to return
-
-Give the Studio operator:
+## Handoff
 
 | Value | Used for |
 | --- | --- |
-| Domain service PAT | Domain service authentication |
-| Database name | Domain resource binding |
-| Schema name | Domain resource binding |
-| Share name, when used | Cross-identity database access |
+| Domain service PAT | Unattended Domain operations |
+| Database name and ownership confirmation | Persistent binding and Intent activation |
+| Schema name | Persistent Domain schema |
 
-Each delegated contributor supplies their own user PAT directly through Studio rather than sending it to the Domain operator.
+Each contributor must still connect and verify their own user credential. Continue to [[Create Your First Domain]].
 
 ---
 
-_Applies to: studio/main (unreleased snapshot). Verified against `studio@5c9d2bbf339a` on 2026-08-22._
+_Release scope and source-review limits: [Home](README.md#release-and-verification-scope)._

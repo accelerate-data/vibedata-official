@@ -37,10 +37,8 @@ SIDEBAR_PAGE = "_Sidebar.md"
 RELEASE_PAGE = "Release.md"
 RELEASE_STEM = "Release"
 
-# Always-reachable operator entry points: the latest GitHub Release (release
-# notes + assets) and the CLI installer asset attached to it.
+# Release notes remain reachable independently of the generated Release page.
 RELEASES_URL = "https://github.com/accelerate-data/vibedata-official/releases/latest"
-INSTALLER_URL = f"{RELEASES_URL}/download/install.sh"
 
 GIT_AUTHOR_NAME = "github-actions[bot]"
 GIT_AUTHOR_EMAIL = "41898282+github-actions[bot]@users.noreply.github.com"
@@ -51,11 +49,9 @@ GETTING_STARTED_PAGES: tuple[tuple[str, str], ...] = (
     ("Microsoft Entra administrator", "Prerequisites-Entra-Administrator"),
     ("Microsoft Fabric administrator", "Prerequisites-Fabric-Administrator"),
     ("GitHub organisation owner", "Prerequisites-GitHub-Organisation-Owner"),
-    ("Azure infrastructure owner", "Prerequisites-Azure-Infrastructure"),
     ("MotherDuck administrator", "Prerequisites-MotherDuck-Administrator"),
     ("Operator setup", "Prerequisites-Operator"),
-    ("Deploy: Local Docker", "Deploy-with-Local-Docker"),
-    ("Deploy: Kubernetes on Azure", "Deploy-on-Kubernetes-on-Azure"),
+    ("Install from your cloud marketplace", "Deploy-via-Cloud-Marketplace"),
     ("Configure the Studio instance", "Configure-the-Studio-Instance"),
     ("Create your first Domain", "Create-Your-First-Domain"),
     ("Verify the first Domain", "Verify-the-First-Domain"),
@@ -66,8 +62,7 @@ GETTING_STARTED_PAGES: tuple[tuple[str, str], ...] = (
 
 OPERATE_PAGES: tuple[tuple[str, str], ...] = (
     ("Update Studio", "update"),
-    ("Roll back a release", "rollback"),
-    ("Cloud installer", "cloud-installer"),
+    ("Recovery and rollback", "rollback"),
 )
 
 
@@ -164,7 +159,6 @@ def render_sidebar(has_release: bool) -> str:
         "### Releases",
         "",
         f"- [Latest release notes]({RELEASES_URL})",
-        f"- [Installer]({INSTALLER_URL})",
     ]
     if has_release:
         lines += [f"- [This release]({RELEASE_STEM})"]
