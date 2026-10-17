@@ -2,7 +2,7 @@
 
 Plan: [2026-10-16 source alignment](../docs/superpowers/plans/2026-10-16-onboarding-vibedata-source-alignment.md).
 
-**Current scope:** The user authorized the scoped commit, branch update, push and draft PR. Installed-package Codex testing is deliberately skipped by user decision; do not request installation again. Run no more Claude tests. Studio remains excluded. Earlier failed and unverified results remain evidence; draft publication does not make them pass. This overrides historical restart commands below. Merge and release publication are not authorized.
+**Current scope:** The user authorized the scoped commit, branch update, push and draft PR. Installed-package Codex testing is deliberately skipped by user decision; do not request installation again. Run no more Claude tests. Studio remains excluded. Earlier failed and unverified results remain evidence; draft publication does not make them pass. This overrides historical restart commands below. Merging the PR into main and release publication are not authorized.
 
 ## Launch
 
@@ -226,3 +226,9 @@ The user approved committing the scoped implementation and documentation, checki
 Fetched `origin/main` remains `b878bf81be9301ec1f21729a021846e780e107b1`. It includes the earlier onboarding PR #48 as a squash and the separate wiki fixes from PR #47. Integrate that base into this feature branch so the new PR contains only the alignment changes and retained dependency documentation. Recheck the changed CI/wiki boundary after integration; historical two-failure results remain historical.
 
 GitHub confirms PR #48 is merged and explicitly records no associated Linear issue. No issue for this follow-up is identified. The draft will state this tracking gap instead of borrowing the source repository's VD-6914 or inventing a ticket. The previously failed Linear authentication is not retried.
+
+At 08:39 +04, branch integration is complete: implementation commit `97a7011`, followed by merge `404d320` from `origin/main@b878bf8`. Every one of 27 conflict resolutions was checked against an identical historical input from `d07d1a8` or `36ab98d`; the reviewed alignment content was retained. Ten deleted legacy rule templates reintroduced by the squash-history merge were removed again. All 68 scoped input hashes/deletions match the pre-merge checkpoint. The incoming wiki fixes, tests and CI match main exactly and are outside the PR diff. No force-push or history rewrite was used.
+
+Fresh post-integration checks on `404d320`: **169 tests, 168 passed, one opt-in integration skip, zero failures; coverage 89%**. The two historical wiki failures are resolved by main's existing PR #47 changes. Marketplace validation, root version increase `1.3.0 → 1.4.0`, catalog freshness, Ruff lint and formatting all pass. The previously enabled 15/15 scaffold result remains valid for byte-identical plugin inputs and is not reported as a new integration run. No new Claude or installed-package test ran. Evidence: `pr-full-suite`, `pr-coverage`, `pr-marketplace`, `pr-version`, `pr-catalog`, `pr-lint` and `pr-format` JSON/log files in the retained workspace.
+
+The remaining acceptance gaps concern runtime behavior and tracking: captured Claude package-scope violations remain unresolved; Codex installed-package onboarding is skipped/unverified by user decision; Studio is excluded; no Linear issue is linked. Keep the PR draft and report remote CI separately from these local results. Python compilation and 35 local documentation file targets also pass; documentation anchors were not checked. The next step after opening is review of the draft and its CI results.
