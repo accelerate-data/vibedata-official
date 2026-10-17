@@ -22,12 +22,21 @@ class OnboardingTemplateTests(unittest.TestCase):
     def test_skill_identity_and_conditional_references(self):
         self.assertTrue((SKILL / "SKILL.md").is_file(), "Shared skill is missing")
         text = (SKILL / "SKILL.md").read_text()
+        self.assertLess(len(text.split()), 400)
         metadata = yaml.safe_load(text.split("---", 2)[1])
         self.assertEqual(metadata["name"], "onboarding-vibedata")
         self.assertTrue(metadata["description"].strip())
         for name in ("brownfield", "greenfield", "artifact-contract", "compatibility"):
             self.assertIn(f"references/{name}.md", text)
             self.assertTrue((SKILL / f"references/{name}.md").is_file())
+
+    def test_review_template_has_typed_run_metadata(self):
+        text = (SKILL / "templates/review.md").read_text()
+        rendered = re.sub(r"\{\{[a-z_]+\}\}", "confirmed-value", text)
+        self.assertTrue(rendered.startswith("---\n"))
+        metadata = yaml.safe_load(rendered.split("---", 2)[1])
+        self.assertEqual(set(metadata), {"type", "date", "commit", "source"})
+        self.assertEqual(metadata["type"], "onboarding")
 
     def test_skill_requires_explicit_user_invocation_in_both_runtimes(self):
         metadata = yaml.safe_load((SKILL / "SKILL.md").read_text().split("---", 2)[1])
@@ -73,12 +82,15 @@ class OnboardingTemplateTests(unittest.TestCase):
             (root / "docs/onboarding.md").write_text(
                 "# Status\nExecution unverified.\n"
             )
-            (root / ".agents/rules").mkdir(parents=True)
+            (root / ".agents/skills").mkdir(parents=True)
             (root / ".agents/checks").mkdir()
             shutil.copy(
                 SKILL / "scripts/validate_context.py",
                 root / ".agents/checks/validate_context.py",
             )
+            (root / "tests").mkdir()
+            for name in ("test_adr_links.py", "test_maps.py"):
+                shutil.copy(SKILL / "templates/checks" / name, root / "tests" / name)
             result = subprocess.run(
                 [
                     sys.executable,
@@ -117,12 +129,30 @@ class OnboardingTemplateTests(unittest.TestCase):
             "git-and-prs",
             "workarounds",
         }
-        self.assertEqual({p.stem for p in (templates / "rules").glob("*.md")}, expected)
+        self.assertEqual(
+            {p.stem for p in (templates / "skills").glob("*.md")}, expected
+        )
         for path in templates.rglob("*"):
             if path.is_file():
                 self.assertNotRegex(
                     path.read_text(), r"(?i)nyc.?taxi|trip_key|tlc_pipeline|ops_raw"
                 )
+
+    def test_convention_templates_render_valid_metadata(self):
+        paths = list((SKILL / "templates/skills").glob("*.md"))
+        self.assertEqual(len(paths), 10)
+        for path in paths:
+            with self.subTest(name=path.stem):
+                text = re.sub(
+                    r"\{\{[a-z_]+\}\}", "confirmed repository value", path.read_text()
+                )
+                metadata = yaml.safe_load(text.split("---", 2)[1])
+                self.assertEqual(metadata["name"], path.stem)
+                self.assertIsInstance(metadata["description"], str)
+                self.assertTrue(metadata["description"].strip())
+                self.assertNotIn("{{", text)
+        with self.assertRaises(yaml.YAMLError):
+            yaml.safe_load("name: [broken\ndescription: invalid\n")
 
     def test_greenfield_python_recipe_compiles(self):
         path = SKILL / "templates/greenfield/README.md"

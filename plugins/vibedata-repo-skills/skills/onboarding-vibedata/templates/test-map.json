@@ -8,13 +8,37 @@
         "repo-map.json",
         "test-map.json",
         "AGENTS.md",
-        ".agents/rules/"
+        ".agents/skills/"
       ],
       "structural": [
         ".agents/checks/validate_context.py"
       ],
       "commands": {
         "structural": "python3 .agents/checks/validate_context.py --root ."
+      }
+    },
+    "decisions": {
+      "sources": [
+        "repo-map.json"
+      ],
+      "structural": [
+        "tests/test_adr_links.py"
+      ],
+      "commands": {
+        "structural": "python tests/test_adr_links.py --root ."
+      }
+    },
+    "native_maps": {
+      "sources": [
+        "repo-map.json",
+        "repo-map.schema.json",
+        "test-map.json"
+      ],
+      "structural": [
+        "tests/test_maps.py"
+      ],
+      "commands": {
+        "structural": "python -m pytest tests/test_maps.py"
       }
     }
   },

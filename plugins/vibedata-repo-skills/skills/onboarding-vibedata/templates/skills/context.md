@@ -1,3 +1,8 @@
+---
+name: context
+description: Use when reading, defining or changing repository vocabulary.
+---
+
 # Vocabulary
 
 Scope: vocabulary tasks.

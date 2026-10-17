@@ -1,9 +1,9 @@
 # onboarding-vibedata design
 
-**Status:** Approved for execution in a new session, including the revised instruction-ownership rule; implementation has not started.
+**Status:** The shared repository-preparation skill is implemented. The 2026-10-16 source-alignment update is under local acceptance; Studio lifecycle is blocked. Current results and remaining gates are in the [execution ledger](onboarding-vibedata-source-alignment-run.md).
 **Scope:** One shared skill distributed from `vibedata-official`, usable in Codex and Claude, preparing repositories for later VibeData build sessions.
 **Companion:** [Implementation plan](onboarding-vibedata-plan.md).
-**Repository baseline:** `aee3c19`; recheck current instructions and manifests before implementation.
+**Repository baseline:** Original design `aee3c19`; alignment execution `d07d1a8`, checked against fetched `origin/main@b878bf8`. Historical results remain in the validation record.
 
 ## Contents
 
@@ -44,12 +44,12 @@ Customer-repository onboarding does not automatically commit, push, create a PR,
 | R05 | Existing instruction content is preserved according to the ownership table below; `AGENTS.md` is canonical in every case, and any existing `CLAUDE.md` becomes the reference-only placeholder. |
 | R06 | Conflicting existing instructions, referenced rules, and onboarding requirements are presented to the user before dependent changes proceed. |
 | R07 | The user sees each proposed compatibility change and its effect; approved changes are applied and verified, while declined or pending changes remain follow-ups. |
-| R08 | Rules contain applicable conventions and exceptions; temporary workarounds specify scope, action, reason, and removal condition. |
+| R08 | Discoverable convention skills contain applicable conventions and exceptions; legacy rules remain usable; temporary workarounds specify scope, action, reason, and removal condition. |
 | R09 | Existing vocabulary and decisions are reused; uncertain rationale is identified, and absent knowledge produces minimal placeholders rather than invented business facts. |
 | R10 | Reruns preserve human edits, reconcile missing/stale information, avoid duplicates, and produce no substantive diff when inputs have not changed. |
 | R11 | Discovery does not execute unfamiliar notebooks, ingestion, or arbitrary repository commands; execution checks use an established target and understood side effects. |
 | R12 | Structural checks detect broken paths, reference cycles, incomplete source registration, and stale map relationships; missing test coverage is reported honestly. |
-| R13 | Results distinguish repository context readiness from verified execution and identify exactly which follow-ups block either outcome. |
+| R13 | Results distinguish context, runtime loading, sandbox execution, persistent Domain state and conditional Studio lifecycle; each gap names its next action. |
 | R14 | Fresh sessions locate task files, applicable rules, examples/templates, and checks through the generated context; reduced discovery is measured alongside correctness. |
 | R15 | Both plugin manifests and marketplace catalogs expose the skill, and the generated catalog is updated through the existing generator. |
 | R16 | Baseline scenarios precede authoring; `writing-for-agents` guides creation and `writing-skills` supplies the subsequent behavioral verification pass. |
@@ -60,7 +60,7 @@ Customer-repository onboarding does not automatically commit, push, create a PR,
 ## Artifact contract
 
 The map is an intentional cache of expensive repository discovery, maintained by the same changes that make it stale.
-It contains facts and routing information; rules own conventions, the glossary owns vocabulary, and ADRs own qualifying decisions.
+It contains facts and routing information; convention skills own conventions, the glossary owns vocabulary, and ADRs own qualifying decisions.
 
 | Artifact | Brownfield | Greenfield |
 | --- | --- | --- |
@@ -68,10 +68,11 @@ It contains facts and routing information; rules own conventions, the glossary o
 | `repo-map.schema.json` | Validate the agreed map shape while preserving existing extensions. | The same schema, permitting an empty source/model inventory. |
 | `test-map.json` | Actual checks, their scope and selectors, and explicit coverage gaps. | Scaffold checks and conventions for later tests; no fictitious business coverage. |
 | Canonical instruction file | Existing instructions reconciled into a short startup index and appropriately scoped rules. | `AGENTS.md` with startup routing and maintenance obligations. |
-| `.agents/rules/` | Confirmed conventions, exceptions, documentation rules, and applicable workarounds. | Selected defaults demonstrated by the scaffold and templates. |
+| `.agents/skills/<name>/SKILL.md` | Confirmed task conventions, exceptions and applicable workarounds with valid metadata; retain active legacy rules and customer skills. | Selected defaults demonstrated by the scaffold. |
+| `.claude/skills/<name>` | Contained aliases to canonical skills after ownership checks; preserve collisions pending resolution. | One maintained copy through contained aliases. |
 | Vocabulary, via `artifact_paths.context` | Reuse supported definitions and existing location/format. | Known terms only; otherwise a heading and a statement that no domain terms are established. |
 | ADRs, via `artifact_paths.adr` | Preserve location, numbering, decisions, and history. | Record actual qualifying setup decisions; otherwise create an index stating that no ADRs are recorded. No empty numbered ADR. |
-| Design records | Decisions not recoverable from code, with evidence and rationale; no mandatory record for every trivial artifact. | Templates, and records only for substantive components actually introduced. |
+| Design records | Qualitative decisions not recoverable from code, with rationale and links to mapped verification; no mandatory record for every trivial artifact. | Templates, and records only for substantive components actually introduced. |
 | Repo-specific skills | Only confirmed procedures not already covered by available general skills. | Only procedures that setup actually establishes; no speculative skill library. |
 | Onboarding report | Changes, checks and blockers; a preservation ledger for instruction consolidation, and decision details for actual conflicts or compatibility changes. | The same compact report, with actual setup choices and outstanding configuration. |
 | Review and proposal documents | Evidence-backed findings at the mapped review location; a proposal only when a substantial finding needs a separate decision. | The same formats are available; no empty finding or proposal is invented to fill a directory. |
@@ -99,8 +100,10 @@ For the shared schema, the following role keys are stable, while their values ar
 | `review` | `docs/review/{date}-{type}-{slug}.md` | Findings requiring triage. |
 | `proposal` | `docs/proposal/{nnnn}-{slug}.md` | Optional proposals for substantial follow-up work. |
 | `onboarding_report` | `docs/onboarding.md` | Durable inventory, decisions, and verification for onboarding. |
+| `requirement`, `plan`, `verification`, `case_record` | `docs/{requirement,plans,verify,cases}/{intent}.md` respectively | Future artifacts required by the shared Studio contract; standalone/native maps remain compatible. |
+| `design_record_area` | `docs/design/{area}/{subject}.md` | Qualitative cross-component decisions, linked to mapped evidence. |
 
-In the shared schema, `key_references.agents` names the bootstrap file, `key_references.instructions` the canonical instruction file, and `key_references.rules`, `key_references.schema`, and `key_references.test_map` the actual rules directory, map schema, and test map.
+In the shared schema, `key_references.agents` names the bootstrap file, `key_references.instructions` the canonical instruction file, and `key_references.conventions`, `key_references.schema`, and `key_references.test_map` the canonical skill tree, map schema, and test map. Legacy `rules` remains supported and both roots are checked when present.
 `notes_for_agents` states the startup sequence and maps task kinds to rules and suitable existing examples or templates.
 Paths are repo-relative and preserve case; placeholder patterns are distinguished from existing instances.
 A repository with different ADR identifiers retains them and declares its actual pattern; `{nnnn}` is a default, not a renumbering instruction.
@@ -175,7 +178,7 @@ An unchanged rerun must not rewrite timestamps or reorder content just to demons
 
 ## Rules and temporary workarounds
 
-Task rules cover dbt models, SQL, testing, dlt, existing Python/notebook practices, documentation, and Git conventions where applicable.
+Task convention skills cover dbt models, SQL, testing, dlt, existing Python/notebook practices, documentation, and Git conventions where applicable. Canonical paths are `.agents/skills/<name>/SKILL.md`; selected Claude uses contained directory aliases after collision checks. Legacy rule scopes remain authoritative until losslessly migrated.
 Permanent rules and temporary workarounds remain distinct.
 Select runtime/platform workarounds from observed requirements rather than copying all NYC Taxi workarounds into every repository.
 An ingestion task reads ingestion rules and applicable workarounds, not the full documentation rule library.
@@ -257,7 +260,32 @@ Author-selected defaults are the plugin container name, report path, minimal hel
 They are reviewable defaults, not claims of user preference.
 
 Still to prove: wrapper loading in each runtime, custom-path behavior under VibeData, scaffold execution for the selected platform, and discovery reduction.
-These checks belong to implementation and verification; this planning change runs none of them.
+Current check outcomes and runtime limits are in the execution ledger and append-only validation record; this design is not execution evidence.
+
+## Source-alignment contract (2026-10-16)
+
+The approved [alignment plan](../docs/superpowers/plans/2026-10-16-onboarding-vibedata-source-alignment.md#observable-requirements-and-acceptance-map) maps S01–S12 to the original R01–R19 and conditional L01–L08.
+
+| Requirement | Observable addition and acceptance |
+| --- | --- |
+| S01 | Canonical convention skills, contained Claude aliases, legacy ownership; metadata/context checks and real loading. |
+| S02 | Shared Studio maps require requirement, plan, verification, case_record and design_record_area future patterns; standalone/native contracts remain valid. |
+| S03 | ADR/design symmetry and actual native schema/config/selector checks execute through mapped commands and generated PR CI. |
+| S04 | Measurements and outcomes stay in mapped verification; qualitative designs link them. |
+| S05 | Ordinary tasks load relevant conventions and applicable workarounds after real compaction; mapped lint, explicit unit vars and approved docs guide work. |
+| S06 | Samples account for page overshoot, cost, actual landed rows/load metadata, partial failures and parent-source extension registrations. |
+| S07 | Authorized disposable samples leave persistent Domain state unchanged; missing targets/approval produce concrete proposals. |
+| S08 | Selected DuckDB scaffold uses one explicit database and passes synthetic repeated ingestion, dbt and renamed-copy checks. |
+| S09 | Every setup row has evidence/gap; warning cleanup preserves test IDs/counts and compiled semantics. |
+| S10 | Stable C-n inventory, confirmed-only procedures and typed R-n review triage; source/mart/procedure-or-connected-model rehearsals. |
+| S11 | Current supported consumer capability, artifact paths and side effects gate lifecycle composition; missing support is blocked. |
+| S12 | Current package, preservation, runtime and release evidence remain distinct from historical results and skipped lanes. |
+
+A shared `validate_context(root, *, consumer="standalone")` remains standard-library only; `studio` adds the five roles. Metadata parsing, native customer validation and runtime loading are separate checks. New roles are future patterns, not fabricated documents. Customer schemas and historical ADR IDs retain their ownership.
+
+Inventory rows record C-n, convention, evidence, exceptions, destination and confirmation (`inferred`, `confirmed`, `changed by user`, `dropped`). Established facts need no repeated approval. Studio review metadata records type/date/commit/source; R-n text and IDs survive triage. Review status and proposed-edit approval are distinct. Reuse preservation ledgers instead of duplicating inventories.
+
+No new discovery-efficiency claim is made without the required five-trial R14 comparison. Local scaffold success is not live Studio evidence.
 
 ## Sources
 

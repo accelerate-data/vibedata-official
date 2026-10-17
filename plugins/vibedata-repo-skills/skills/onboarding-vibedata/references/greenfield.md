@@ -7,3 +7,7 @@
 5. Verify structural context, parse scaffold configuration with the selected tool if installed, and exercise synthetic examples only in a disposable local target. Label empty parses as scaffold checks; they do not verify business tests or warehouse execution. Keep unmet environment requirements explicit.
 
 Choose defaults only where the repository and user supply none. Every selected convention must be demonstrated by the actual scaffold or marked as a convention for future work. A successful local example does not verify an unavailable customer platform.
+
+Retain native check ownership. When the shared scaffold needs missing checks, use the [repository-check contract](artifact-contract.md#repository-checks), register actual commands and verify the emitted ADR command and native map checks.
+
+Record selected conventions in the compact [inventory](brownfield.md#convention-inventory-and-procedures), with evidence and confirmation state. Do not invent existing procedures. Rehearse the first real source through its future pipeline/model/test destinations and applicable skills. Record files to read/change/create and exact mapped commands at verification, or the equivalent mapped/report destination. Keep the source inventory empty until a source is actually defined. This route rehearsal does not execute a production build or establish business coverage.

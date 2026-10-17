@@ -14,17 +14,22 @@
     "design_record_pipeline": "docs/design/pipelines/{pipeline}.md",
     "review": "docs/review/{date}-{type}-{slug}.md",
     "proposal": "docs/proposal/{nnnn}-{slug}.md",
-    "onboarding_report": "docs/onboarding.md"
+    "onboarding_report": "docs/onboarding.md",
+    "requirement": "docs/requirement/{intent}.md",
+    "plan": "docs/plans/{intent}.md",
+    "verification": "docs/verify/{intent}.md",
+    "case_record": "docs/cases/{intent}.md",
+    "design_record_area": "docs/design/{area}/{subject}.md"
   },
   "key_references": {
     "agents": "AGENTS.md",
     "instructions": "AGENTS.md",
-    "rules": ".agents/rules/",
     "schema": "repo-map.schema.json",
-    "test_map": "test-map.json"
+    "test_map": "test-map.json",
+    "conventions": ".agents/skills/"
   },
   "notes_for_agents": {
-    "startup": "Read the repo map, then task-specific rules and the test map.",
+    "startup": "Read the repo map, invoke applicable convention skills, then use mapped examples and test commands.",
     "maintenance": "Update maps when a source, module, entrypoint, artifact, test or command changes.",
     "coverage": "No business sources or tests are registered yet."
   }

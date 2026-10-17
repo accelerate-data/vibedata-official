@@ -97,6 +97,133 @@ class OnboardingContextTests(unittest.TestCase):
     def validate(self):
         return self.helper("validate_context").validate_context(self.root)
 
+    def conventions(self, data, *, legacy=False):
+        if not legacy:
+            data["key_references"].pop("rules", None)
+        data["key_references"]["conventions"] = ".agents/skills"
+        write(self.root, ".agents/skills/python/SKILL.md", "# Python\n")
+        write_json(self.root, "repo-map.json", data)
+
+    def test_context_accepts_conventions_or_legacy_rules(self):
+        data = mapped_repo(self.root)
+        self.assertEqual(self.validate(), [])
+        self.conventions(data)
+        before = hashes(self.root)
+        self.assertEqual(self.validate(), [])
+        self.assertEqual(hashes(self.root), before)
+
+    def test_context_validates_both_reference_roots(self):
+        data = mapped_repo(self.root)
+        self.conventions(data, legacy=True)
+        write(self.root, ".agents/rules/python.md", "[old](absent-old.md)\n")
+        write(self.root, ".agents/skills/python/SKILL.md", "[new](absent-new.md)\n")
+        findings = "\n".join(self.validate())
+        self.assertIn("absent-old.md", findings)
+        self.assertIn("absent-new.md", findings)
+
+    def test_skill_templates_are_not_active_instructions(self):
+        data = mapped_repo(self.root)
+        self.conventions(data)
+        write(
+            self.root,
+            ".agents/skills/python/templates/agents.md",
+            "[rule]({{rule_path}})\n",
+        )
+        write(
+            self.root, ".agents/skills/python/references/live.md", "[bad](missing.md)\n"
+        )
+        self.assertEqual(self.validate(), [])
+        write(
+            self.root,
+            ".agents/skills/python/SKILL.md",
+            "[policy](references/live.md)\n",
+        )
+        self.assertIn("missing.md", "\n".join(self.validate()))
+
+    def test_skill_entrypoints_reject_escaped_or_broken_symlinks(self):
+        data = mapped_repo(self.root)
+        self.conventions(data)
+        outside = self.root.parent / "outside"
+        outside.mkdir()
+        write(outside, "SKILL.md", "SECRET_SENTINEL")
+        alias = self.root / ".claude/skills/python"
+        alias.parent.mkdir(parents=True)
+        for target in (outside, self.root / "missing"):
+            with self.subTest(target=target):
+                alias.symlink_to(target, target_is_directory=True)
+                findings = "\n".join(self.validate())
+                self.assertIn(".claude/skills/python", findings)
+                self.assertNotIn("SECRET_SENTINEL", findings)
+                alias.unlink()
+
+    def test_contained_claude_alias_uses_canonical_links_once(self):
+        data = mapped_repo(self.root)
+        self.conventions(data, legacy=True)
+        write(self.root, ".agents/skills/python/SKILL.md", "[shared](../policy.md)\n")
+        write(self.root, ".agents/skills/policy.md", "[bad](missing.md)\n")
+        alias = self.root / ".claude/skills/python"
+        alias.parent.mkdir(parents=True)
+        alias.symlink_to("../../.agents/skills/python", target_is_directory=True)
+        findings = self.validate()
+        self.assertEqual(len(findings), 1, findings)
+        self.assertIn("missing.md", findings[0])
+        write(self.root, ".agents/skills/policy.md", "No additional policy.\n")
+        before = hashes(self.root)
+        self.assertEqual(self.validate(), [])
+        self.assertEqual(hashes(self.root), before)
+
+    def test_studio_requires_each_artifact_role(self):
+        data = mapped_repo(self.root)
+        roles = {
+            "requirement": "docs/requirement/{intent}.md",
+            "plan": "docs/plans/{intent}.md",
+            "verification": "docs/verify/{intent}.md",
+            "case_record": "docs/cases/{intent}.md",
+            "design_record_area": "docs/design/{area}/{subject}.md",
+        }
+        data["artifact_paths"].update(roles)
+        validate = self.helper("validate_context").validate_context
+        for role in roles:
+            with self.subTest(role=role):
+                missing = data["artifact_paths"].pop(role)
+                write_json(self.root, "repo-map.json", data)
+                self.assertEqual(
+                    validate(self.root, consumer="studio"),
+                    [f"artifact_paths: missing role {role}"],
+                )
+                data["artifact_paths"][role] = missing
+        write_json(self.root, "repo-map.json", data)
+        self.assertEqual(validate(self.root, consumer="studio"), [])
+
+    def test_standalone_preserves_legacy_roles(self):
+        mapped_repo(self.root)
+        before = hashes(self.root)
+        validate = self.helper("validate_context").validate_context
+        self.assertEqual(validate(self.root, consumer="standalone"), [])
+        with self.assertRaisesRegex(ValueError, "consumer"):
+            validate(self.root, consumer="unknown")
+        self.assertEqual(hashes(self.root), before)
+
+    def test_consumer_cli_rejects_unknown_and_reports_missing_studio_roles(self):
+        mapped_repo(self.root)
+        for consumer, code in (("standalone", 0), ("studio", 1), ("unknown", 2)):
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPTS / "validate_context.py"),
+                    "--root",
+                    str(self.root),
+                    "--consumer",
+                    consumer,
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(result.returncode, code, result.stderr)
+            if consumer == "studio":
+                self.assertIn("verification", result.stderr)
+
     def test_inspection_does_not_execute_or_disclose(self):
         shutil.copytree(FIXTURES / "python", self.root, dirs_exist_ok=True)
         write(self.root, ".env", "TOKEN=SECRET_SENTINEL\n")

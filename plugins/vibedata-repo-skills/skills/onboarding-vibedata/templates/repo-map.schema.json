@@ -96,14 +96,25 @@
       "required": [
         "agents",
         "instructions",
-        "rules",
         "schema",
         "test_map"
       ],
       "additionalProperties": {
         "type": "string",
         "minLength": 1
-      }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "conventions"
+          ]
+        },
+        {
+          "required": [
+            "rules"
+          ]
+        }
+      ]
     },
     "notes_for_agents": {
       "type": [
