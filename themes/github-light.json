@@ -12,7 +12,8 @@
     "--vd-status-success: #1A7F37 -> #187733 to reach 4.62:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 4.17:1)",
     "--vd-status-warning: #9A6700 -> #8B5D00 to reach 4.70:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 3.99:1)",
     "--vd-status-error: #CF222E -> #CB212D to reach 4.54:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 4.39:1)",
-    "--vd-control-border: #8597A9 -> #7F92A4 to reach 3.0:1 on --vd-surface, --vd-field, --vd-surface-raised, --vd-surface-subtle (worst was 2.82:1, now 3.01:1)"
+    "--vd-control-border: #8597A9 -> #7F92A4 to reach 3.0:1 on --vd-surface, --vd-field, --vd-surface-raised, --vd-surface-subtle (worst was 2.82:1, now 3.01:1)",
+    "--vd-link: added as #0965D1 (action #0969DA adjusted to reach 4.5:1 on every ground a link sits on; worst was 4.26:1); --vd-surface-hover: added as #DDEAFA (the brand surface, as the design system's own light theme does), both roles the design system's theme contract now requires"
   ],
   "roles": {
     "--vd-surface": "#FFFFFF",
@@ -52,6 +53,8 @@
     "--vd-heat-1": "#B5D2F4",
     "--vd-heat-2": "#78ACEB",
     "--vd-heat-3": "#3F8AE2",
-    "--vd-heat-4": "#0969DA"
+    "--vd-heat-4": "#0969DA",
+    "--vd-link": "#0965D1",
+    "--vd-surface-hover": "#DDEAFA"
   }
 }

@@ -9,7 +9,8 @@
   "changes": [
     "control-border: #30363D -> #56616E to reach 3.0:1 on #0D1117",
     "action so on-action stays readable: #2F81F7 -> #126FF6 to reach 4.5:1 on #FFFFFF",
-    "--vd-control-border: #56616E -> #5C6875 to reach 3.0:1 on --vd-surface, --vd-field, --vd-surface-raised, --vd-surface-subtle (worst was 2.74:1, now 3.04:1)"
+    "--vd-control-border: #56616E -> #5C6875 to reach 3.0:1 on --vd-surface, --vd-field, --vd-surface-raised, --vd-surface-subtle (worst was 2.74:1, now 3.04:1)",
+    "--vd-link: added as #3D89F8 (focus #126FF6 adjusted to reach 4.5:1 on every ground a link sits on; worst was 3.42:1); --vd-surface-hover: added as #0D1117 (the page surface, as the design system's own dark theme does), both roles the design system's theme contract now requires"
   ],
   "roles": {
     "--vd-surface": "#0D1117",
@@ -49,6 +50,8 @@
     "--vd-heat-1": "#0E2D5A",
     "--vd-heat-2": "#104592",
     "--vd-heat-3": "#115AC5",
-    "--vd-heat-4": "#126FF6"
+    "--vd-heat-4": "#126FF6",
+    "--vd-link": "#3D89F8",
+    "--vd-surface-hover": "#0D1117"
   }
 }
