@@ -58,7 +58,7 @@ jobs:
         with:
           repository: accelerate-data/vd-design-system
           # Publish-time test reference, not Studio's runtime design-system pin.
-          ref: 147006d73dc48a835a0d56a749927b3319a2f772
+          ref: 73400548551e0735e7c47115aa6d4532470ba97f
           path: .theme-contract
           token: ${{ steps.theme-contract-token.outputs.token }}
           persist-credentials: false

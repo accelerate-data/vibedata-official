@@ -8,7 +8,8 @@
   "attribution": "Catppuccin Mocha",
   "changes": [
     "control-border: #45475A -> #666985 to reach 3.0:1 on #1E1E2E",
-    "--vd-control-border: #666985 -> #777B97 to reach 3.0:1 on --vd-surface, --vd-field, --vd-surface-raised, --vd-surface-subtle (worst was 2.35:1, now 3.03:1)"
+    "--vd-control-border: #666985 -> #777B97 to reach 3.0:1 on --vd-surface, --vd-field, --vd-surface-raised, --vd-surface-subtle (worst was 2.35:1, now 3.03:1)",
+    "--vd-link: added as #89B4FA; --vd-surface-hover: added as #1E1E2E (the page surface, as the design system's own dark theme does), both roles the design system's theme contract now requires"
   ],
   "roles": {
     "--vd-surface": "#1E1E2E",
@@ -48,6 +49,8 @@
     "--vd-heat-1": "#3E4B6B",
     "--vd-heat-2": "#59709E",
     "--vd-heat-3": "#7193CD",
-    "--vd-heat-4": "#89B4FA"
+    "--vd-heat-4": "#89B4FA",
+    "--vd-link": "#89B4FA",
+    "--vd-surface-hover": "#1E1E2E"
   }
 }

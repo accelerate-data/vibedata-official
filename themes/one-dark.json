@@ -12,7 +12,8 @@
     "--vd-status-error: #E06C75 -> #EB9FA4 to reach 4.64:1 on --vd-surface, --vd-surface-raised, --vd-surface-brand, --vd-surface-subtle (was 3.04:1)",
     "--vd-code-surface: #21252B -> #1B1F24 to keep the code block's fixed metadata ink at 4.57:1 (was 4.25:1)",
     "--vd-text-secondary: #939BA8 -> #ABB1BB to reach 4.5:1 on --vd-tint, --vd-surface-brand (worst was 3.47:1, now 4.51:1)",
-    "--vd-control-border: #6A758B -> #717C93 to reach 3.0:1 on --vd-surface, --vd-field, --vd-surface-raised, --vd-surface-subtle (worst was 2.73:1, now 3.01:1)"
+    "--vd-control-border: #6A758B -> #717C93 to reach 3.0:1 on --vd-surface, --vd-field, --vd-surface-raised, --vd-surface-subtle (worst was 2.73:1, now 3.01:1)",
+    "--vd-link: added as #71B7F1 (focus #61AFEF adjusted to reach 4.5:1 on every ground a link sits on; worst was 4.11:1); --vd-surface-hover: added as #282C34 (the page surface, as the design system's own dark theme does), both roles the design system's theme contract now requires"
   ],
   "roles": {
     "--vd-surface": "#282C34",
@@ -52,6 +53,8 @@
     "--vd-heat-1": "#39536C",
     "--vd-heat-2": "#47749B",
     "--vd-heat-3": "#5492C6",
-    "--vd-heat-4": "#61AFEF"
+    "--vd-heat-4": "#61AFEF",
+    "--vd-link": "#71B7F1",
+    "--vd-surface-hover": "#282C34"
   }
 }
