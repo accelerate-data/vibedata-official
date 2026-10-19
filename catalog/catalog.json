@@ -180,6 +180,27 @@
         "readiness": "supported"
       },
       {
+        "id": "customer-historical-ltv",
+        "title": "Compute historical customer lifetime value with margin",
+        "pitch": "One reproducible, cohort-by-tenure customer value built on net revenue and margin, with refunds, unknown cost and unreached months shown honestly.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "customer-retention-churn-features",
+        "title": "Build retention cohorts and a churn feature table",
+        "pitch": "One agreed definition of active and lost, a cohort retention table, and features with a churn label that only looks forward.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "customer-rfm-segmentation",
+        "title": "Score customers with RFM, maintain segments incrementally and explain every move",
+        "pitch": "Repeatable RFM segments that stay current as data arrives, equal a rebuild from zero, and say why a customer moved.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
         "id": "database-tables-to-bronze",
         "title": "Load a database table set into bronze with a bounded incremental strategy and landed-data proof",
         "pitch": "Land a database's tables into bronze, each the way it changes, and reconcile each approved run against the source with a cause for every difference found.",
