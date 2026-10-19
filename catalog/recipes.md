@@ -7,6 +7,9 @@ Third-party content is collated from upstream sources, provided as is, and used 
 | `api-to-bronze-incremental-contract` | Land a SaaS or REST API into bronze with an incremental cursor and a schema contract | ingestion | supported |
 | `bounded-partition-backfill` | Backfill a bounded date range after a logic change without a full refresh | transformation | supported |
 | `business-event-fact` | Build a business-event fact with auditable duplicate handling | transformation | supported |
+| `customer-historical-ltv` | Compute historical customer lifetime value with margin | transformation | supported |
+| `customer-retention-churn-features` | Build retention cohorts and a churn feature table | transformation | supported |
+| `customer-rfm-segmentation` | Score customers with RFM, maintain segments incrementally and explain every move | transformation | supported |
 | `database-tables-to-bronze` | Load a database table set into bronze with a bounded incremental strategy and landed-data proof | ingestion | supported |
 | `dbt-full-refresh-to-incremental` | Convert a full-refresh dbt model to incremental and show the runtime delta | transformation | supported |
 | `dbt-refactor-output-identical` | Refactor dbt models without changing consumer output | transformation | supported |
