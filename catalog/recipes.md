@@ -7,6 +7,10 @@ Third-party content is collated from upstream sources, provided as is, and used 
 | `api-to-bronze-incremental-contract` | Land a SaaS or REST API into bronze with an incremental cursor and a schema contract | ingestion | supported |
 | `bounded-partition-backfill` | Backfill a bounded date range after a logic change without a full refresh | transformation | supported |
 | `business-event-fact` | Build a business-event fact with auditable duplicate handling | transformation | supported |
+| `customer-consent-preferences` | Unify consent and communication preferences with auditable latest-wins logic | governance-cost | supported |
+| `customer-historical-ltv` | Compute historical customer lifetime value with margin | transformation | supported |
+| `customer-retention-churn-features` | Build retention cohorts and a churn feature table | transformation | supported |
+| `customer-rfm-segmentation` | Score customers with RFM, maintain segments incrementally and explain every move | transformation | supported |
 | `database-tables-to-bronze` | Load a database table set into bronze with a bounded incremental strategy and landed-data proof | ingestion | supported |
 | `dbt-full-refresh-to-incremental` | Convert a full-refresh dbt model to incremental and show the runtime delta | transformation | supported |
 | `dbt-refactor-output-identical` | Refactor dbt models without changing consumer output | transformation | supported |
@@ -32,6 +36,7 @@ Third-party content is collated from upstream sources, provided as is, and used 
 | `legacy-sql-to-dbt` | Convert a legacy SQL script or view into a dbt model and prove parity | transformation | supported |
 | `logistics-fleet-utilization` | Build fleet utilisation against explicit asset availability | transformation | supported |
 | `managed-connector-to-dlt` | Replace a Fivetran or Airbyte connector with a dlt pipeline and reconcile the result | ingestion | supported |
+| `marketing-attribution-models` | Attribute conversions to touchpoints under several models side by side | transformation | supported |
 | `master-b2b-account-hierarchy` | Resolve B2B account hierarchies and roll measures to the ultimate parent | transformation | supported |
 | `master-product-sku-hierarchy` | Conform product and SKU hierarchies across systems | transformation | supported |
 | `materialized-view-to-dbt` | Convert a materialized view into a dbt model and preserve its required refresh semantics | transformation | supported |
@@ -48,6 +53,7 @@ Third-party content is collated from upstream sources, provided as is, and used 
 | `people-pay-band-gaps` | Check pay against salary bands and report pay gaps at an aggregate grain | governance-cost | supported |
 | `people-payroll-gl-tieout` | Tie payroll to the general ledger at every cut-off and classify every break | transformation | supported |
 | `pii-classification-and-masking` | Tag personal-data columns, mask them by kind for a lower-privilege audience and prove the masked outputs | governance-cost | supported |
+| `product-sessionization-funnels` | Sessionize event streams and build reproducible funnels from batch exports | transformation | supported |
 | `prove-dbt-change-safe` | Assess an existing dbt change for safe merge without modifying it | data-quality | supported |
 | `readiness-gated-orchestration` | Gate a consumer pipeline on upstream data readiness instead of a clock | orchestration | supported |
 | `revops-bookings-billings-cash` | Tie bookings to billings to cash and classify every break | transformation | supported |

@@ -180,6 +180,34 @@
         "readiness": "supported"
       },
       {
+        "id": "customer-consent-preferences",
+        "title": "Unify consent and communication preferences with auditable latest-wins logic",
+        "pitch": "One auditable answer to whether a customer may be contacted, with the deciding event and a suppression list that never loosens an opt-out.",
+        "area": "governance-cost",
+        "readiness": "supported"
+      },
+      {
+        "id": "customer-historical-ltv",
+        "title": "Compute historical customer lifetime value with margin",
+        "pitch": "One reproducible, cohort-by-tenure customer value built on net revenue and margin, with refunds, unknown cost and unreached months shown honestly.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "customer-retention-churn-features",
+        "title": "Build retention cohorts and a churn feature table",
+        "pitch": "One agreed definition of active and lost, a cohort retention table, and features with a churn label that only looks forward.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "customer-rfm-segmentation",
+        "title": "Score customers with RFM, maintain segments incrementally and explain every move",
+        "pitch": "Repeatable RFM segments that stay current as data arrives, equal a rebuild from zero, and say why a customer moved.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
         "id": "database-tables-to-bronze",
         "title": "Load a database table set into bronze with a bounded incremental strategy and landed-data proof",
         "pitch": "Land a database's tables into bronze, each the way it changes, and reconcile each approved run against the source with a cause for every difference found.",
@@ -355,6 +383,13 @@
         "readiness": "supported"
       },
       {
+        "id": "marketing-attribution-models",
+        "title": "Attribute conversions to touchpoints under several models side by side",
+        "pitch": "One reproducible attribution whose credit under every model adds back to booked value, so teams can see exactly where they differ.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
         "id": "master-b2b-account-hierarchy",
         "title": "Resolve B2B account hierarchies and roll measures to the ultimate parent",
         "pitch": "See every corporate family's total, with every account placed or explicitly unresolved and every broken parent link explained.",
@@ -464,6 +499,13 @@
         "title": "Tag personal-data columns, mask them by kind for a lower-privilege audience and prove the masked outputs",
         "pitch": "Classify personal data by column, mask it by kind for a lower-privilege audience, and verify that audience's access where grants are applied.",
         "area": "governance-cost",
+        "readiness": "supported"
+      },
+      {
+        "id": "product-sessionization-funnels",
+        "title": "Sessionize event streams and build reproducible funnels from batch exports",
+        "pitch": "Rebuild visits and funnels from landed event exports so every conversion figure traces to events and differences from the vendor are explained.",
+        "area": "transformation",
         "readiness": "supported"
       },
       {
