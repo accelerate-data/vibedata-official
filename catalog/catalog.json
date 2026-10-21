@@ -166,6 +166,20 @@
         "readiness": "supported"
       },
       {
+        "id": "banking-aml-features",
+        "title": "Build AML monitoring features at account-day grain",
+        "pitch": "One reproducible feature row per account and day under a stated time basis, with every transaction counted or explained.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "banking-delinquency-vintages",
+        "title": "Build loan delinquency roll rates and vintage curves from loan, schedule, payment and event records",
+        "pitch": "Month-end buckets, roll rates and vintage curves for a term-loan book that add up, keep currencies apart by default and never invent a cure.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
         "id": "bounded-partition-backfill",
         "title": "Backfill a bounded date range after a logic change without a full refresh",
         "pitch": "Restate one date range after a logic change, and prove nothing else moved because of it.",
@@ -176,6 +190,41 @@
         "id": "business-event-fact",
         "title": "Build a business-event fact with auditable duplicate handling",
         "pitch": "Count business events with a defensible identity rule and an audit trail for every source row.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "cpg-promotion-lift",
+        "title": "Measure trade-promotion lift and the post-promotion dip against an explicit baseline",
+        "pitch": "One lift and dip figure per promotion event, with the baseline method shown and a reason for every event that cannot be measured.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "customer-consent-preferences",
+        "title": "Unify consent and communication preferences with auditable latest-wins logic",
+        "pitch": "One auditable answer to whether a customer may be contacted, with the deciding event and a suppression list that never loosens an opt-out.",
+        "area": "governance-cost",
+        "readiness": "supported"
+      },
+      {
+        "id": "customer-historical-ltv",
+        "title": "Compute historical customer lifetime value with margin",
+        "pitch": "One reproducible, cohort-by-tenure customer value built on net revenue and margin, with refunds, unknown cost and unreached months shown honestly.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "customer-retention-churn-features",
+        "title": "Build retention cohorts and a churn feature table",
+        "pitch": "One agreed definition of active and lost, a cohort retention table, and features with a churn label that only looks forward.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "customer-rfm-segmentation",
+        "title": "Score customers with RFM, maintain segments incrementally and explain every move",
+        "pitch": "Repeatable RFM segments that stay current as data arrives, equal a rebuild from zero, and say why a customer moved.",
         "area": "transformation",
         "readiness": "supported"
       },
@@ -313,6 +362,27 @@
         "readiness": "supported"
       },
       {
+        "id": "healthcare-claims-remittance",
+        "title": "Reconcile billed claims to payer remittances, denials and batch payments by payer",
+        "pitch": "Billed to paid, adjusted, denied and open for every claim line and payer, with every remittance line applied or explained and every batch tied to its payment.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "healthcare-readmission-cohort",
+        "title": "Build a thirty-day readmission cohort with explicit exclusions",
+        "pitch": "Every admission is an index, excluded for a stated reason or set aside, and the readmission rate ties back to it.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "hospitality-occupancy-adr-revpar",
+        "title": "Build nightly occupancy, ADR and RevPAR by property with closed-night restatements",
+        "pitch": "One nightly table of occupancy, ADR and RevPAR that reconciles to every reservation line and rolls up from sums.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
         "id": "identity-golden-record-crosswalk",
         "title": "Deduplicate customers into a golden record with a source crosswalk",
         "pitch": "One customer, one stable id, every source record traced to it and every unresolved one explained.",
@@ -334,9 +404,23 @@
         "readiness": "supported"
       },
       {
+        "id": "insurance-loss-triangles",
+        "title": "Build paid and incurred claims loss triangles by accident and development period",
+        "pitch": "Reproducible paid and incurred triangles whose older diagonals never move, with every claim transaction counted or explained.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
         "id": "legacy-sql-to-dbt",
         "title": "Convert a legacy SQL script or view into a dbt model and prove parity",
         "pitch": "Retire a hand-run SQL script by rebuilding it in dbt and proving the new models return exactly what the old one did.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "life-sciences-enrollment",
+        "title": "Build clinical-trial enrollment and site-performance models with every screened subject accounted for",
+        "pitch": "Every screening record is enrolled, failed for a stated reason, set aside or left out of scope, and site performance ties back to the subjects.",
         "area": "transformation",
         "readiness": "supported"
       },
@@ -352,6 +436,20 @@
         "title": "Replace a Fivetran or Airbyte connector with a dlt pipeline and reconcile the result",
         "pitch": "Swap a Fivetran or Airbyte connector for a dlt pipeline you own, and prove table by table that it lands what the connector did before you cut over.",
         "area": "ingestion",
+        "readiness": "supported"
+      },
+      {
+        "id": "manufacturing-oee-downtime",
+        "title": "Build overall equipment effectiveness and a downtime Pareto",
+        "pitch": "Show what cost each line its OEE points with every stop, piece and machine accounted for.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "marketing-attribution-models",
+        "title": "Attribute conversions to touchpoints under several models side by side",
+        "pitch": "One reproducible attribution whose credit under every model adds back to booked value, so teams can see exactly where they differ.",
+        "area": "transformation",
         "readiness": "supported"
       },
       {
@@ -467,6 +565,13 @@
         "readiness": "supported"
       },
       {
+        "id": "product-sessionization-funnels",
+        "title": "Sessionize event streams and build reproducible funnels from batch exports",
+        "pitch": "Rebuild visits and funnels from landed event exports so every conversion figure traces to events and differences from the vendor are explained.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
         "id": "prove-dbt-change-safe",
         "title": "Assess an existing dbt change for safe merge without modifying it",
         "pitch": "Review the business answers behind a dbt change with independent evidence and leave its implementation unchanged.",
@@ -474,10 +579,24 @@
         "readiness": "supported"
       },
       {
+        "id": "public-sector-grant-funds",
+        "title": "Track grant funds per award from authorization to drawdown and flag exceptions",
+        "pitch": "Show each award's authorized, obligated, expended and drawn position per budget category and period, with flagged exceptions and every line reconciled.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
         "id": "readiness-gated-orchestration",
         "title": "Gate a consumer pipeline on upstream data readiness instead of a clock",
         "pitch": "Start the build when the data is ready, not when the clock says so, and fail loudly instead of building on partial data.",
         "area": "orchestration",
+        "readiness": "supported"
+      },
+      {
+        "id": "retail-sell-through-stockout",
+        "title": "Build sell-through and stockout risk by store, SKU, and day",
+        "pitch": "One row per store, SKU and day that says what sold, what is left and what is about to run out, with a reason on every flag and nothing dropped.",
+        "area": "transformation",
         "readiness": "supported"
       },
       {
@@ -502,6 +621,13 @@
         "readiness": "supported"
       },
       {
+        "id": "saas-mrr-waterfall-nrr",
+        "title": "Build the MRR waterfall with net and gross revenue retention",
+        "pitch": "One agreed definition of monthly recurring revenue, a waterfall that foots, and retention figures the board can trace.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
         "id": "scalar-sql-function-to-dbt-macro",
         "title": "Convert a scalar SQL function into a dbt macro and prove equivalence",
         "pitch": "Move a hidden warehouse function into dbt as a macro and prove the SQL it generates gives what the function did.",
@@ -512,6 +638,20 @@
         "id": "service-ticket-sla",
         "title": "Track ticket SLA attainment and backlog aging outside the vendor dashboard",
         "pitch": "See how every SLA number is computed and how old the open backlog was on any past day.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "shared-calendar-fiscal-periods",
+        "title": "Build one shared calendar and fiscal-period date table",
+        "pitch": "One date table every mart joins, so a day lands in the same fiscal period in every report.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "shared-fx-conversion",
+        "title": "Normalize multi-currency amounts to a reporting currency with as-of rates",
+        "pitch": "One repeatable reporting-currency figure where every amount shows its rate, date, source and method, and every amount that could not convert shows why.",
         "area": "transformation",
         "readiness": "supported"
       },
@@ -540,6 +680,20 @@
         "id": "stored-procedure-to-dbt",
         "title": "Convert a stored procedure into a dbt model and prove parity",
         "pitch": "Retire a stored procedure by rebuilding it in dbt and proving the table matches after every compared run, not only at the end.",
+        "area": "transformation",
+        "readiness": "supported"
+      },
+      {
+        "id": "telecom-cdr-usage",
+        "title": "Land call-detail batches and aggregate them into subscriber-day usage with manifest completeness",
+        "pitch": "Land call-detail batches and publish subscriber-day usage with batch completeness, day backing and visible restatement of late batches.",
+        "area": "ingestion",
+        "readiness": "supported"
+      },
+      {
+        "id": "utilities-meter-to-bill",
+        "title": "Reconcile meter reads to bills and quantify unbilled energy",
+        "pitch": "Match metered to billed energy for every in-scope period and quantify what was never billed, with nothing silently dropped.",
         "area": "transformation",
         "readiness": "supported"
       }
