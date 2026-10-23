@@ -72,8 +72,8 @@
 - [x] Bump child to 1.2.0 and root to 1.5.0; no marketplace entry change.
 - [x] Run catalog generation/check, marketplace/version gates, lint/format, compile, full coverage suite and whitespace check. Run supported optional integration if its dependencies are available in a disposable environment.
 - [x] Obtain independent whole-change review; fix important findings with RED/GREEN evidence.
-- [ ] Commit named files, push branch via SSH/443, create PR, inspect head and CI, resolve in-scope CI failures.
-- [ ] Send completion notification and leave self-contained audit, plan, validation and PR links.
+- [x] Commit named files, push branch via SSH/443, create PR, inspect head and CI, resolve in-scope CI failures.
+- [x] Send completion notification and leave self-contained audit, plan, validation and PR links.
 
 ## Verification mapping and execution ledger
 
@@ -87,3 +87,7 @@
 | R7 | CI-equivalent local commands, independent review, remote PR head and checks |
 
 Execution evidence: `docs/reviews/onboarding-reference-validation-2026-10-23.md`.
+
+Delivered in [PR #59](https://github.com/accelerate-data/vibedata-official/pull/59).
+Independent review: Ship. Required remote CI checks passed on the implementation
+commit; the PR carries current-head checks. Worktree retained; no merge or deployment.

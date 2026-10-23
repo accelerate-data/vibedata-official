@@ -109,4 +109,18 @@ aggregate eligibility wording, plus a nonexistent dbt-variable parity-test claim
 All three were corrected; the supported-version limit was also made an explicit
 structural gate. The targeted independent recheck returned **Ship**, with no remaining critical,
 important or minor findings. The reviewer ran four selected semantic regressions
-and verified the untouched vendor hashes. Remote PR checks follow. No merge or deployment is part of this refresh.
+and verified the untouched vendor hashes. [PR #59](https://github.com/accelerate-data/vibedata-official/pull/59) is open
+against `main` from `feat/onboarding-ossie-reference-refresh`.
+
+Implementation commit `f6a3e2ed89a828eb53a96c1f823c8eb17f3d6098` passed all
+three required remote checks:
+
+- [ci](https://github.com/accelerate-data/vibedata-official/actions/runs/39995813151)
+- [marketplace-validate](https://github.com/accelerate-data/vibedata-official/actions/runs/39995813142)
+- [version-bump](https://github.com/accelerate-data/vibedata-official/actions/runs/39995812983)
+
+The Dependabot auto-merge job was correctly skipped for this human-authored PR.
+This closeout adds only plan/evidence text; the PR exposes checks for its latest
+head. The implementation worktree is preserved for review. The reference remains
+clean at its recorded revision; the original marketplace checkout and its unrelated
+`.cache/` remain untouched. High-priority task completion notifications were sent. No merge or deployment is part of this refresh.
