@@ -1,0 +1,165 @@
+version: "0.2.0.dev0"
+name: example_star
+description: "Skeleton of one fact star — copy this shape. Shows a fact, a role-playing dimension with two roles, a date dimension with a keyed time hierarchy, an aggregate source with its content, a derived rate, and the VIBEDATA payloads."
+datasets:
+  - name: orders
+    source: core.fct_order
+    primary_key: [order_key]
+    description: One row per order.
+    fields:
+      - name: order_key
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: order_key
+        datatype: String
+      - name: order_date
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: order_date
+        datatype: Date
+        dimension:
+          is_time: true
+      - name: customer_key
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: customer_key
+        datatype: String
+      - name: ship_to_customer_key
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: ship_to_customer_key
+        datatype: String
+      - name: amount
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: amount
+        datatype: Decimal
+    custom_extensions:
+      - vendor_name: VIBEDATA
+        data: '{"vibedata_version": "1.4", "logical_sources": [{"name": "LTS1_detail", "physical_table": "fct_order", "priority_group": 1, "content_grain": ["order"], "column_map": {"order_key": "order_key", "order_date": "order_date", "customer_key": "customer_key", "ship_to_customer_key": "ship_to_customer_key", "amount": "amount", "order_count": "order_key", "order_revenue": "amount"}}, {"name": "LTS2_daily", "physical_table": "agg_order_daily", "priority_group": 0, "content_grain": ["order_date"], "note": "Example contract: count(*) with WHERE order_date >= :window_start AND customer_key IS NOT NULL, without a row-dropping join. It supplies order_count only for queries imposing that full restriction; unrestricted counts use detail or the full-population monthly source. Verify actual SQL before adopting this shape. content_filter held by assert_order_daily_matches_its_content_filter", "column_map": {"order_date": "order_date", "order_count": "order_count"}, "content_levels": [{"via": "orders_to_date", "level": "day", "key_columns": ["order_date"]}], "content_filter": "order_date >= :window_start AND customer_key IS NOT NULL"}, {"name": "LTS3_monthly", "physical_table": "agg_order_monthly", "priority_group": 0, "content_grain": ["order_month"], "content_levels": [{"via": "orders_to_date", "level": "month", "key_columns": ["order_month"]}], "note": "Joins dim_month, the date dimension''s month-grain table, at the month key. No row filter: every order is rolled up", "column_map": {"order_count": "order_count", "order_revenue": "order_revenue"}}]}'
+  - name: customer
+    source: core.dim_customer
+    primary_key: [customer_key]
+    description: "One row per customer. Role-playing: reached as buyer and as ship-to."
+    fields:
+      - name: customer_key
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: customer_key
+        datatype: String
+      - name: customer_name
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: customer_name
+        datatype: String
+    custom_extensions:
+      - vendor_name: VIBEDATA
+        data: '{"vibedata_version": "1.4", "logical_sources": [{"name": "LTS1_base", "physical_table": "dim_customer", "priority_group": 1, "content_grain": ["customer"], "column_map": {"customer_key": "customer_key", "customer_name": "customer_name"}}]}'
+  - name: date
+    source: core.dim_date
+    primary_key:
+      - calendar_date
+    description: One row per calendar day.
+    fields:
+      - name: calendar_date
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: calendar_date
+        datatype: Date
+      - name: calendar_year
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: calendar_year
+        datatype: Integer
+      - name: month_start_date
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: month_start_date
+        datatype: Date
+      - name: month_name
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: month_name
+        datatype: String
+    custom_extensions:
+      - vendor_name: VIBEDATA
+        data: '{"vibedata_version": "1.4", "logical_sources": [{"name": "LTS1_calendar", "physical_table": "dim_date", "priority_group": 1, "content_grain": ["calendar_date"], "column_map": {"calendar_date": "calendar_date", "calendar_year": "calendar_year", "month_start_date": "month_start_date", "month_name": "month_name"}}, {"name": "LTS2_month_table", "physical_table": "dim_month", "priority_group": 0, "content_grain": ["month_start_date"], "content_levels": [{"level": "month", "key_columns": ["month_start_date"]}], "note": "The month-grain calendar table: one row per month. It supplies the month level and everything above it, never a day", "column_map": {"month_start_date": "month_start_date", "month_name": "month_name", "calendar_year": "calendar_year"}}], "levels": [{"name": "year", "keys": [{"name": "calendar_year", "fields": ["calendar_year"], "primary": true, "display": true}]}, {"name": "month", "keys": [{"name": "month_start_date", "fields": ["month_start_date"], "primary": true, "display": true}], "attributes": ["month_name"]}, {"name": "day", "keys": [{"name": "calendar_date", "fields": ["calendar_date"], "primary": true, "display": true}]}], "row_level": {"level": "day", "versioned": false}, "hierarchies": [{"name": "Time", "is_time": true, "levels": ["year", "month", "day"]}]}'
+relationships:
+  - name: orders_to_customer
+    from: orders
+    to: customer
+    from_columns: [customer_key]
+    to_columns: [customer_key]
+    custom_extensions:
+      - vendor_name: VIBEDATA
+        data: '{"vibedata_version": "1.4", "physical_join": "fct_order_to_dim_customer", "cardinality": "many-to-one", "join_type": "LEFT OUTER"}'
+  - name: orders_to_ship_to_customer
+    from: orders
+    to: customer
+    from_columns: [ship_to_customer_key]
+    to_columns: [customer_key]
+    custom_extensions:
+      - vendor_name: VIBEDATA
+        data: '{"vibedata_version": "1.4", "physical_join": "fct_order_to_ShipTo_Customer", "cardinality": "many-to-one", "join_type": "LEFT OUTER"}'
+  - name: orders_to_date
+    from: orders
+    to: date
+    from_columns:
+      - order_date
+    to_columns:
+      - calendar_date
+    custom_extensions:
+      - vendor_name: VIBEDATA
+        data: '{"vibedata_version": "1.4", "physical_join": "fct_order_to_dim_date", "cardinality": "many-to-one", "join_type": "LEFT OUTER"}'
+metrics:
+  - name: order_count
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: SUM(CASE WHEN orders.order_key IS NOT NULL THEN 1 ELSE 0 END)
+    datatype: Integer
+    custom_extensions:
+      - vendor_name: VIBEDATA
+        data: '{"vibedata_version": "1.4", "aggregation": "SUM"}'
+  - name: order_revenue
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: SUM(orders.amount)
+    datatype: Decimal
+    custom_extensions:
+      - vendor_name: VIBEDATA
+        data: '{"vibedata_version": "1.4", "aggregation": "SUM"}'
+  - name: average_order_value
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: SUM(orders.amount) * 1.0 / NULLIF(SUM(CASE WHEN orders.order_key IS NOT NULL THEN 1 ELSE 0 END), 0)
+    datatype: Decimal
+    custom_extensions:
+      - vendor_name: VIBEDATA
+        data: '{"vibedata_version": "1.4", "aggregation": "NON_ADDITIVE", "derived_expression": "order_revenue * 1.0 / NULLIF(order_count, 0)"}'
+  - name: avg_daily_order_revenue
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: SUM(orders.amount)
+    datatype: Decimal
+    custom_extensions:
+      - vendor_name: VIBEDATA
+        data: '{"vibedata_version": "1.4", "aggregation": "NON_ADDITIVE", "based_on_dimensions": {"of": "order_revenue", "across": [{"via": "orders_to_date", "level": "day"}], "rule": "AVG"}}'
+    description: Order revenue summed per order day, then averaged over the days with orders (a dimension-based aggregation rule, AVG across Time at day).
+custom_extensions:
+  - vendor_name: VIBEDATA
+    data: '{"vibedata_version": "1.4", "physical_tables": [{"name": "fct_order", "source": "core.fct_order", "dbt_model": "fct_order", "table_type": "TABLE"}, {"name": "dim_customer", "source": "core.dim_customer", "dbt_model": "dim_customer", "table_type": "TABLE"}, {"name": "ShipTo_Customer", "source": "core.dim_customer", "dbt_model": "dim_customer", "table_type": "ALIAS", "alias_of": "dim_customer", "role": "ship-to customer"}, {"name": "agg_order_daily", "source": "agg.agg_order_daily", "dbt_model": "agg_order_daily", "table_type": "TABLE"}, {"name": "dim_date", "source": "core.dim_date", "dbt_model": "dim_date", "table_type": "TABLE"}, {"name": "dim_month", "source": "core.dim_month", "dbt_model": "dim_month", "table_type": "TABLE"}, {"name": "agg_order_monthly", "source": "agg.agg_order_monthly", "dbt_model": "agg_order_monthly", "table_type": "TABLE"}], "physical_joins": [{"name": "fct_order_to_dim_customer", "from": "fct_order", "to": "dim_customer"}, {"name": "fct_order_to_ShipTo_Customer", "from": "fct_order", "to": "ShipTo_Customer"}, {"name": "agg_order_daily_to_dim_customer", "from": "agg_order_daily", "to": "dim_customer"}, {"name": "fct_order_to_dim_date", "from": "fct_order", "to": "dim_date"}, {"name": "agg_order_daily_to_dim_date", "from": "agg_order_daily", "to": "dim_date"}, {"name": "agg_order_monthly_to_dim_month", "from": "agg_order_monthly", "to": "dim_month"}], "variables": [{"name": "window_start", "datatype": "Date", "dbt_var": "window_start", "note": "First day the aggregate covers"}]}'

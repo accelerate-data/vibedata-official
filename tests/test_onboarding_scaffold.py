@@ -28,6 +28,71 @@ def load_module(path, source):
 
 
 class ScaffoldTests(unittest.TestCase):
+    def test_map_schema_requires_valid_runners_and_producers(self):
+        schema = json.loads((TEMPLATES / "repo-map.schema.json").read_text())
+        runner = {"kind": "airflow", "location": "ops:daily_sales", "runs": ["sales"]}
+        self.repo["sources"] = {
+            "sales": {"kind": "python", "dataset": "raw", "produces": ["items"]}
+        }
+        self.repo["orchestrators"] = {"daily": runner}
+        jsonschema.validate(self.repo, schema)
+        for changed in (
+            {"path": "run.py"},
+            {"runs": ["sales", "sales"]},
+            {"kind": ""},
+            {"location": ""},
+        ):
+            with self.subTest(changed=changed):
+                self.repo["orchestrators"]["daily"] = {**runner, **changed}
+                with self.assertRaises(jsonschema.ValidationError):
+                    jsonschema.validate(self.repo, schema)
+        self.repo["orchestrators"]["daily"] = runner
+        self.repo["sources"]["sales"]["produces"] = ["items", "items"]
+        with self.assertRaises(jsonschema.ValidationError):
+            jsonschema.validate(self.repo, schema)
+
+    def test_native_maps_check_runner_membership_and_shared_producers(self):
+        source = TEMPLATES.parent / "scripts/validate_context.py"
+        write(
+            self.root,
+            ".agents/checks/validate_context.py",
+            source.read_text(),
+        )
+        path = self.template("checks/test_maps.py", "tests/test_maps.py")
+        checks = load_module(path, TEMPLATES / "checks/test_maps.py")
+        # Attribute the identical copied checker to retained source for coverage.
+        make_spec = importlib.util.spec_from_file_location
+        loader = patch.object(
+            checks.importlib.util,
+            "spec_from_file_location",
+            side_effect=lambda name, path: make_spec(name, source),
+        )
+        loader.start()
+        self.addCleanup(loader.stop)
+        self.repo["sources"] = {"a": {"kind": "python", "dataset": "raw"}}
+        self.repo["orchestrators"] = {}
+        write_json(self.root, "repo-map.json", self.repo)
+        with self.assertRaisesRegex(AssertionError, "no orchestrator"):
+            checks.test_source_routing()
+        self.repo["orchestrators"] = {
+            "external": {"kind": "airflow", "location": "daily", "runs": ["a"]}
+        }
+        write_json(self.root, "repo-map.json", self.repo)
+        checks.test_source_routing()
+        self.repo["sources"]["b"] = {"kind": "python", "dataset": "raw"}
+        self.repo["orchestrators"]["external"]["runs"].append("b")
+        write_json(self.root, "repo-map.json", self.repo)
+        with self.assertRaisesRegex(AssertionError, "produces"):
+            checks.test_source_routing()
+        self.repo["sources"]["a"]["produces"] = ["items"]
+        self.repo["sources"]["b"]["produces"] = ["accounts"]
+        write_json(self.root, "repo-map.json", self.repo)
+        checks.test_source_routing()
+        self.repo["sources"]["b"]["produces"] = ["items"]
+        write_json(self.root, "repo-map.json", self.repo)
+        with self.assertRaisesRegex(AssertionError, "same table"):
+            checks.test_source_routing()
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="onboarding-scaffold-")
         self.addCleanup(self.temp.cleanup)
@@ -512,6 +577,11 @@ class ScaffoldTests(unittest.TestCase):
             self.template("dbt/" + name, "transformation/macros/" + name)
         for name in ("test_adr_links.py", "test_maps.py"):
             self.template("checks/" + name, "tests/" + name)
+        write(
+            self.root,
+            ".agents/checks/validate_context.py",
+            (TEMPLATES.parent / "scripts/validate_context.py").read_text(),
+        )
         snippets = re.findall(
             r"```python\n(.*?)```",
             (TEMPLATES / "greenfield/README.md").read_text(),
@@ -546,6 +616,15 @@ if __name__ == '__main__':
             "pipeline": "ingestion/pipelines/demo.py",
             "source_module": "ingestion/sources/demo.py",
             "config_section": "sources.demo",
+            "dataset": "raw",
+            "produces": ["items"],
+        }
+        self.repo["orchestrators"] = {
+            "ingest": {
+                "kind": "python",
+                "path": "orchestration/run_ingest.py",
+                "runs": ["demo"],
+            },
         }
         self.repo["artifact_paths"].update(
             {

@@ -133,7 +133,7 @@ class OnboardingTemplateTests(unittest.TestCase):
             {p.stem for p in (templates / "skills").glob("*.md")}, expected
         )
         for path in templates.rglob("*"):
-            if path.is_file():
+            if path.is_file() and "__pycache__" not in path.parts:
                 self.assertNotRegex(
                     path.read_text(), r"(?i)nyc.?taxi|trip_key|tlc_pipeline|ops_raw"
                 )

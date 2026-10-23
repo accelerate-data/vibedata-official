@@ -32,5 +32,6 @@
     "startup": "Read the repo map, invoke applicable convention skills, then use mapped examples and test commands.",
     "maintenance": "Update maps when a source, module, entrypoint, artifact, test or command changes.",
     "coverage": "No business sources or tests are registered yet."
-  }
+  },
+  "orchestrators": {}
 }

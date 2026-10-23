@@ -28,3 +28,9 @@ For each applicable setup check, retain before-state, proposed change, side effe
 For an actual conflict, record sources, alternatives, effect, recommendation, decision and blocked writes. For a compatibility change, retain the exact diff, input revision/hash, disposition and verification; put applied changes under Changes and pending/declined changes here.
 
 Keep existing report history, including prior ledgers and decisions. Omit unused optional detail rather than adding empty tables. Preserve this report's bytes when facts and outcomes are unchanged.
+
+When canonical modelling applies, record seed/schema versions and custom mapped
+locations; structure/coverage/suppliers/note/freshness results; content-review
+file evidence; and data checks separately. Unknown business meaning and missing
+coverage remain findings. For DuckDB, retain untouched inherited-view totals and
+failures separately from post-build portability and persistent Domain state.

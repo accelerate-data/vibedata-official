@@ -160,6 +160,7 @@ def inspect_repository(root: Path) -> dict[str, object]:
         context_tool = path.parts[0] in {".agents", ".claude", ".codex"}
         if (
             path.name.lower() in ARTIFACT_NAMES
+            or path.name.endswith(".ossie.yaml")
             or context_tool
             or path.parent.name in {"adr", "decisions"}
         ):
