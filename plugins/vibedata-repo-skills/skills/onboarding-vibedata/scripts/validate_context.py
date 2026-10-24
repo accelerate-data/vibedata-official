@@ -44,6 +44,24 @@ def resolve_path(
         raise ValueError(f"{value}: invalid or unexpected placeholder pattern")
     if base is None and ".." in path.parts:
         raise ValueError(f"{value}: path escapes repository convention")
+    if pattern and any(c in value for c in "*?["):
+        if (
+            PATTERN.search(value)
+            or "**" in value
+            or any(c in path.parent.as_posix() for c in "*?[")
+        ):
+            raise ValueError(
+                f"{value}: glob must select files in one literal directory"
+            )
+        directory = resolve_path(root, path.parent.as_posix(), base=base)
+        matches = sorted(directory.glob(path.name))
+        if not matches:
+            raise ValueError(f"{value}: artifact glob matches no files")
+        for match in matches:
+            checked = resolve_path(root, match.relative_to(root).as_posix())
+            if not checked.is_file():
+                raise ValueError(f"{value}: artifact glob must match files")
+        return directory
     candidate = (base or root) / expanded
     try:
         resolved = candidate.resolve()
@@ -86,6 +104,97 @@ def read_object(path: Path) -> dict:
     if not isinstance(data, dict):
         raise TypeError(f"{path.name}: expected a JSON object")
     return data
+
+
+def source_routing_findings(root: Path, repo: dict) -> list[str]:
+    """Check declared ownership; never execute a runner or inspect remote state."""
+    errors = []
+    sources = repo.get("sources", {})
+    if not isinstance(sources, dict):
+        return ["sources must be an object"]
+    if "orchestrators" in repo:
+        runners = repo["orchestrators"]
+        if not isinstance(runners, dict):
+            return ["orchestrators must be an object"]
+        runs = set()
+        for name, runner in runners.items():
+            label = f"orchestrators.{name}"
+            if not isinstance(runner, dict):
+                errors.append(f"{label}: expected an object")
+                continue
+            if not isinstance(runner.get("kind"), str) or not runner["kind"].strip():
+                errors.append(f"{label}: kind is required")
+            if ("path" in runner) == ("location" in runner):
+                errors.append(f"{label}: supply exactly one of path or location")
+            if "path" in runner:
+                try:
+                    path = resolve_path(root, runner["path"])
+                    if not path.is_file():
+                        errors.append(f"{label}: runner path must name a file")
+                except (OSError, ValueError) as exc:
+                    errors.append(f"{label}: {exc}")
+            elif (
+                not isinstance(runner.get("location"), str)
+                or not runner["location"].strip()
+            ):
+                errors.append(f"{label}: external location is required")
+            members = runner.get("runs")
+            if not isinstance(members, list) or any(
+                not isinstance(member, str) or not member.strip() for member in members
+            ):
+                errors.append(f"{label}: runs must list source names")
+            else:
+                if len(set(members)) != len(members):
+                    errors.append(f"{label}: duplicate source in runs")
+                runs.update(members)
+        if runs - sources.keys():
+            errors.append(
+                f"orchestrators run unknown sources: {sorted(runs - sources.keys())}"
+            )
+        if sources.keys() - runs:
+            errors.append(
+                f"sources with no orchestrator: {sorted(sources.keys() - runs)}"
+            )
+    datasets = {}
+    for name, source in sources.items():
+        if not isinstance(source, dict):
+            continue
+        dataset = source.get("dataset")
+        if dataset is not None:
+            if not isinstance(dataset, str) or not dataset.strip():
+                errors.append(f"sources.{name}: dataset must be a nonempty string")
+                continue
+            datasets.setdefault(dataset, []).append((name, source))
+        if "produces" in source:
+            tables = source["produces"]
+            if (
+                not isinstance(tables, list)
+                or not tables
+                or any(not isinstance(t, str) or not t.strip() for t in tables)
+            ):
+                errors.append(
+                    f"sources.{name}: produces must list nonempty table names"
+                )
+            elif len(set(tables)) != len(tables):
+                errors.append(f"sources.{name}: duplicate table in produces")
+    for dataset, owners in datasets.items():
+        if len(owners) < 2:
+            continue
+        claimed = set()
+        for name, source in owners:
+            tables = source.get("produces")
+            if not isinstance(tables, list) or not tables:
+                errors.append(
+                    f"sources.{name}: shared dataset {dataset} requires produces"
+                )
+                continue
+            for table in tables:
+                if not isinstance(table, str) or not table.strip():
+                    continue
+                if table in claimed:
+                    errors.append(f"sources on {dataset} claim the same table: {table}")
+                claimed.add(table)
+    return errors
 
 
 def instruction_findings(root: Path, starts: list[Path]) -> list[str]:
@@ -192,6 +301,7 @@ def validate_context(root: Path, *, consumer: str = "standalone") -> list[str]:
     for key in ("entrypoints", "notes_for_agents"):
         if not isinstance(repo.get(key), (dict, list)):
             errors.append(f"repo-map.json: {key} must be an object or list")
+    errors.extend(source_routing_findings(root, repo))
     roles = repo.get("artifact_paths", {})
     if isinstance(roles, dict):
         required_roles = ROLES | STUDIO_ROLES if consumer == "studio" else ROLES

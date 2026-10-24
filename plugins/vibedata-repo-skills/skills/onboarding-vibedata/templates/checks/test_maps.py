@@ -1,5 +1,6 @@
 """Native schema, dlt registration and dbt selector checks for a selected scaffold."""
 
+import importlib.util
 import json
 import subprocess
 import sys
@@ -30,6 +31,16 @@ def test_repo_map_schema():
     repo = _json("repo-map.json")
     schema = repo.get("key_references", {}).get("schema", "repo-map.schema.json")
     jsonschema.validate(repo, _json(schema))
+
+
+def test_source_routing():
+    repo = _json("repo-map.json")
+    # The shared scaffold owns this checker; native repositories retain their own.
+    path = _path(".agents/checks/validate_context.py")
+    spec = importlib.util.spec_from_file_location("onboarding_context", path)
+    checker = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(checker)
+    assert not (errors := checker.source_routing_findings(ROOT, repo)), "\n".join(errors)
 
 
 def test_source_config_sections():

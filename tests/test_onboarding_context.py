@@ -77,6 +77,108 @@ def hashes(root):
 
 
 class OnboardingContextTests(unittest.TestCase):
+    def test_inventory_reports_canonical_models_without_classifying_them_as_code(self):
+        write(self.root, "semantics/sales.ossie.yaml", "name: sales\n")
+        result = self.inspect()
+        self.assertIn("semantics/sales.ossie.yaml", result["existing_artifacts"])
+        self.assertEqual(result["mode"], "greenfield")
+
+    def test_logical_model_globs_require_confined_matches(self):
+        data = mapped_repo(self.root)
+        data["artifact_paths"]["logical_model"] = "semantics/*.ossie.yaml"
+        write_json(self.root, "repo-map.json", data)
+        self.assertTrue(self.validate())
+        write(self.root, "semantics/sales.ossie.yaml", "name: sales\n")
+        self.assertEqual(self.validate(), [])
+        outside = Path(self.temp.name) / "outside.ossie.yaml"
+        outside.write_text("name: outside\n")
+        (self.root / "semantics/escape.ossie.yaml").symlink_to(outside)
+        self.assertIn("outside repository", "\n".join(self.validate()))
+        (self.root / "semantics/escape.ossie.yaml").unlink()
+        data["artifact_paths"]["logical_model"] = "../*.ossie.yaml"
+        write_json(self.root, "repo-map.json", data)
+        self.assertTrue(self.validate())
+
+    def test_runner_paths_and_members_are_validated_without_execution(self):
+        data = mapped_repo(self.root)
+        data["sources"] = {"sales": {"kind": "python"}}
+        data["orchestrators"] = {
+            "daily": {
+                "kind": "airflow",
+                "location": "Airflow: daily_sales",
+                "runs": ["sales"],
+            }
+        }
+        write_json(self.root, "repo-map.json", data)
+        self.assertEqual(self.validate(), [])
+        data["orchestrators"]["daily"]["runs"] = ["unknown"]
+        write_json(self.root, "repo-map.json", data)
+        self.assertIn("unknown", "\n".join(self.validate()))
+        data["orchestrators"]["daily"] = {
+            "kind": "python",
+            "path": "missing.py",
+            "runs": ["sales"],
+        }
+        write_json(self.root, "repo-map.json", data)
+        self.assertIn("missing.py", "\n".join(self.validate()))
+        write(self.root, "run.py", "raise RuntimeError('must not run')\n")
+        data["orchestrators"]["daily"]["path"] = "run.py"
+        write_json(self.root, "repo-map.json", data)
+        self.assertEqual(self.validate(), [])
+
+    def test_shared_dataset_requires_distinct_producers(self):
+        data = mapped_repo(self.root)
+        data["sources"] = {
+            "sales": {"kind": "python", "dataset": "raw"},
+            "customers": {"kind": "python", "dataset": "raw"},
+        }
+        write_json(self.root, "repo-map.json", data)
+        self.assertIn("produces", "\n".join(self.validate()))
+        for name, source in data["sources"].items():
+            source["produces"] = [name]
+        write_json(self.root, "repo-map.json", data)
+        self.assertEqual(self.validate(), [])
+        data["sources"]["customers"]["produces"] = ["sales"]
+        write_json(self.root, "repo-map.json", data)
+        self.assertIn("same table", "\n".join(self.validate()))
+
+    def test_routing_rejects_invalid_shapes_and_escaping_runner(self):
+        check = self.helper("validate_context").source_routing_findings
+        write(self.root, "run.py", "raise RuntimeError('must not run')\n")
+        outside = Path(self.temp.name) / "outside.py"
+        outside.write_text("raise RuntimeError('must not run')\n")
+        (self.root / "escape.py").symlink_to(outside)
+        valid = {"kind": "python", "path": "run.py", "runs": ["sales"]}
+        for changed in (
+            {"kind": " "},
+            {"location": "external"},
+            {"path": "escape.py"},
+            {"path": "."},
+            {"runs": ["sales", "sales"]},
+            {"runs": [None]},
+        ):
+            with self.subTest(changed=changed):
+                repo = {
+                    "sources": {"sales": {"kind": "python"}},
+                    "orchestrators": {"daily": {**valid, **changed}},
+                }
+                self.assertTrue(check(self.root, repo))
+
+    def test_source_produces_rejects_malformed_or_duplicate_tables(self):
+        check = self.helper("validate_context").source_routing_findings
+        for tables in ([], "sales", [None], [" "], ["sales", "sales"]):
+            with self.subTest(tables=tables):
+                repo = {
+                    "sources": {
+                        "sales": {
+                            "kind": "python",
+                            "dataset": "raw",
+                            "produces": tables,
+                        }
+                    }
+                }
+                self.assertTrue(check(self.root, repo))
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="onboarding-test-")
         self.addCleanup(self.temp.cleanup)

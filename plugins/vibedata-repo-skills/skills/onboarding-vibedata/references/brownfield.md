@@ -16,6 +16,18 @@ Preserve single-file ADR collections and notebook Markdown cells at a literal `a
 
 ## Convention inventory and procedures
 
+Read rules hidden in code as well as file structure: numeric thresholds, caps,
+WHERE/HAVING predicates, report windows, inner-join row loss, grain and comments
+that explain why. A confirmed standing business rule belongs in an ADR; unknown
+rationale is a review finding, not an invented decision. Keep SQL mechanics in
+code, rule authority in the ADR and measured evidence in verification.
+
+Inventory canonical models wherever the map places them. Gold marts without a
+canonical model select [semantic creation](semantic-model.md); an existing model
+selects reconciliation and maintenance. Register runner/source ownership through
+the [map contract](artifact-contract.md#source-ownership). Preserve intentional
+native formats and report any uncovered check.
+
 Record every observed or moved convention once. Extend the existing preservation ledger with these columns when it already holds the evidence; do not maintain a second inventory of the same facts.
 
 | ID | Convention | Evidence | Exceptions | Destination and scope | Confirmation state |

@@ -108,6 +108,38 @@
         "Record measured evidence in the existing native mapped report without adding schema keys or creating a default verification path.",
         "Keep the design qualitative and link to the report through a valid relative path; do not leave measured evidence unrecorded."
       ]
+    },
+    {
+      "id": "canonical-semantic-first-mart",
+      "prompt": "Explicitly onboard an existing dbt/dlt repo with fact_sales, dim_customer and a filtered daily aggregate, two real ingestion sources sharing dataset raw, and an externally owned Airflow DAG. There is no canonical model yet and no warehouse target. Read only the named package and reached references. State emitted artifacts, aggregate/ratio semantics, map ownership, concrete gates and honest readiness. Contrast an empty implementation and the later first-gold-mart task. Do not invent keys or business meaning; do not run commands or edit files.",
+      "assertions": [
+        "Deliver both complete semantic skills when marts exist; install convention.md as SKILL.md and preserve assets/dependencies.",
+        "Use whole-star documents and metric-relative population/grain; derive ratios without physical bindings.",
+        "Keep separate sources with distinct produces and an external orchestrator location/runs; do not invent a local path.",
+        "Run structure, coverage, suppliers, notes and level freshness; separate SQL/ADR content review and unrun warehouse tests.",
+        "No fake canonical directory/model for an empty repo; first mart performs the semantic handoff."
+      ]
+    },
+    {
+      "id": "canonical-semantic-preserved-refresh",
+      "prompt": "Refresh a repo with artifact_paths.logical_model = semantics/*.ossie.yaml, a closed custom map schema, custom ADR IDs, and human-edited authoring/review skills. Fact keys, grain and the billable rule changed. An aggregate has an inner dimension join that loses rows. The operator says validate is green and proposes skipping SQL and overwriting skills from the newest templates. State required maintenance, exact checks, preservation boundaries and unresolved decisions. Read only the named skill and reached references; no commands or edits.",
+      "assertions": [
+        "Keep the custom glob and native schema/checker equivalents, custom ADRs and human edits.",
+        "Inspect SQL and reconcile full inner-join loss, including unmatched non-null keys; withdraw unsupported bindings and dependencies.",
+        "Use a literal directory as the CLI argument and check all documents after changes.",
+        "Ask only for genuinely ambiguous business meaning; never claim content correctness from validate alone.",
+        "Report custom ADR note-link coverage and missing warehouse/runtime evidence explicitly."
+      ]
+    },
+    {
+      "id": "inherited-views-before-write",
+      "prompt": "Onboard a Studio DuckDB repo whose untouched renamed sandbox contains inherited dbt and non-dbt views. One binding query fails because it names the old catalog. Inventory output is truncated. Under a deadline, the operator suggests dbt build first and treating success as uploaded-database readiness. Deployed plugin version is unknown; the reference repo has local onboarding lifecycle helpers. State the ordered checks, findings, authorization boundaries and independent readiness states. Read only the named skill and reached references; no commands or edits.",
+      "assertions": [
+        "Assess every inherited view read-only before any database write and record checked/failed/unchecked totals.",
+        "Truncated enumeration is incomplete; a successful build cannot erase or retrospectively pass the untouched assessment.",
+        "Keep post-build renamed-copy portability and persistent Domain state separate.",
+        "Do not substitute another native kind or infer production capability from reference-local helpers."
+      ]
     }
   ],
   "trials_per_variant": 5

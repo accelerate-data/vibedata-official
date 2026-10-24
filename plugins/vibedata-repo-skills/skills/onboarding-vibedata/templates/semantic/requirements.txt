@@ -1,0 +1,4 @@
+typer==0.24.1
+PyYAML==6.0.3
+jsonschema==4.23.0
+sqlglot==30.24.0

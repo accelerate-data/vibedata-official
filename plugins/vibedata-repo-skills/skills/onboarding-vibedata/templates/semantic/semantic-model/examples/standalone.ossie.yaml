@@ -1,0 +1,67 @@
+version: "0.2.0.dev0"
+name: example_standalone
+description: "Skeleton of a standalone model — copy this shape. One dataset, no relationships, one physical table with a note explaining why no fact-star mapping is established."
+datasets:
+  - name: daily_zone_revenue
+    source: finance.mart_daily_zone_revenue
+    primary_key: [revenue_date, zone_key]
+    description: "Daily revenue by zone. Billable trips only, so its counts answer a narrower population than the fact."
+    fields:
+      - name: revenue_date
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: revenue_date
+        datatype: Date
+        dimension:
+          is_time: true
+      - name: zone_key
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: zone_key
+        datatype: String
+      - name: zone_name
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: zone_name
+        datatype: String
+      - name: trip_count
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: trip_count
+        datatype: Integer
+      - name: total_revenue
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: total_revenue
+        datatype: Decimal
+    custom_extensions:
+      - vendor_name: VIBEDATA
+        data: '{"vibedata_version": "1.4", "logical_sources": [{"name": "LTS1_detail", "physical_table": "mart_daily_zone_revenue", "priority_group": 1, "content_grain": ["revenue_date", "zone_key"], "note": "Independent billable report: no fact-star mapping is established here. A billable-only source cannot answer unrestricted star-level trip_count or revenue queries; a compatible filtered query would still require an honest star mapping.", "column_map": {"revenue_date": "revenue_date", "zone_key": "zone_key", "zone_name": "zone_name", "trip_count": "trip_count", "total_revenue": "total_revenue", "billable_zone_day_trip_count": "trip_count", "billable_zone_day_revenue": "total_revenue"}}]}'
+metrics:
+  - name: billable_zone_day_trip_count
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: SUM(daily_zone_revenue.trip_count)
+    description: Billable trips per zone and day. Scope-prefixed because the star's trip_count is a different population.
+    datatype: Integer
+    custom_extensions:
+      - vendor_name: VIBEDATA
+        data: '{"vibedata_version": "1.4", "aggregation": "SUM"}'
+  - name: billable_zone_day_revenue
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: SUM(daily_zone_revenue.total_revenue)
+    datatype: Decimal
+    custom_extensions:
+      - vendor_name: VIBEDATA
+        data: '{"vibedata_version": "1.4", "aggregation": "SUM"}'
+custom_extensions:
+  - vendor_name: VIBEDATA
+    data: '{"vibedata_version": "1.4", "physical_tables": [{"name": "mart_daily_zone_revenue", "source": "finance.mart_daily_zone_revenue", "dbt_model": "mart_daily_zone_revenue", "table_type": "TABLE", "note": "Standalone: independent report with no established fact-star mapping. A billable filter alone would not prevent aggregate use for a matching metric."}], "physical_joins": []}'

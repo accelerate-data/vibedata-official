@@ -1,0 +1,556 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/accelerate-data/vibedata-official/tree/main/plugins/vibedata-repo-skills/skills/onboarding-vibedata/templates/semantic/semantic-model/scripts/vibedata-schema.json",
+  "title": "VIBEDATA extensions for Apache Ossie (frozen key set)",
+  "description": "The closed VIBEDATA payload vocabulary. Each custom_extensions entry with vendor_name VIBEDATA carries a JSON-encoded object of one of these four shapes, chosen by the level it sits at. Unknown keys are rejected by tools/ossie.py; new keys arrive by intent with a validator change and tests.",
+  "type": "object",
+  "$defs": {
+    "modelPayload": {
+      "type": "object",
+      "properties": {
+        "vibedata_version": {
+          "type": "string",
+          "const": "1.4"
+        },
+        "physical_tables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/physicalTable"
+          }
+        },
+        "physical_joins": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/physicalJoin"
+          }
+        },
+        "variables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/variable"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "physicalTable": {
+      "type": "object",
+      "required": [
+        "name",
+        "source"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dbt_model": {
+          "type": "string",
+          "description": "dbt ref() name that builds this table; aliases name their base model"
+        },
+        "table_type": {
+          "enum": [
+            "TABLE",
+            "VIEW",
+            "ALIAS",
+            "OPAQUE_VIEW",
+            "STORED_PROC",
+            "SYNONYM"
+          ]
+        },
+        "alias_of": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string",
+          "description": "Why-not or partial-mapping rationale, recorded where it cannot drift from the entry"
+        }
+      },
+      "additionalProperties": false
+    },
+    "physicalJoin": {
+      "type": "object",
+      "required": [
+        "name",
+        "from",
+        "to"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "from": {
+          "type": "string",
+          "minLength": 1
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "datasetPayload": {
+      "type": "object",
+      "properties": {
+        "vibedata_version": {
+          "type": "string",
+          "const": "1.4"
+        },
+        "alias_of": {
+          "type": "string"
+        },
+        "physical": {
+          "type": "object"
+        },
+        "partitioned_by": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "scd": {
+          "$ref": "#/$defs/scd"
+        },
+        "logical_sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/logicalSource"
+          }
+        },
+        "hierarchies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/hierarchy"
+          }
+        },
+        "levels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/level"
+          },
+          "description": "The dimension's levels (OBIEE logical levels), declared once and shared by its hierarchies"
+        },
+        "row_level": {
+          "$ref": "#/$defs/rowLevel"
+        }
+      },
+      "additionalProperties": false
+    },
+    "scd": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            1,
+            2,
+            3
+          ]
+        },
+        "natural_key": {
+          "type": "string"
+        },
+        "valid_from": {
+          "type": "string"
+        },
+        "valid_to": {
+          "type": "string"
+        },
+        "is_current": {
+          "type": "string"
+        },
+        "open_ended_value": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "logicalSource": {
+      "type": "object",
+      "required": [
+        "name",
+        "physical_table"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "physical_table": {
+          "type": "string",
+          "minLength": 1
+        },
+        "priority_group": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "content_grain": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "note": {
+          "type": "string",
+          "description": "Partial-mapping rationale: which columns were refused and why"
+        },
+        "column_map": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "join_cost": {
+          "type": "number",
+          "description": "Relative cost for aggregate ordering, lower wins"
+        },
+        "content_levels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/levelRef"
+          },
+          "description": "Per dimension role, the level this source holds; a role not listed is aggregated away"
+        },
+        "content_filter": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Row predicate over the dataset's fields and :variables that every row of this source satisfies; held by a test named in note"
+        },
+        "navigable": {
+          "type": "boolean",
+          "description": "false: an engine must not choose this source unless asked by name (population the content_filter cannot state)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "hierarchy": {
+      "type": "object",
+      "required": [
+        "name",
+        "levels"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "is_time": {
+          "type": "boolean",
+          "description": "Levels order chronologically by their primary keys"
+        },
+        "scd_rollup": {
+          "enum": [
+            "as_of",
+            "current"
+          ],
+          "description": "Type 2 only: a member rolls up as of the fact's date, or as it is now"
+        },
+        "levels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "description": "Level names, coarsest first"
+        }
+      },
+      "additionalProperties": false
+    },
+    "relationshipPayload": {
+      "type": "object",
+      "properties": {
+        "vibedata_version": {
+          "type": "string",
+          "const": "1.4"
+        },
+        "physical_join": {
+          "type": "string"
+        },
+        "cardinality": {
+          "enum": [
+            "many-to-one",
+            "one-to-one",
+            "many-to-many"
+          ]
+        },
+        "join_type": {
+          "type": "string"
+        },
+        "join_cost": {
+          "type": "number"
+        },
+        "join_expression": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string",
+          "description": "Why this relationship lacks key-covering to_columns, or why a reachable path has none"
+        },
+        "to_level": {
+          "type": "string",
+          "description": "Level of the target whose primary key to_columns carry: the join reaches a member of a versioned dimension, not one of its rows"
+        },
+        "weight": {
+          "type": "string",
+          "description": "Field of the from dataset that allocates a measure entering this relationship from its one side (a weighted bridge); the weights of one member sum to 1"
+        }
+      },
+      "additionalProperties": false
+    },
+    "variable": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "description": "A named value predicates reference as :name, bound to where the repo defines it (OBIEE repository variable)",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "datatype": {
+          "type": "string",
+          "description": "Ossie DataType of the value"
+        },
+        "dbt_var": {
+          "type": "string",
+          "description": "dbt project var that supplies the value"
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "level": {
+      "type": "object",
+      "required": [
+        "name",
+        "keys"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "keys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/levelKey"
+          },
+          "minItems": 1
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Descriptive fields of a member that identify nothing (a name that repeats)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "levelRef": {
+      "type": "object",
+      "properties": {
+        "via": {
+          "type": "string",
+          "description": "Relationship that reaches the dimension (names the role). Omitted only on a dimension's own coarser source, where the level is one of the dataset's own levels"
+        },
+        "level": {
+          "type": "string",
+          "description": "A level of the target dataset; omitted, the target's own rows"
+        },
+        "key": {
+          "type": "string",
+          "description": "Which of the level's keys; default its primary key"
+        },
+        "key_columns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Aggregate content only: the source's columns that carry that key, in key-field order"
+        }
+      },
+      "additionalProperties": false
+    },
+    "metricPayload": {
+      "type": "object",
+      "properties": {
+        "vibedata_version": {
+          "type": "string",
+          "const": "1.4"
+        },
+        "aggregation": {
+          "enum": [
+            "SUM",
+            "MIN",
+            "MAX",
+            "NON_ADDITIVE"
+          ],
+          "description": "Rule for rolling a pre-aggregated column up to a coarser grain; NON_ADDITIVE never rolls up"
+        },
+        "derived_expression": {
+          "type": "string",
+          "description": "Post-aggregation formula over other metrics; the metric binds to no column"
+        },
+        "at_levels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/levelRef"
+          },
+          "description": "Level-based metric: evaluated at these levels whatever the query groups by"
+        },
+        "time_series": {
+          "$ref": "#/$defs/timeSeries"
+        },
+        "based_on_dimensions": {
+          "$ref": "#/$defs/basedOnDimensions"
+        },
+        "filter": {
+          "type": "string",
+          "description": "OBIEE FILTER(... USING ...): the rows the metric reads, as a predicate over dataset.field columns the core expression also reads"
+        },
+        "unrelated_dimensions": {
+          "enum": [
+            "error",
+            "total"
+          ],
+          "description": "A query that groups or filters by a dimension the metric cannot reach: error (default) rejects the query; total repeats the metric's value without that dimension"
+        }
+      },
+      "additionalProperties": false
+    },
+    "timeSeries": {
+      "type": "object",
+      "required": [
+        "function",
+        "of",
+        "via",
+        "level"
+      ],
+      "properties": {
+        "function": {
+          "enum": [
+            "AGO",
+            "TODATE",
+            "ROLLING"
+          ]
+        },
+        "of": {
+          "type": "string",
+          "description": "Metric whose value is shifted or accumulated"
+        },
+        "via": {
+          "type": "string"
+        },
+        "level": {
+          "type": "string"
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "AGO only: periods back"
+        },
+        "periods": {
+          "type": "integer",
+          "minimum": 2,
+          "description": "ROLLING only: the current member and periods - 1 before it, in the time dimension's chronological order"
+        }
+      },
+      "additionalProperties": false
+    },
+    "rowLevel": {
+      "type": "object",
+      "required": [
+        "level",
+        "versioned"
+      ],
+      "description": "The level one row of the dataset is. versioned: rows are versions of that level's members (Type 2)",
+      "properties": {
+        "level": {
+          "type": "string"
+        },
+        "versioned": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "levelKey": {
+      "type": "object",
+      "required": [
+        "name",
+        "fields"
+      ],
+      "description": "Fields that identify one member of the level. Every key is unique at its level by declaration",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "primary": {
+          "type": "boolean",
+          "description": "Exactly one per level: what joins, aggregate navigation and blending use"
+        },
+        "display": {
+          "type": "boolean",
+          "description": "At most one per level: the key shown for a member; default the primary"
+        }
+      },
+      "additionalProperties": false
+    },
+    "basedOnDimensions": {
+      "type": "object",
+      "required": [
+        "of",
+        "across",
+        "rule"
+      ],
+      "description": "OBIEE dimension-based aggregation rule: evaluate `of` at the query's grain refined by `across`, then apply `rule` across those members",
+      "properties": {
+        "of": {
+          "type": "string"
+        },
+        "across": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/levelRef"
+          },
+          "minItems": 1
+        },
+        "rule": {
+          "enum": [
+            "AVG",
+            "SUM",
+            "MIN",
+            "MAX",
+            "MEDIAN",
+            "FIRST",
+            "LAST"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

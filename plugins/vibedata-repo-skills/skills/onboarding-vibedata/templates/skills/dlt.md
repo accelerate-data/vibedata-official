@@ -17,3 +17,14 @@ Profile a remote source once per unchanged input. Save its identity/version, rea
 A nominal sample limit is not an exact row cap. Check the selected loader's actual limit semantics before loading: dlt can count yielded pages, and a whole final page or Parquet row group can exceed a row threshold. Record requested limit, yielded page/row-group size, expected read cost and authorized budget first; unknown or excessive cost blocks that sample pending a supported smaller read or a decision. Report actual landed counts and failed/partial loads after execution. Never treat an attempted or partial sample as a safe completed load.
 
 When adding a resource to an existing source, keep its parent source and pipeline identity. Update the existing source module, resource docs/tests, pipeline design and applicable dbt source/staging registrations together. Create another source/pipeline only when the source contract actually changes that boundary. A loader without `DLT_INGEST_LIMIT` support retains its own sampling mechanism.
+
+Register each source with its actual runner in `orchestrators.<name>.runs` and
+update any separate runner code/list in the same change. `runs` is membership;
+the runner owns execution order. An external runner records its confirmed job
+identity and owner under `location`, not an invented local path. Keep the native
+runner/map parity test; a structural map check cannot verify remote scheduling.
+
+When a second source shares a `dataset`, declare distinct `produces` table names
+on both sources. A single local source's resources can remain its table list;
+a producer outside the repository needs an explicit `produces` list. Preserve
+native map formats and report uncovered ownership instead of fabricating it.

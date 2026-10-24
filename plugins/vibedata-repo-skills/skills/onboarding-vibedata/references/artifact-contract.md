@@ -22,6 +22,7 @@ Use [repo-map.json](../templates/repo-map.json), [schema](../templates/repo-map.
 | --- | --- |
 | `modules` | Real module paths and short responsibilities. |
 | `sources` | Actual source identity and implementation kind; existing artifact paths and confirmed `required_artifacts`. |
+| `orchestrators` | Actual runners, source membership and local `path` or external `location`; see [source ownership](#source-ownership). |
 | `entrypoints` | Named executable/configuration paths that actually exist. |
 | `commands` | Existing understood commands; environment-dependent commands remain unverified in the report. |
 | `artifact_paths` | Semantic roles mapped to customer-selected repo-relative paths or future filename patterns. |
@@ -35,7 +36,49 @@ In the shared schema, `key_references.agents` is the runtime bootstrap; `key_ref
 
 `test-map.json` has `taxonomy` and `modules`. Each module has existing `sources` paths and optional `unit`, `data`, `structural`, `selectors`, and `commands`. Use `gaps` for missing coverage. A Python module needs no dbt selector. Selector resolution needs native dbt checks when available; path validation does not execute selectors or commands. Empty inventories are valid.
 
+For an existing canonical semantic model, a file glob such as
+`semantics/*.ossie.yaml` selects files in one literal repository directory. It
+must match at least one file; every match must remain inside the repository,
+including symlink targets. Recursive/directory globs are unsupported by the
+portable checker. Use brace patterns for future artifacts. Keep the native
+checker for customer pattern syntax outside this contract.
+
+## Source ownership
+
+For shared maps, `orchestrators` has one entry per runner: `kind` (`python`,
+`airflow`, `fabric`, or the actual kind), `runs` (source names), and exactly one
+of `path` (existing local runner file) or `location` (confirmed external owner
+and scheduler/job identity). `runs` is membership, not execution order; order
+belongs to the runner. Every source is named by a runner and every member names
+a source. Empty inventories are valid. Ask about external scheduling only when
+the repository and established decisions cannot identify it. A manual command
+can be the confirmed external location; unknown ownership is a finding.
+
+`dataset` is the destination schema identity, not the source name. Once two
+sources share a dataset, each declares nonempty, distinct `produces` table names;
+two producers cannot silently claim the same table. A single source can use its
+module's resources as the list. If its producer is outside the repository and
+cannot be inspected, obtain its table list and record `produces` too. Preserve
+intentional joint ownership in a native contract with its native checks and an
+explicit decision, rather than relabel a collision as validated.
+
+Retain actual layer taxonomy. `built_by` names the builder, never the scheduler;
+use `custom` with explanatory `notes` when no standard build procedure applies.
+Map every applicable layer to its real test module or a named coverage gap;
+custom layers do not get invented dbt selectors. A separately maintained runner
+list needs its native code/map parity test. The shared scaffold's runner reads
+the map directly. The portable graph check does not inspect external scheduling
+or prove runner code executes the declared members; record that limit.
+
+Existing native maps retain their schema and checker. Do not add shared keys to
+a closed customer schema. Missing runner ownership or table coverage remains a
+reported gap, even when native structural checking passes.
+
 ## Artifact selection
+
+For gold marts or an existing canonical model, follow the complete
+[semantic-model contract](semantic-model.md), including both seeded skills,
+their dependencies, mapped artifacts and structure/content/data evidence.
 
 Use the [agents template](../templates/agents.md) as routing, then select only applicable [convention templates](../templates/skills/): dbt/SQL/testing for transformations, dlt for dlt ingestion, Python for existing Python/notebooks, and context/ADR/design/Git rules for their respective tasks. Replace path tokens using the map and confirmed overrides before emitting a convention skill. A task should load its own rules, not the whole library.
 

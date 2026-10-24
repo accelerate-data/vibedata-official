@@ -128,3 +128,10 @@ Retain dbt's Jinja call when filling the template; replace only its confirmed id
 6. Execute emitted pytest checks after dbt deps, then mapped Ruff/SQLFluff commands. Set `DBT_SEND_ANONYMOUS_USAGE_STATS=false` and `RUNTIME__DLTHUB_TELEMETRY=false` for local synthetic trials. Report actual commands/results and explicit missing customer/runtime evidence.
 
 Rehearse the first-source route at mapped verification: files to read, files to create/change and commands, with current paths or legitimate future patterns. Rehearsal does not execute a production build.
+
+Register the emitted ingestion runner in `orchestrators.run_ingest` with
+`kind: python`, its real `path`, and `runs: []`. Add each first real source to
+`runs` as it is registered. This runner reads source pipelines from the map in
+map order; do not invent a second `PIPELINES` list. Keep a native runner's own
+order/list and parity test when it uses one. No gold marts means no canonical
+model or semantic test module yet; preserve the first-mart convention handoff.

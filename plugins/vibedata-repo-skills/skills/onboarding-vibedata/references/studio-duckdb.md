@@ -16,6 +16,31 @@ Establish Domain state from existing operator evidence or an authorized read-onl
 
 Onboarding does not create a Domain or seed its persistent database. Sandbox state and persistent Domain state are separate observations.
 
+## Inherited views before any database write
+
+Assess an existing, authorized DuckDB sandbox's untouched renamed copy before
+ingestion, `dbt build`, baseline builds or any other database write. A rebuild can
+replace broken inherited views and hide the failure.
+
+1. Use the supported read-only sandbox SQL route. Record catalog identity and
+   enumerate every non-internal view in that catalog with
+   `SELECT schema_name, view_name FROM duckdb_views() WHERE database_name = current_database() AND NOT internal`.
+   Include views outside the dbt project and views without tests.
+2. Attempt `SELECT * FROM "schema"."view" LIMIT 0` for each, doubling embedded
+   double quotes in each identifier. Record checked, failed and unchecked totals
+   and safe `schema.view` failure reasons. This proves binding only. Do not attach
+   the original catalog, rewrite views or access the protected Domain file.
+3. File failures as review findings: missing catalog, missing external file or
+   extension, or access failure. Timeout, truncated inventory, unavailable tools
+   or an already modified sandbox make this assessment incomplete. No
+   user-defined views is explicitly not applicable. Auth failures retain the
+   hard stop for that service.
+4. Preserve this result in verification and the report. Continue independent
+   context work; an authorized sandbox rebuild is a separate result. It does
+   not repair the uploaded Domain database or clear its inherited-view finding.
+   Recommend a separately scoped portable rebuild/new Domain when appropriate.
+   The post-build renamed-copy test below remains a second gate.
+
 ## Bounded sandbox outcomes
 
 With an empty persistent Domain, attempt each registered source's bounded sample and applicable dbt build only when an existing disposable target, source access, cost and side effects are authorized. Resolve the database from the current runtime contract; record its actual identity, source/version, supported limit, possible whole-page/row-group overshoot, landed rows and load metadata. A nominal row limit is not an exact cap. Stop dependent builds after failed/partial loads and report what landed. Use the dlt convention's repeated small sample to verify replacement.
@@ -51,6 +76,6 @@ Use the deployed runtime's supported commands against an established, authorized
 
 Resolve requirements, plans and verification artifacts through the deployed consumer's current context reader and Domain-declared artifact paths. The inspected 0.128.12 source reads coordinates from `/run/vd/intent-context.json`; inherited environment variables are not proof of runtime identity. Do not relocate artifacts to a preferred layout that executable checks reject. Retain existing CI; installation, replacement and SDK changes require concrete reviewed scope. Check the selected bundle/version before proposing CI installation. Runtime compaction, missing tools and defective bundles remain platform findings; extra repository prose cannot prove they are fixed.
 
-Before any native lifecycle call, verify supported onboarding kind, onboarding review, artifact resolution and phase side effects in the selected source and deployed version. Consumer 0.128.12 source (`65222435e3483c4be0a612e20910abfbaf56d9cb`) has no supported onboarding kind or review entrypoint; generic phases are not substitutes. Its CI installation and verification commit/push, and shipping pushes before final approval. Do not invoke those phases under local-only authorization. A companion consumer release and deployed target evidence are required; continue standalone context work and report Studio lifecycle blocked.
+Before any native lifecycle call, verify supported onboarding kind, review, artifact resolution and phase side effects in the selected source and deployed version. On 2026-10-23, consumer 0.133.4 source (`d49c8d54bb6b52fcc905ae598d8738a919bde7fd`) still has no `onboarding` kind in its production registry. A reference Domain's local skill or a journey fixture is not a shipped lifecycle entrypoint; generic kinds are not substitutes. The earlier 0.128.12 inspection (`65222435e3483c4be0a612e20910abfbaf56d9cb`) also found phase commit/push side effects. Inspect the selected version's side effects afresh. Do not invoke phases outside current authorization. A supported consumer release and deployed target evidence are required; continue standalone context work and report Studio lifecycle blocked when either is missing.
 
 Record consumer/version, input revision, each disposition, checks run and unavailable checks in the onboarding report. Separate context, runtime loading, sandbox execution, persistent Domain state and conditional Studio lifecycle evidence.
