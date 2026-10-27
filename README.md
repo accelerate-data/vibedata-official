@@ -66,10 +66,10 @@ edit them by hand. CI fails when they are stale.
 | --- | --- | --- |
 | Plugins | 9 | [catalog/plugins.md](catalog/plugins.md) |
 | Skills | 14 | [catalog/skills.md](catalog/skills.md) |
-| Recipes | 55 | [catalog/recipes.md](catalog/recipes.md) |
+| Recipes | 110 | [catalog/recipes.md](catalog/recipes.md) |
 | Connector sources | 1 | [catalog/connectors.md](catalog/connectors.md) |
 | Themes | 9 | [catalog/themes.md](catalog/themes.md) |
-| MCP servers | 211 | [catalog/mcp.md](catalog/mcp.md) |
+| MCP servers | 213 | [catalog/mcp.md](catalog/mcp.md) |
 <!-- END GENERATED: catalog-summary -->
 
 Third-party content is collated from upstream sources, provided as is, and used
