@@ -1,0 +1,43 @@
+# dbt Quality (docs/design/domain-ci-release D9, D11): dbt-project-evaluator against a temporary copy of the
+# Domain's packages.yml that adds the release's pinned evaluator. Advisory: it always passes, its findings are
+# warnings. Released on its own (AC-1). domain-ci.yml runs the identical steps inline as its `dbt-quality` job
+# (one `ci / dbt-quality`, AC-19); an invariant keeps the two in step. It writes `result-dbt-quality`.
+# Kept (VD-7648): release.py's RELEASED_WORKFLOWS publishes it to vibedata-official, where domain repos call it.
+# It never runs in this repo (workflow_call only), so its manual disable in this repo's Actions UI changes nothing.
+name: dbt Quality
+
+on:
+  workflow_call: {}
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.11"
+  BASE_SHA: ${{ github.event.pull_request.base.sha }}
+
+jobs:
+  dbt-quality:
+    name: dbt-quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc10"
+      - run: vibedata-domain-ci install quality
+      - id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: vibedata-domain-ci check dbt-quality
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-dbt-quality
+          overwrite: true
+          path: results/result-dbt-quality.json
+          if-no-files-found: ignore
