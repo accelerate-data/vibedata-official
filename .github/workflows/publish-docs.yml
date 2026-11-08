@@ -1,0 +1,28 @@
+# dbt Docs publishing (docs/design/domain-ci-release, Callers; domain-deploy). Called by the domain repo's
+# publish.yml after publish-manifest.yml. Generates the static dbt Docs site from the production parse (no
+# connection: --empty-catalog --no-compile) and uploads it to `dbt-docs-latest`. Platform-agnostic (D21).
+name: Publish dbt Docs
+
+on:
+  workflow_call: {}
+
+permissions:
+  contents: write   # uploads to the domain repo's dbt-docs-latest release
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  publish-docs:
+    name: publish-docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc9"
+      - run: vibedata-domain-ci install dbt
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: vibedata-domain-ci publish-docs
