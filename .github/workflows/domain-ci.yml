@@ -1,0 +1,838 @@
+# The Domain CI engine (docs/design/domain-pr-ci-engine, docs/design/domain-ci-release): one job per baseline
+# check, each reported as `ci / <check>`, a `plan` job that validates the PR's CI plan, and one `ci / verdict`
+# that decides the PR and posts one comment. dbt Quality is also released on its own (dbt-quality.yml); the
+# `dbt-quality` job here runs the same steps inline so it reports as one `ci / dbt-quality`.
+#
+# A domain repo calls the released copy from vibedata-official through the caller template onboarding writes
+# (packaged as vibedata_domain_ci/data/callers/ci.yml): a `config` job reads each secret's name from
+# .workflow/ci-config.yml, and a job named `ci` (so GitHub shows `ci / <check>`) holds only the pin, inputs and
+# secrets. The caller grants the permissions the engine's jobs need: a called workflow cannot raise its
+# caller's token. Secrets are passed by name, one line each (they do not pass across organisations implicitly).
+#
+#   on:
+#     pull_request:
+#       types: [opened, synchronize, reopened]
+#   permissions: { contents: read, pull-requests: write, id-token: write }
+#   jobs:
+#     config: …                # outputs the secret names .workflow/ci-config.yml gives
+#     ci:
+#       needs: config
+#       uses: accelerate-data/vibedata-official/.github/workflows/domain-ci.yml@domain-ci/vX.Y.Z
+#       with:
+#         llm_api_url: ${{ vars[needs.config.outputs.llm_api_url] }}
+#         llm_model: ${{ vars[needs.config.outputs.llm_model] }}
+#       secrets:
+#         LLM_API_KEY: ${{ secrets[needs.config.outputs.llm_api_key] }}
+#         MOTHERDUCK_TOKEN: ${{ secrets[needs.config.outputs.motherduck_token] }}
+#
+# In source every job installs the engine through install-engine@main, never from the PR's own tree (AC-20).
+# The release stamps each install-engine step into `pip install vibedata-domain-ci==<version>`, under `-c .github/managed-constraints.txt` when that file exists (D2);
+# every job checks the Domain out first, so that file is there.
+name: Domain CI engine
+
+on:
+  workflow_call:
+    inputs:
+      llm_api_url:
+        description: Design-drift LLM endpoint (OpenAI-compatible); a required Variable, so empty fails ci / preflight.
+        type: string
+        default: ""
+      llm_model:
+        description: Design-drift LLM model; a required Variable, so empty fails ci / preflight.
+        type: string
+        default: ""
+    secrets:
+      LLM_API_KEY:
+        description: Key for the design-drift LLM endpoint.
+        required: false
+      MOTHERDUCK_TOKEN:
+        description: MotherDuck token for the checks that need the CI environment (MotherDuck domains).
+        required: false
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.11"
+  # Every job reads the domain repo's layout through the base branch's repo-map.json roles (AC-73, AC-74).
+  BASE_SHA: ${{ github.event.pull_request.base.sha }}
+
+jobs:
+  preflight:
+    name: preflight
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    outputs:
+      platform: ${{ steps.check.outputs.platform }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - id: inputs
+        run: vibedata-domain-ci provision-inputs
+      # One presence flag per `*_VAR` key the platform's `required_github` declares (domain-ci-release D22,
+      # AC-52): GITHUB_TOKEN cannot list a repo's Secrets or Variables, so preflight checks what arrived, never
+      # a value. `provision` needs preflight, so a missing one is named before the CI environment is created.
+      - id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_REF: ${{ github.head_ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_REF: ${{ github.base_ref }}
+          VD_GITHUB_PRESENT_LLM_API_KEY_VAR: ${{ secrets.LLM_API_KEY != '' }}
+          VD_GITHUB_PRESENT_LLM_API_URL_VAR: ${{ inputs.llm_api_url != '' }}
+          VD_GITHUB_PRESENT_LLM_MODEL_VAR: ${{ inputs.llm_model != '' }}
+          VD_GITHUB_PRESENT_MOTHERDUCK_TOKEN_VAR: ${{ secrets.MOTHERDUCK_TOKEN != '' }}
+          VD_GITHUB_PRESENT_AZURE_TENANT_ID_VAR: ${{ vars[steps.inputs.outputs.azure_tenant_id_var] != '' }}
+          VD_GITHUB_PRESENT_AZURE_CLIENT_ID_VAR: ${{ vars[steps.inputs.outputs.azure_client_id_var] != '' }}
+          VD_GITHUB_PRESENT_FABRIC_CAPACITY_ID_VAR: ${{ vars[steps.inputs.outputs.fabric_capacity_id_var] != '' }}
+          # A Vertex AI URL waives LLM_API_KEY; a fork PR gets no Secrets, so an absent value only warns.
+          VD_GITHUB_LLM_API_URL: ${{ inputs.llm_api_url }}
+          IS_FORK: ${{ github.event.pull_request.head.repo.fork }}
+          # A Dependabot run gets only Dependabot Secrets, so an absent value only warns too.
+          IS_DEPENDABOT: ${{ github.actor == 'dependabot[bot]' }}
+        run: vibedata-domain-ci check preflight
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-preflight
+          overwrite: true
+          path: results/result-preflight.json
+          if-no-files-found: ignore
+
+  static:
+    name: static
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - run: vibedata-domain-ci install static
+      - name: Install gitleaks
+        run: |
+          case "$(uname -m)" in
+            arm64|aarch64) GITLEAKS_ARCH=linux_arm64 ;;
+            *)              GITLEAKS_ARCH=linux_x64 ;;
+          esac
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_${GITLEAKS_ARCH}.tar.gz" \
+            | tar xz -C /usr/local/bin gitleaks
+      - id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: vibedata-domain-ci check static
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-static
+          overwrite: true
+          path: results/result-static.json
+          if-no-files-found: ignore
+
+  adr-numbering:
+    name: adr-numbering
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: vibedata-domain-ci check adr-numbering
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-adr-numbering
+          overwrite: true
+          path: results/result-adr-numbering.json
+          if-no-files-found: ignore
+
+  managed-requirements:
+    name: managed-requirements
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: vibedata-domain-ci check managed-requirements
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-managed-requirements
+          overwrite: true
+          path: results/result-managed-requirements.json
+          if-no-files-found: ignore
+
+  logical-model:
+    name: logical-model
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0  # odcs diff needs the merge-base with the PR's base
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: vibedata-domain-ci check logical-model
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-logical-model
+          overwrite: true
+          path: results/result-logical-model.json
+          if-no-files-found: ignore
+
+  design-drift:
+    name: design-drift
+    # Reads a declared GitHub Secret or Variable: preflight names a missing one first (domain-ci-release AC-52).
+    needs: [preflight]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - run: vibedata-domain-ci install dbt
+      - id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_API_URL: ${{ inputs.llm_api_url }}
+          LLM_MODEL: ${{ inputs.llm_model }}
+        run: vibedata-domain-ci check design-drift
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-design-drift
+          overwrite: true
+          path: results/result-design-drift.json
+          if-no-files-found: ignore
+
+  dbt-parse:
+    name: dbt-parse
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - run: vibedata-domain-ci install dbt
+      - id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: vibedata-domain-ci check dbt-parse
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-dbt-parse
+          overwrite: true
+          path: results/result-dbt-parse.json
+          if-no-files-found: ignore
+
+  # On Fabric the studio unit reaches the Domain's Key Vault as the CI identity when a pipeline is imported
+  # (VD-7606), so dlt-static signs in first. A fork PR gets no OIDC token, so its pipeline import fails there.
+  dlt-static:
+    name: dlt-static
+    # Reads a declared GitHub Secret or Variable: preflight names a missing one first (domain-ci-release AC-52).
+    needs: [preflight]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - run: vibedata-domain-ci install pipelines
+      - id: inputs
+        run: vibedata-domain-ci provision-inputs
+      - name: Sign in (Fabric)
+        if: ${{ startsWith(steps.inputs.outputs.platform, 'fabric_') && github.event.pull_request.head.repo.fork == false }}
+        uses: azure/login@v3
+        with:
+          tenant-id: ${{ vars[steps.inputs.outputs.azure_tenant_id_var] }}
+          client-id: ${{ vars[steps.inputs.outputs.azure_client_id_var] }}
+          allow-no-subscriptions: true
+      - id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: vibedata-domain-ci check dlt-static
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-dlt-static
+          overwrite: true
+          path: results/result-dlt-static.json
+          if-no-files-found: ignore
+
+  dbt-breaking-changes:
+    name: dbt-breaking-changes
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - run: vibedata-domain-ci install dbt
+      # Production state, written outside the checkout; a failed fetch leaves it empty and the check says so.
+      - name: Fetch production state
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: vibedata-domain-ci prod-state
+      - id: check
+        run: vibedata-domain-ci check dbt-breaking-changes
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-dbt-breaking-changes
+          overwrite: true
+          path: results/result-dbt-breaking-changes.json
+          if-no-files-found: ignore
+
+  data-files:
+    name: data-files
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: vibedata-domain-ci check data-files
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-data-files
+          overwrite: true
+          path: results/result-data-files.json
+          if-no-files-found: ignore
+
+  # Inline so GitHub reports one `ci / dbt-quality` (AC-19); a nested call would add a level. dbt-quality.yml is
+  # also released on its own (AC-1, D11) and its steps stay identical to these (invariant:
+  # tests/unit/domain_ci_release/test_invariant_released_workflows.py).
+  dbt-quality:
+    name: dbt-quality
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - run: vibedata-domain-ci install quality
+      - id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: vibedata-domain-ci check dbt-quality
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-dbt-quality
+          overwrite: true
+          path: results/result-dbt-quality.json
+          if-no-files-found: ignore
+
+  dependency-audit:
+    name: dependency-audit
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - run: vibedata-domain-ci install audit
+      - id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: vibedata-domain-ci check dependency-audit
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-dependency-audit
+          overwrite: true
+          path: results/result-dependency-audit.json
+          if-no-files-found: ignore
+
+  ci-files-changed:
+    name: ci-files-changed
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: vibedata-domain-ci check ci-files-changed
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-ci-files-changed
+          overwrite: true
+          path: results/result-ci-files-changed.json
+          if-no-files-found: ignore
+
+  # On Fabric Warehouse dbt-fabric compiles only over a connection, so sql-lint lints against the ephemeral
+  # Warehouse `provision` created (AC-71); elsewhere it compiles credential-free. It runs whatever `provision`
+  # concluded, so a plan or provision failure never drops it, and fails on Warehouse without an environment.
+  sql-lint:
+    name: sql-lint
+    needs: [provision]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - run: vibedata-domain-ci install lint
+      - id: inputs
+        run: vibedata-domain-ci provision-inputs
+      - name: Sign in (Fabric Warehouse)
+        if: ${{ steps.inputs.outputs.platform == 'fabric_warehouse' && needs.provision.result == 'success' }}
+        uses: azure/login@v3
+        with:
+          tenant-id: ${{ vars[steps.inputs.outputs.azure_tenant_id_var] }}
+          client-id: ${{ vars[steps.inputs.outputs.azure_client_id_var] }}
+          allow-no-subscriptions: true
+      - id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          IS_FORK: ${{ github.event.pull_request.head.repo.fork }}
+          PROVISION_OUTPUTS: ${{ toJSON(needs.provision.outputs) }}
+        run: vibedata-domain-ci check sql-lint
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-sql-lint
+          overwrite: true
+          path: results/result-sql-lint.json
+          if-no-files-found: ignore
+
+  plan:
+    name: plan
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    outputs:
+      to_run: ${{ steps.plan.outputs.to_run }}
+      needs_environment: ${{ steps.plan.outputs.needs_environment }}
+      run_dbt_gate: ${{ steps.plan.outputs.run_dbt_gate }}
+      run_dlt_gate: ${{ steps.plan.outputs.run_dlt_gate }}
+      run_pipeline_smoke_run: ${{ steps.plan.outputs.run_pipeline_smoke_run }}
+      run_orchestration_static: ${{ steps.plan.outputs.run_orchestration_static }}
+      platform: ${{ steps.plan.outputs.platform }}
+      azure_tenant_id_var: ${{ steps.plan.outputs.azure_tenant_id_var }}
+      azure_client_id_var: ${{ steps.plan.outputs.azure_client_id_var }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - id: plan
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          IS_FORK: ${{ github.event.pull_request.head.repo.fork != false }}  # a deleted fork (null repo) is a fork, as provision treats it
+        run: vibedata-domain-ci plan
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-plan
+          overwrite: true
+          path: results/result-plan.json
+          if-no-files-found: ignore
+
+  # The only producer of a CI environment (docs/design/domain-pr-ci-engine § Provision outputs), created
+  # once per PR before the first check that needs it and reused by every push (on MotherDuck, re-cloned from
+  # production on every run, VD-7717). Nothing in this workflow
+  # deletes it: PR close or the nightly sweep does (AC-34). A fork PR gets no secrets, so the job is
+  # skipped and the planner fails the checks that need it (AC-72); a deleted fork counts as a fork.
+  provision:
+    name: provision
+    needs: [preflight, plan]
+    if: >-
+      ${{ always() && needs.preflight.result == 'success'
+      && needs.plan.outputs.needs_environment == 'true'
+      && github.event.pull_request.head.repo.fork == false }}
+    # One provision at a time per PR, so a later push never races an earlier one's create (or MotherDuck re-clone).
+    # Never cancel: a cancelled in-flight create is not rolled back. When a new push cancels the run (the caller's
+    # concurrency, AC-109), GitHub re-evaluates each running job's `if:` and cancels only those now false: `always()`
+    # lets provision complete (even one still waiting in its group), while every other job's `!cancelled()` stops it
+    # starting (AC-33).
+    concurrency:
+      group: domain-ci-provision-${{ github.repository }}-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      workspace_id: ${{ steps.provision.outputs.workspace_id }}
+      workspace_name: ${{ steps.provision.outputs.workspace_name }}
+      lakehouse_id: ${{ steps.provision.outputs.lakehouse_id }}
+      lakehouse_name: ${{ steps.provision.outputs.lakehouse_name }}
+      onelake_bucket_url: ${{ steps.provision.outputs.onelake_bucket_url }}
+      database: ${{ steps.provision.outputs.database }}
+      warehouse_id: ${{ steps.provision.outputs.warehouse_id }}
+      bridge_lakehouse_id: ${{ steps.provision.outputs.bridge_lakehouse_id }}
+      host: ${{ steps.provision.outputs.host }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - run: vibedata-domain-ci install provision
+      - id: inputs
+        run: vibedata-domain-ci provision-inputs
+      - name: Sign in to Azure
+        if: ${{ startsWith(needs.preflight.outputs.platform, 'fabric_') }}
+        uses: azure/login@v3
+        with:
+          tenant-id: ${{ vars[steps.inputs.outputs.azure_tenant_id_var] }}
+          client-id: ${{ vars[steps.inputs.outputs.azure_client_id_var] }}
+          allow-no-subscriptions: true
+      - name: Provision the CI environment
+        id: provision
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          FABRIC_CAPACITY_ID: ${{ vars[steps.inputs.outputs.fabric_capacity_id_var] }}
+          MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
+        run: vibedata-domain-ci provision
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-provision
+          overwrite: true
+          path: results/result-provision.json
+          if-no-files-found: ignore
+
+  dlt-gate:
+    name: dlt-gate
+    needs: [plan, provision]
+    if: ${{ !cancelled() && needs.plan.outputs.run_dlt_gate == 'true' && needs.provision.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - run: vibedata-domain-ci install dlt
+      # dlt's Warehouse destination opens TDS through pyodbc with "ODBC Driver 18 for SQL Server", which the runner
+      # image does not ship (VD-7579).
+      - name: SQL Server ODBC driver
+        if: ${{ needs.plan.outputs.platform == 'fabric_warehouse' }}
+        run: |
+          curl -fsSL -o /tmp/packages-microsoft-prod.deb "https://packages.microsoft.com/config/ubuntu/$(. /etc/os-release && echo "$VERSION_ID")/packages-microsoft-prod.deb"
+          sudo dpkg -i /tmp/packages-microsoft-prod.deb
+          sudo apt-get update -q
+          sudo ACCEPT_EULA=Y apt-get install -y -q msodbcsql18
+      - name: Sign in (Fabric)
+        if: ${{ startsWith(needs.plan.outputs.platform, 'fabric_') }}
+        uses: azure/login@v3
+        with:
+          tenant-id: ${{ vars[needs.plan.outputs.azure_tenant_id_var] }}
+          client-id: ${{ vars[needs.plan.outputs.azure_client_id_var] }}
+          allow-no-subscriptions: true
+      # dlt's Warehouse destination reads a TDS token, not the Azure CLI session (ingestion design § Destination
+      # retargeting).
+      - name: Warehouse SQL token
+        if: ${{ needs.plan.outputs.platform == 'fabric_warehouse' }}
+        run: |
+          token=$(az account get-access-token --resource https://database.windows.net/ --query accessToken -o tsv)
+          echo "::add-mask::$token"
+          echo "DESTINATION__FABRIC__CREDENTIALS__ACCESS_TOKEN=$token" >> "$GITHUB_ENV"
+      - id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          CHECK_ENTRY: ${{ toJSON(fromJSON(needs.plan.outputs.to_run)['dlt-gate']) }}
+          PROVISION_OUTPUTS: ${{ toJSON(needs.provision.outputs) }}
+          MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
+        run: vibedata-domain-ci check dlt-gate
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-dlt-gate
+          overwrite: true
+          path: results/result-dlt-gate.json
+          if-no-files-found: ignore
+
+  dbt-gate:
+    name: dbt-gate
+    needs: [plan, provision, dlt-gate]
+    if: ${{ !cancelled() && needs.plan.outputs.run_dbt_gate == 'true' && needs.provision.result == 'success' && contains(fromJSON('["success","skipped"]'), needs.dlt-gate.result) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - run: vibedata-domain-ci install dbt
+      # The Warehouse TDS connection's system driver, as in dlt-gate; dbt-fabric's mssql-python is not expected to
+      # need it, but the gate must not depend on that (VD-7579).
+      - name: SQL Server ODBC driver
+        if: ${{ needs.plan.outputs.platform == 'fabric_warehouse' }}
+        run: |
+          curl -fsSL -o /tmp/packages-microsoft-prod.deb "https://packages.microsoft.com/config/ubuntu/$(. /etc/os-release && echo "$VERSION_ID")/packages-microsoft-prod.deb"
+          sudo dpkg -i /tmp/packages-microsoft-prod.deb
+          sudo apt-get update -q
+          sudo ACCEPT_EULA=Y apt-get install -y -q msodbcsql18
+      - name: Fetch dlt-gate's result (the sources it did not ingest)
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          name: result-dlt-gate
+          path: results
+      - name: Sign in (Fabric)
+        if: ${{ startsWith(needs.plan.outputs.platform, 'fabric_') }}
+        uses: azure/login@v3
+        with:
+          tenant-id: ${{ vars[needs.plan.outputs.azure_tenant_id_var] }}
+          client-id: ${{ vars[needs.plan.outputs.azure_client_id_var] }}
+          allow-no-subscriptions: true
+      # Production state, written outside the checkout; a failed fetch leaves it empty and the check says so.
+      - name: Fetch production state
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: vibedata-domain-ci prod-state
+      - id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          CHECK_ENTRY: ${{ toJSON(fromJSON(needs.plan.outputs.to_run)['dbt-gate']) }}
+          PROVISION_OUTPUTS: ${{ toJSON(needs.provision.outputs) }}
+          MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
+        run: vibedata-domain-ci check dbt-gate
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-dbt-gate
+          overwrite: true
+          path: results/result-dbt-gate.json
+          if-no-files-found: ignore
+
+  # Until VD-7115 it skips every pipeline it selects: the smoke run cannot apply the row cap yet.
+  pipeline-smoke-run:
+    name: pipeline-smoke-run
+    needs: [plan, provision, dlt-gate, dbt-gate]
+    if: ${{ !cancelled() && needs.plan.outputs.run_pipeline_smoke_run == 'true' && needs.provision.result == 'success' && contains(fromJSON('["success","skipped"]'), needs.dlt-gate.result) && contains(fromJSON('["success","skipped"]'), needs.dbt-gate.result) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - id: check
+        env:
+          CHECK_ENTRY: ${{ toJSON(fromJSON(needs.plan.outputs.to_run)['pipeline-smoke-run']) }}
+          PROVISION_OUTPUTS: ${{ toJSON(needs.provision.outputs) }}
+        run: vibedata-domain-ci check pipeline-smoke-run
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-pipeline-smoke-run
+          overwrite: true
+          path: results/result-pipeline-smoke-run.json
+          if-no-files-found: ignore
+
+  # Static only: no environment, no deploy, no schedule (orchestration AC-16, AC-17).
+  orchestration-static:
+    name: orchestration-static
+    needs: [plan]
+    if: ${{ !cancelled() && needs.plan.outputs.run_orchestration_static == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - run: vibedata-domain-ci install dbt
+      - id: check
+        env:
+          CHECK_ENTRY: ${{ toJSON(fromJSON(needs.plan.outputs.to_run)['orchestration-static']) }}
+        run: vibedata-domain-ci check orchestration-static
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-orchestration-static
+          overwrite: true
+          path: results/result-orchestration-static.json
+          if-no-files-found: ignore
+
+  version-pins:
+    name: version-pins
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      # Warns when the workflow pin and the package pin in .workflow/requirements.txt differ; never fails.
+      # Until the engine is released, install-engine installs the 0.0.0 development build and the check is skipped.
+      - id: check
+        run: vibedata-domain-ci check version-pins
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-version-pins
+          overwrite: true
+          path: results/result-version-pins.json
+          if-no-files-found: ignore
+
+  verdict:
+    name: verdict
+    needs: [preflight, static, sql-lint, adr-numbering, managed-requirements, logical-model, design-drift, dbt-parse, dlt-static, dbt-breaking-changes, data-files, dbt-quality, dependency-audit, ci-files-changed, version-pins, plan, provision, dlt-gate, dbt-gate, pipeline-smoke-run, orchestration-static]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      # Only the constraints file: the released workflow installs the engine under it (`pip install -c`).
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          sparse-checkout: .github/managed-constraints.txt
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc11"
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: result-*
+          path: results
+          merge-multiple: true
+      - env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: vibedata-domain-ci verdict --results-dir results
