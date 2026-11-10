@@ -1,0 +1,42 @@
+# Production manifest publishing (docs/design/domain-ci-release, Callers; domain-deploy). Called by the domain
+# repo's publish.yml on a push to main. Parses the dbt project for production and publishes the immutable
+# `dbt-manifest-<sha>` release, then the manifests on `dbt-docs-latest` that PR CI reads as production state.
+# Platform-agnostic (D21): `vibedata-domain-ci` selects the platform from .workflow/ci-config.yml; the only
+# Fabric-only step is azure/login. It deploys no orchestration item (AC-3) and checks out only the caller's repo.
+name: Publish production manifest
+
+on:
+  workflow_call: {}
+
+permissions:
+  contents: write   # creates and uploads GitHub Releases in the domain repo
+  id-token: write   # Fabric: azure/login (OIDC)
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  publish-manifest:
+    name: publish-manifest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc12"
+      - id: inputs
+        run: vibedata-domain-ci provision-inputs
+      - name: Sign in to Azure (Fabric)
+        if: ${{ startsWith(steps.inputs.outputs.platform, 'fabric_') }}
+        uses: azure/login@v3
+        with:
+          tenant-id: ${{ vars[steps.inputs.outputs.azure_tenant_id_var] }}
+          client-id: ${{ vars[steps.inputs.outputs.azure_client_id_var] }}
+          allow-no-subscriptions: true
+      - run: vibedata-domain-ci install dbt
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          # `github.event.after` reads the push event; workflow_dispatch has none.
+          BUILD_SHA: ${{ github.event.after || github.sha }}
+        run: vibedata-domain-ci publish-manifest
