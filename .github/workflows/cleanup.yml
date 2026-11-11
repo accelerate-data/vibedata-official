@@ -1,0 +1,51 @@
+# CI workspace cleanup (docs/design/domain-ci-release, Callers; D18). Called by the domain repo's cleanup.yml on
+# `pull_request: closed` (that PR's environment) and on a nightly schedule (every environment whose PR is not
+# open). It reads no CI result, so it removes environments left by failed or cancelled runs too.
+# Platform-agnostic (D21): Fabric deletes `vibedata_ephemeral_<repo>_<pr>` workspaces; MotherDuck drops this
+# Domain's `pr_<domain>_<pr>_*` databases. It never touches production.
+name: CI workspace cleanup
+
+on:
+  workflow_call:
+    secrets:
+      MOTHERDUCK_TOKEN:
+        description: MotherDuck token (MotherDuck domains).
+        required: false
+
+permissions:
+  contents: read
+  pull-requests: read   # reads which PRs are open; a private repo's lookup fails without it
+  id-token: write       # Fabric: azure/login (OIDC)
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  cleanup:
+    name: cleanup
+    runs-on: ubuntu-latest
+    steps:
+      # The default branch's ci-config.yml: a closed PR's merge ref may no longer exist.
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: if [ -f .github/managed-constraints.txt ]; then set -- -c .github/managed-constraints.txt; fi; python -m pip install --quiet "$@" "vibedata-domain-ci==1.0.0rc15"
+      - id: inputs
+        run: vibedata-domain-ci provision-inputs
+      - name: Sign in to Azure (Fabric)
+        if: ${{ startsWith(steps.inputs.outputs.platform, 'fabric_') }}
+        uses: azure/login@v3
+        with:
+          tenant-id: ${{ vars[steps.inputs.outputs.azure_tenant_id_var] }}
+          client-id: ${{ vars[steps.inputs.outputs.azure_client_id_var] }}
+          allow-no-subscriptions: true
+      - run: vibedata-domain-ci install provision
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
+          CLEANUP_PR_NUMBER: ${{ github.event_name == 'pull_request' && github.event.pull_request.number || '' }}
+        run: vibedata-domain-ci cleanup
