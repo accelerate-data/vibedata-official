@@ -100,7 +100,7 @@ jobs:
         # cosign v2 verify looks only for the legacy .sig tag and reports
         # "no signatures found". --offline (below) avoids the online Rekor
         # lookup that once hung a vd-studio self-verify 40+ min (cc217782).
-        uses: sigstore/cosign-installer@v4.1.2
+        uses: sigstore/cosign-installer@v4.1.3
         with:
           cosign-release: v3.0.6
 
