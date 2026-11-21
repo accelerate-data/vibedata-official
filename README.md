@@ -7,7 +7,7 @@
   </a>
 </p>
 
-The official skill library and plugin marketplace for [vibedata](https://www.getvibedata.ai) — the agentic coordination layer for data platforms.
+The official skill library and plugin marketplace for [Vibedata](https://www.getvibedata.ai), your data engineering agent.
 
 > Organizational data engineering standards, encoded and enforced.
 
